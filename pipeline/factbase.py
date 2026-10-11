@@ -27,6 +27,16 @@ TABLES = {
     "DT_1JU1501": ("Home", "주거 형태", "Actual"),
     "DT_1JC1521": ("Home", "평형", "Actual"),
 }
+CLASSIFICATIONS = {
+    "DT_1PL1502": {"objL2": "ALL"},
+    "DT_1BZ0506": {"objL2": "ALL"},
+    "DT_1JC1517": {"objL2": "0", "objL3": "ALL"},
+    "DT_1JC1516": {"objL2": "ALL"},
+    "DT_1IN1502": {},
+    "DT_1B8000G": {"objL2": "ALL"},
+    "DT_1JU1501": {},
+    "DT_1JC1521": {"objL2": "ALL"},
+}
 FIELDS = ["fact_id", "driver", "topic", "dataset_id", "actual_projection", "year", "geography_code", "geography_name", "dimension_2_code", "dimension_2_name", "dimension_3_code", "dimension_3_name", "measure_code", "measure_name", "value_raw", "unit", "source_url", "retrieved_at"]
 
 
@@ -131,9 +141,9 @@ def fetch(table, api_key, current_year):
     projection = TABLES[table][2] == "Official Projection"
     params = {
         "method": "getList", "apiKey": api_key, "orgId": "101", "tblId": table,
-        "objL1": "00", "objL2": "ALL", "objL3": "ALL", "itmId": "ALL", "prdSe": "Y",
+        "objL1": "00", **CLASSIFICATIONS[table], "itmId": "ALL", "prdSe": "Y",
         "startPrdDe": "2022" if projection else str(current_year - 2),
-        "endPrdDe": "2052" if projection else str(current_year), "format": "json",
+        "endPrdDe": "2052" if projection else str(current_year), "format": "json", "jsonVD": "Y",
     }
     url = API + "?" + urllib.parse.urlencode(params)
     request = urllib.request.Request(url, headers={"User-Agent": "crPlatform-factbase/1.0"})
@@ -165,13 +175,15 @@ def from_api(table, item, today):
     year = int(item["PRD_DE"])
     if not 2010 <= year <= 2052: raise ValueError(f"Unexpected year: {table}/{year}")
     if item.get("C1") != "00": raise ValueError(f"Non-national geography: {table}/{item.get('C1')}")
-    measure = str(item["ITM_ID"])
-    name = item.get("ITM_NM") or measure
+    # The population-trend table places indicator codes in C2; ITM_ID is T1.
+    measure = str(item["C2"] if table == "DT_1B8000G" else item["ITM_ID"])
+    name = (item.get("C2_NM") if table == "DT_1B8000G" else item.get("ITM_NM")) or measure
     driver, topic, mode = TABLES[table]
     return dict(fact_id=fact_for(table, measure, name), driver=driver, topic=topic,
                 dataset_id=table, actual_projection=mode, year=year,
                 geography_code="00", geography_name=item.get("C1_NM") or "전국",
-                dimension_2_code=item.get("C2") or "", dimension_2_name=item.get("C2_NM") or "",
+                dimension_2_code="" if table == "DT_1B8000G" else item.get("C2") or "",
+                dimension_2_name="" if table == "DT_1B8000G" else item.get("C2_NM") or "",
                 dimension_3_code=item.get("C3") or "", dimension_3_name=item.get("C3_NM") or "",
                 measure_code=measure, measure_name=name, value_raw=normalized_value(item.get("DT")),
                 unit=item.get("UNIT_NM") or "지표별", source_url=source_url(table), retrieved_at=today)

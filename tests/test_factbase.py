@@ -15,6 +15,8 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual((projected["fact_id"], projected["actual_projection"]), ("D02", "Official Projection"))
         with self.assertRaises(ValueError):
             factbase.from_api("DT_1PL1502", {**base, "C4": "unexpected"}, "2026-10-11")
+        life_event = factbase.from_api("DT_1B8000G", {**base, "TBL_ID": "DT_1B8000G", "C2": "10", "C2_NM": "출생아수(명)", "ITM_ID": "T1", "DT": "254341"}, "2026-10-11")
+        self.assertEqual((life_event["fact_id"], life_event["measure_code"], life_event["dimension_2_code"]), ("L04", "10", ""))
 
     def test_revisions_and_missing_markers_are_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
