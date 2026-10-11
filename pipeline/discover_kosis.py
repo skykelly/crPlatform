@@ -24,7 +24,7 @@ SEARCHES = (
 
 for term in SEARCHES:
     params = {"method": "getList", "apiKey": KEY, "searchNm": term,
-              "orgId": "101", "resultCount": "30", "startCount": "1", "format": "json"}
+              "orgId": "101", "resultCount": "30", "startCount": "1", "format": "json", "jsonVD": "Y"}
     request = urllib.request.Request(
         "https://kosis.kr/openapi/statisticsSearch.do?" + urllib.parse.urlencode(params),
         headers={"User-Agent": "crPlatform-factbase/1.0"},

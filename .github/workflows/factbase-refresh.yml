@@ -15,6 +15,10 @@ on:
         description: 'Search KOSIS metadata for the new five-driver dashboard'
         type: boolean
         default: false
+      probe_candidates:
+        description: 'Inspect dimensions of candidate dashboard tables'
+        type: boolean
+        default: false
   schedule:
     # 10th of each month, 09:30 Asia/Seoul (UTC+9, no daylight saving)
     - cron: '30 0 10 * *'
@@ -51,8 +55,13 @@ jobs:
         env:
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
         run: python pipeline/discover_kosis.py
+      - name: Probe candidate tables
+        if: ${{ inputs.probe_candidates }}
+        env:
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
+        run: python pipeline/probe_candidate_tables.py
       - name: Fetch and validate KOSIS data
-        if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources }}
+        if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources && !inputs.probe_candidates }}
         env:
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
         run: python pipeline/factbase.py refresh
@@ -61,7 +70,7 @@ jobs:
           python pipeline/factbase.py check
           python pipeline/factbase.py build
       - name: Publish verified data to GitHub
-        if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources }}
+        if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources && !inputs.probe_candidates }}
         run: |
           git add data/factbase.sqlite data/raw sites/korea-life-fact-base/dist/data/dashboard.json
           if git diff --cached --quiet; then
