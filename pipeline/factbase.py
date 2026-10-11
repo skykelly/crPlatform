@@ -261,8 +261,11 @@ def build():
         marriages = series(conn, "DT_1B8000G", "20")
         if not actual or not projection or not births or not marriages:
             raise ValueError("A national dashboard series is missing")
+        raw_root = ROOT / "data" / "raw"
+        change_dates = [path.name for path in raw_root.iterdir() if path.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.name)] if raw_root.exists() else []
         data = {
             "schema_version": 1, "source": "KOSIS", "quality": qa,
+            "last_changed_at": max(change_dates, default=max(d["retrieved_at"] for d in (actual[-1], births[-1], marriages[-1]))),
             "actual": {"single_person_households": actual, "births": births, "marriages": marriages},
             "official_projection": {"single_person_households": projection},
             "catalog_count": qa["catalog"],

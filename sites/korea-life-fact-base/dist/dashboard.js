@@ -57,9 +57,9 @@
     .forEach(([value, caption], i) => {minis[i].querySelector('strong').textContent = value; minis[i].querySelector('span').textContent = caption;});
   const observed = [last(actual), last(births), last(marriages)];
   const latestRetrieval = observed.map(d => d.retrieved_at).sort().at(-1);
-  status.textContent = `${origin} · 실제치 ${last(actual).year}년 · 수집 ${latestRetrieval} · Actual과 Official Projection 분리`;
+  status.textContent = `${origin} · 실제치 ${last(actual).year}년 · 원자료 갱신 ${data.last_changed_at || latestRetrieval} · Actual과 Official Projection 분리`;
   document.querySelector('.hero .meta span:first-child').textContent = `Core Fact ${data.catalog_count}개`;
-  document.querySelector('.hero .meta span:last-child').textContent = `${latestRetrieval} 데이터 기준`;
+  document.querySelector('.hero .meta span:last-child').textContent = `${data.last_changed_at || latestRetrieval} 원자료 갱신`;
   const sourceLine = document.querySelector('#dashboard .sources');
   sourceLine.innerHTML = `출처: <a href="${last(actual).source_url}" target="_blank" rel="noreferrer">KOSIS 1인 가구</a> · <a href="${last(projected).source_url}" target="_blank" rel="noreferrer">KOSIS 장래가구추계</a> · <a href="${last(births).source_url}" target="_blank" rel="noreferrer">KOSIS 인구동향</a>. 전망은 2022년 기준 추계이며 실제치와 직접 연결하지 않았다.`;
 })();
