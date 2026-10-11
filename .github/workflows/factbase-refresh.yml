@@ -7,6 +7,10 @@ on:
         description: 'Validate stored data without calling KOSIS'
         type: boolean
         default: false
+      probe_api:
+        description: 'Check KOSIS request parameters without changing data'
+        type: boolean
+        default: false
   schedule:
     # 10th of each month, 09:30 Asia/Seoul (UTC+9, no daylight saving)
     - cron: '30 0 10 * *'
@@ -33,8 +37,13 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Validate current database
         run: python pipeline/factbase.py check
+      - name: Diagnose KOSIS request parameters
+        if: ${{ inputs.probe_api }}
+        env:
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
+        run: python pipeline/probe_kosis.py
       - name: Fetch and validate KOSIS data
-        if: ${{ !inputs.validate_only }}
+        if: ${{ !inputs.validate_only && !inputs.probe_api }}
         env:
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
         run: python pipeline/factbase.py refresh
@@ -43,7 +52,7 @@ jobs:
           python pipeline/factbase.py check
           python pipeline/factbase.py build
       - name: Publish verified data to GitHub
-        if: ${{ !inputs.validate_only }}
+        if: ${{ !inputs.validate_only && !inputs.probe_api }}
         run: |
           git add data/factbase.sqlite data/raw sites/korea-life-fact-base/dist/data/dashboard.json
           if git diff --cached --quiet; then
