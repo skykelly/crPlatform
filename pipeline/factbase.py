@@ -36,6 +36,12 @@ TABLE_TITLES = {
     "DT_1B8000G": "인구동향: 출생·혼인·이혼",
     "DT_1JU1501": "주택 종류별 주택",
     "DT_1JC1521": "주택 종류·주거면적별 가구",
+    "DT_1ES4F09S": "시도별 맞벌이 가구",
+    "DT_1B26001_A01": "시군구별 이동자 수",
+    "DT_1TS202001": "생활시간조사 평균시간",
+    "DT_1PE1502": "거처 종류·점유형태별 가구 (2015)",
+    "DT_1PE2002": "거처 종류·점유형태별 가구 (2020)",
+    "DT_1L9U101": "가구당 월평균 가계수지",
 }
 CLASSIFICATIONS = {
     "DT_1PL1502": {"objL2": "ALL"},
@@ -319,10 +325,10 @@ def build():
         housing_area = [{"label": row["name"], "value": row["value"]} for row in area_rows if row["code"] in ("00", "10", "20", "30", "40", "50", "60")]
         housing_area.sort(key=lambda row: (row["label"] != "계", -row["value"]))
         coverage = []
-        for table, (driver, _, mode) in TABLES.items():
-            row = conn.execute("SELECT min(year) AS first_year,max(year) AS last_year,count(*) AS records FROM observations WHERE dataset_id=?", (table,)).fetchone()
-            coverage.append({"table_id": table, "title": TABLE_TITLES[table], "driver": driver, "status": mode,
-                             "first_year": row["first_year"], "latest_year": row["last_year"], "records": row["records"], "source_url": source_url(table)})
+        for row in conn.execute("SELECT dataset_id,driver,actual_projection,min(year) AS first_year,max(year) AS last_year,count(*) AS records,min(source_url) AS source_url FROM observations GROUP BY dataset_id,driver,actual_projection ORDER BY driver,dataset_id"):
+            table = row["dataset_id"]
+            coverage.append({"table_id": table, "title": TABLE_TITLES.get(table, table), "driver": row["driver"], "status": row["actual_projection"],
+                             "first_year": row["first_year"], "latest_year": row["last_year"], "records": row["records"], "source_url": row["source_url"]})
         raw_root = ROOT / "data" / "raw"
         change_dates = [path.name for path in raw_root.iterdir() if path.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.name)] if raw_root.exists() else []
         data = {

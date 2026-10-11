@@ -65,6 +65,11 @@ jobs:
         env:
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
         run: python pipeline/factbase.py refresh
+      - name: Fetch and validate additional five-driver series
+        if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources && !inputs.probe_candidates }}
+        env:
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
+        run: python pipeline/extended_facts.py
       - name: Rebuild web data and validate again
         run: |
           python pipeline/factbase.py check
