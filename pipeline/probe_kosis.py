@@ -39,9 +39,11 @@ for label, changes in variants.items():
             if isinstance(parsed, list):
                 print(f"{label}: rows={len(parsed)} fields={sorted(parsed[0])[:12] if parsed else []}")
             else:
-                print(f"{label}: JSON object error={parsed.get('err', 'unknown')}")
+                print(f"{label}: JSON object error={parsed.get('err', 'unknown')} message={str(parsed.get('errMsg', ''))[:120].replace(key, '[redacted]')}")
         except json.JSONDecodeError:
             code = re.search(r'err["\s]*:["\s]*([0-9A-Za-z_-]+)', body)
-            print(f"{label}: non-JSON error={code.group(1) if code else 'unknown'}")
+            message = re.search(r'errMsg["\s]*:["\s]*"([^"]{0,120})"', body)
+            detail = message.group(1).replace(key, "[redacted]") if message else ""
+            print(f"{label}: non-JSON error={code.group(1) if code else 'unknown'} message={detail} prefix={body.lstrip()[:1]!r} bytes={len(body)}")
     except Exception as exc:
         print(f"{label}: request error={type(exc).__name__}")
