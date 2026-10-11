@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "data" / "factbase.sqlite"
-SITE_DATA = ROOT / "sites" / "korea-life-fact-base" / "dist" / "data" / "dashboard.json"
+SITE_DATA = ROOT / "data" / "legacy_dashboard.json"
 WORKBOOK = ROOT / "outputs" / "01a1263b-a1e2-7bf1-92f4-1494b204937a" / "korea_customer_life_fact_dataset_phase1.xlsx"
 API = "https://kosis.kr/openapi/Param/statisticsParameterData.do"
 TABLES = {
@@ -353,11 +353,10 @@ def build():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("bootstrap", "refresh", "check", "build"))
+    parser.add_argument("command", choices=("bootstrap", "refresh", "check"))
     args = parser.parse_args()
     if args.command == "bootstrap": bootstrap()
     elif args.command == "refresh": refresh(os.environ.get("KOSIS_API_KEY", ""))
-    elif args.command == "build": build()
     else:
         conn = connect()
         try: print(json.dumps(check(conn), ensure_ascii=False))
