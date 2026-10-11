@@ -45,6 +45,8 @@ for table, (year, period) in tables.items():
             print(json.dumps({"table": table, "meta": kind, "sample": sample}, ensure_ascii=False))
         except Exception as exc:
             print(f"{table} meta {kind}: {type(exc).__name__}")
+    if table == "DT_1TS202001":
+        continue
     for variant in variants:
         params = {"method": "getList", "apiKey": key, "orgId": "101", "tblId": table,
                   "itmId": "ALL", "prdSe": period, "startPrdDe": year,
