@@ -1,0 +1,56 @@
+name: Refresh Korea Life Fact Base
+
+on:
+  workflow_dispatch:
+    inputs:
+      validate_only:
+        description: 'Validate stored data without calling KOSIS'
+        type: boolean
+        default: false
+  schedule:
+    # 10th of each month, 09:30 Asia/Seoul (UTC+9, no daylight saving)
+    - cron: '30 0 10 * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: factbase-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test ingestion rules
+        run: python -m unittest discover -s tests -v
+      - name: Validate current database
+        run: python pipeline/factbase.py check
+      - name: Fetch and validate KOSIS data
+        if: ${{ !inputs.validate_only }}
+        env:
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
+        run: python pipeline/factbase.py refresh
+      - name: Rebuild web data and validate again
+        run: |
+          python pipeline/factbase.py check
+          python pipeline/factbase.py build
+      - name: Publish verified data to GitHub
+        if: ${{ !inputs.validate_only }}
+        run: |
+          git add data/factbase.sqlite data/raw sites/korea-life-fact-base/dist/data/dashboard.json
+          if git diff --cached --quiet; then
+            echo 'No official data changes; nothing to publish.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'data: refresh official Korea life facts'
+          git push origin HEAD:main

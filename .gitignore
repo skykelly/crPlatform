@@ -1,6 +1,11 @@
 # Local research and browser-session artifacts
 .artifact-work/
 .playwright-cli/
+__pycache__/
+*.pyc
+data/factbase.sqlite-journal
+data/factbase.sqlite-wal
+data/factbase.sqlite-shm
 
 # Reproducible deployment archives
 sites/**/site-source*.tar.gz
