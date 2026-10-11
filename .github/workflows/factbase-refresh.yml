@@ -74,10 +74,16 @@ jobs:
         run: |
           python pipeline/factbase.py check
           python pipeline/factbase.py build
+          if [ -f sites/korea-life-fact-base-v2/dist/data/dashboard.json ]; then
+            python pipeline/dashboard_v3.py
+          fi
       - name: Publish verified data to GitHub
         if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources && !inputs.probe_candidates }}
         run: |
           git add data/factbase.sqlite data/raw sites/korea-life-fact-base/dist/data/dashboard.json
+          if [ -f sites/korea-life-fact-base-v2/dist/data/dashboard.json ]; then
+            git add sites/korea-life-fact-base-v2/dist/data/dashboard.json
+          fi
           if git diff --cached --quiet; then
             echo 'No official data changes; nothing to publish.'
             exit 0
