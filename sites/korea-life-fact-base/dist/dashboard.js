@@ -6,18 +6,19 @@
   status.textContent = '공식 통계 데이터 확인 중…';
   const local = './data/dashboard.json';
   const remote = 'https://raw.githubusercontent.com/skykelly/crPlatform/main/sites/korea-life-fact-base/dist/data/dashboard.json';
-  let data, origin;
-  for (const [url, label] of [[remote, 'GitHub 최신본'], [local, '사이트 저장본']]) {
+  const candidates = await Promise.all([[local, '사이트 저장본'], [remote, 'GitHub 최신본']].map(async ([url, label]) => {
     try {
       const response = await fetch(url + '?t=' + Date.now(), {cache: 'no-store'});
       if (!response.ok) throw new Error(String(response.status));
       const candidate = await response.json();
       if (candidate.schema_version !== 1 || !candidate.actual?.single_person_households?.length) throw new Error('schema');
-      data = candidate;
-      origin = label;
-      break;
-    } catch (_) { /* fall through to the published snapshot */ }
-  }
+      return {data: candidate, origin: label};
+    } catch (_) { return null; }
+  }));
+  const selected = candidates.filter(Boolean).sort((a, b) =>
+    (a.data.last_changed_at || '').localeCompare(b.data.last_changed_at || '') ||
+    a.data.quality.observations - b.data.quality.observations).at(-1);
+  const data = selected?.data, origin = selected?.origin;
   if (!data) {
     status.textContent = '데이터 연결 실패. 화면의 고정값은 2026.10.10 기준이며 최신 값이 아닐 수 있습니다.';
     return;
