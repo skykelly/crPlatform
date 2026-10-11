@@ -170,7 +170,8 @@ def fetch(table, api_key, current_year):
 
 def from_api(table, item, today):
     if item.get("TBL_ID") != table: raise ValueError(f"Wrong table in API response: {table}")
-    if item.get("PRD_SE") not in (None, "Y"): raise ValueError(f"Nonannual data returned: {table}")
+    if not re.fullmatch(r"\d{4}", str(item.get("PRD_DE", ""))):
+        raise ValueError(f"Nonannual period returned: {table}")
     if any(item.get(f"C{i}") for i in range(4, 9)): raise ValueError(f"Unexpected extra dimensions: {table}")
     year = int(item["PRD_DE"])
     if not 2010 <= year <= 2052: raise ValueError(f"Unexpected year: {table}/{year}")
