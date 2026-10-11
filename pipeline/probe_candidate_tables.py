@@ -11,14 +11,8 @@ if not key:
 
 tables = {"DT_1TS202001": ("2024", "F")}
 variants = (
-    {"objL1": "A0", "objL2": "S0", "objL3": "C1", "objL4": "ALL"},
-    {"objL1": "00"},
-    {"objL1": "ALL"},
-    {"objL1": "00", "objL2": "ALL"},
-    {"objL1": "ALL", "objL2": "ALL"},
-    {"objL1": "ALL", "objL2": "ALL", "objL3": "ALL"},
-    {"objL1": "ALL", "objL2": "ALL", "objL3": "ALL", "objL4": "ALL"},
-    {"objL1": "ALL", "objL2": "ALL", "objL3": "ALL", "objL4": "ALL", "objL5": "ALL"},
+    {"objL1": "A0", "objL2": "S0", "objL3": "C1", "objL4": "S11"},
+    {"objL1": "A0", "objL2": "S0", "objL3": "C1", "objL4": "S4"},
 )
 
 for table, (year, period) in tables.items():
@@ -45,11 +39,9 @@ for table, (year, period) in tables.items():
             print(json.dumps({"table": table, "meta": kind, "sample": sample}, ensure_ascii=False))
         except Exception as exc:
             print(f"{table} meta {kind}: {type(exc).__name__}")
-    if table == "DT_1TS202001":
-        continue
     for variant in variants:
         params = {"method": "getList", "apiKey": key, "orgId": "101", "tblId": table,
-                  "itmId": "ALL", "prdSe": period, "startPrdDe": year,
+                  "itmId": "T10", "prdSe": period, "startPrdDe": year,
                   "endPrdDe": year, "format": "json", "jsonVD": "Y", **variant}
         request = urllib.request.Request(
             "https://kosis.kr/openapi/Param/statisticsParameterData.do?" + urllib.parse.urlencode(params),
@@ -68,7 +60,7 @@ for table, (year, period) in tables.items():
                             and any(term in str(row.get("C1_NM", "")) for term in ("가전", "가구", "수선", "가사서비스", "광열"))]
                 print(json.dumps({"table": table, "variant": variant, "count": len(result),
                                   "sample": sample, "matching": matching[:50]}, ensure_ascii=False))
-                break
+                continue
             message = str(result.get("errMsg", "")).replace(key, "[redacted]")
             print(json.dumps({"table": table, "variant": variant, "error": result.get("err"), "message": message}, ensure_ascii=False))
         except Exception as exc:
