@@ -5,6 +5,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import sqlite3
 import sys
 import urllib.parse
@@ -138,11 +139,22 @@ def fetch(table, api_key, current_year):
     request = urllib.request.Request(url, headers={"User-Agent": "crPlatform-factbase/1.0"})
     try:
         with urllib.request.urlopen(request, timeout=90) as response:
-            payload = json.load(response)
+            body = response.read().decode("utf-8", errors="replace")
     except Exception as exc:
         raise RuntimeError(f"{table}: KOSIS API request failed ({type(exc).__name__})") from None
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        # KOSIS documents JSON, but API errors can use JS object notation:
+        # {err:"11",errMsg:"..."}. Never print the URL or key.
+        error_code = re.search(r'err\s*:\s*"([0-9A-Za-z_-]+)"', body)
+        error_message = re.search(r'errMsg\s*:\s*"([^"]{0,200})"', body)
+        if error_code:
+            message = (error_message.group(1) if error_message else "API error").replace(api_key, "[redacted]")
+            raise ValueError(f"{table}: KOSIS error {error_code.group(1)}: {message}") from None
+        raise ValueError(f"{table}: KOSIS returned non-JSON data") from None
     if not isinstance(payload, list) or not payload:
-        raise ValueError(f"{table}: API returned no rows or an error: {str(payload)[:240]}")
+        raise ValueError(f"{table}: API returned no data rows (response type {type(payload).__name__})")
     return payload
 
 
