@@ -24,7 +24,20 @@ variants = {
     "recent-period": {"startPrdDe": None, "endPrdDe": None, "newEstPrdCnt": "1"},
     "all-item": {"itmId": "ALL"},
     "all-dimensions": {"objL1": "ALL", "objL2": "ALL", "itmId": "ALL"},
+    "jsonvd-second": {"objL2": "ALL", "jsonVD": "Y"},
+    "jsonvd-two-all": {"objL2": "ALL", "itmId": "ALL", "jsonVD": "Y"},
 }
+
+for table, extra in {
+    "DT_1BZ0506": {"objL2": "ALL"},
+    "DT_1JC1517": {"objL2": "0", "objL3": "ALL"},
+    "DT_1JC1516": {"objL2": "ALL"},
+    "DT_1IN1502": {},
+    "DT_1B8000G": {},
+    "DT_1JU1501": {},
+    "DT_1JC1521": {"objL2": "ALL"},
+}.items():
+    variants[table] = {"tblId": table, "itmId": "ALL", "jsonVD": "Y", **extra}
 
 for label, changes in variants.items():
     params = {**base, **changes}
