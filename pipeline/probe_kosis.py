@@ -34,6 +34,7 @@ for table, extra in {
     "DT_1JC1516": {"objL2": "ALL"},
     "DT_1IN1502": {},
     "DT_1B8000G": {},
+    "DT_1B8000G-with-obj2": {"tblId": "DT_1B8000G", "objL2": "ALL"},
     "DT_1JU1501": {},
     "DT_1JC1521": {"objL2": "ALL"},
 }.items():
@@ -50,7 +51,8 @@ for label, changes in variants.items():
         try:
             parsed = json.loads(body)
             if isinstance(parsed, list):
-                print(f"{label}: rows={len(parsed)} fields={sorted(parsed[0])[:12] if parsed else []}")
+                codes = {k: parsed[0].get(k) for k in ("TBL_ID", "PRD_DE", "C1", "C2", "C3", "ITM_ID") if parsed} if parsed else {}
+                print(f"{label}: rows={len(parsed)} codes={codes} fields={sorted(parsed[0])[:12] if parsed else []}")
             else:
                 print(f"{label}: JSON object error={parsed.get('err', 'unknown')} message={str(parsed.get('errMsg', ''))[:120].replace(key, '[redacted]')}")
         except json.JSONDecodeError:
