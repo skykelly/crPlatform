@@ -10,22 +10,36 @@ if not key:
     raise SystemExit("KOSIS_API_KEY missing")
 
 tables = {
-    "DT_1ES4F09S": "2025",  # dual-earner households
-    "DT_1B26001_A01": "2025",  # domestic movers
-    "DT_1TS202001": "2024",  # time-use: sleep and housework
-    "DT_1PE2002": "2020",  # tenure
-    "DT_1L9U101": "2025",  # household expenditure
+    "DT_1TS202001": ("2024", "F"),  # time-use: sleep and housework
+    "DT_1PE2002": ("2020", "F"),  # tenure
+    "DT_1L9U101": ("2025", "Y"),  # household expenditure
 }
 variants = (
     {"objL1": "00"},
+    {"objL1": "ALL"},
     {"objL1": "00", "objL2": "ALL"},
+    {"objL1": "ALL", "objL2": "ALL"},
     {"objL1": "ALL", "objL2": "ALL", "objL3": "ALL"},
 )
 
-for table, year in tables.items():
+for table, (year, period) in tables.items():
+    for kind in ("PRD", "OBJ", "ITM"):
+        meta = {"method": "getMeta", "type": kind, "apiKey": key, "orgId": "101",
+                "tblId": table, "format": "json", "jsonVD": "Y"}
+        request = urllib.request.Request(
+            "https://kosis.kr/openapi/statisticsData.do?" + urllib.parse.urlencode(meta),
+            headers={"User-Agent": "crPlatform-factbase/1.0"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                result = json.load(response)
+            print(json.dumps({"table": table, "meta": kind,
+                              "sample": result[:4] if isinstance(result, list) else result}, ensure_ascii=False))
+        except Exception as exc:
+            print(f"{table} meta {kind}: {type(exc).__name__}")
     for variant in variants:
         params = {"method": "getList", "apiKey": key, "orgId": "101", "tblId": table,
-                  "itmId": "ALL", "prdSe": "Y", "startPrdDe": year,
+                  "itmId": "ALL", "prdSe": period, "startPrdDe": year,
                   "endPrdDe": year, "format": "json", "jsonVD": "Y", **variant}
         request = urllib.request.Request(
             "https://kosis.kr/openapi/Param/statisticsParameterData.do?" + urllib.parse.urlencode(params),
