@@ -32,7 +32,14 @@ for term in SEARCHES:
     try:
         with urllib.request.urlopen(request, timeout=45) as response:
             body = response.read().decode("utf-8", errors="replace")
-        rows = json.loads(body)
+        try:
+            rows = json.loads(body)
+        except json.JSONDecodeError:
+            code = re.search(r'err\s*:\s*"([0-9A-Za-z_-]+)"', body)
+            message = re.search(r'errMsg\s*:\s*"([^"\r\n]{0,160})"', body)
+            detail = message.group(1).replace(KEY, "[redacted]") if message else "unknown response"
+            print(f"SEARCH {term}: KOSIS error {code.group(1) if code else 'unknown'}: {detail}")
+            continue
         if not isinstance(rows, list):
             raise ValueError("non-list response")
         print(f"SEARCH {term}: {len(rows)} results")
