@@ -1,3 +1,4 @@
+import json
 import sqlite3
 import tempfile
 import unittest
@@ -7,6 +8,18 @@ from pipeline import factbase
 
 
 class PipelineTests(unittest.TestCase):
+    def test_published_dashboard_matches_national_totals(self):
+        with factbase.SITE_DATA.open(encoding="utf-8") as handle:
+            data = json.load(handle)
+        dashboard = data["dashboard"]
+        actual_by_year = {row["year"]: row["value"] for row in data["actual"]["single_person_households"]}
+        latest = actual_by_year[dashboard["age_year"]]
+        self.assertEqual(sum(row["value"] for row in dashboard["age_bands"]), latest)
+        self.assertEqual(len(dashboard["regions"]), 17)
+        self.assertEqual(sum(row[str(dashboard["regional_year"])] for row in dashboard["regions"]), actual_by_year[dashboard["regional_year"]])
+        self.assertEqual(sum(row["value"] for row in dashboard["housing_stock"]), dashboard["housing_total"])
+        self.assertEqual(sum(row["records"] for row in data["coverage"]), data["quality"]["observations"])
+
     def test_api_mapping_keeps_actual_and_projection_separate(self):
         base = {"TBL_ID": "DT_1PL1502", "PRD_SE": "Y", "PRD_DE": "2025", "C1": "00", "C1_NM": "전국", "C2": "000", "C2_NM": "합계", "ITM_ID": "T00", "ITM_NM": "1인가구", "DT": "8,244,308", "UNIT_NM": "가구"}
         actual = factbase.from_api("DT_1PL1502", base, "2026-10-11")

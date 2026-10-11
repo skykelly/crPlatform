@@ -27,6 +27,16 @@ TABLES = {
     "DT_1JU1501": ("Home", "주거 형태", "Actual"),
     "DT_1JC1521": ("Home", "평형", "Actual"),
 }
+TABLE_TITLES = {
+    "DT_1PL1502": "성·연령별 1인 가구",
+    "DT_1BZ0506": "가구주 연령·가구원수별 장래가구추계",
+    "DT_1JC1517": "가구주 성·연령·세대구성별 가구",
+    "DT_1JC1516": "세대구성·가구원수별 일반가구",
+    "DT_1IN1502": "인구·가구·주택",
+    "DT_1B8000G": "인구동향: 출생·혼인·이혼",
+    "DT_1JU1501": "주택 종류별 주택",
+    "DT_1JC1521": "주택 종류·주거면적별 가구",
+}
 CLASSIFICATIONS = {
     "DT_1PL1502": {"objL2": "ALL"},
     "DT_1BZ0506": {"objL2": "ALL"},
@@ -259,8 +269,60 @@ def build():
         projection = series(conn, "DT_1BZ0506", "T02", "000")
         births = series(conn, "DT_1B8000G", "10")
         marriages = series(conn, "DT_1B8000G", "20")
-        if not actual or not projection or not births or not marriages:
+        total_households = series(conn, "DT_1JC1516", "T10", "00")
+        household_size = series(conn, "DT_1JC1516", "T30", "00")
+        projection_total = series(conn, "DT_1BZ0506", "T01", "000")
+        if not all((actual, projection, births, marriages, total_households, household_size, projection_total)):
             raise ValueError("A national dashboard series is missing")
+        latest_year = actual[-1]["year"]
+        latest_count = int(actual[-1]["value"])
+        def numeric_rows(query, args=()):
+            rows = []
+            for record in conn.execute(query, args):
+                try: value = float(record["value_raw"])
+                except ValueError: continue
+                rows.append({**{key: record[key] for key in record.keys() if key != "value_raw"}, "value": value})
+            return rows
+        age = numeric_rows("SELECT dimension_2_code AS code,dimension_2_name AS name,value_raw FROM observations WHERE dataset_id='DT_1PL1502' AND year=? AND geography_code='00' AND measure_code='T00' AND dimension_2_code!='000'", (latest_year,))
+        age_by_code = {r["code"]: r["value"] for r in age}
+        age_groups = [
+            ("35세 미만", ("024", "025", "030", "035")),
+            ("35–49세", ("040", "045", "050")),
+            ("50–64세", ("055", "060", "065")),
+            ("65세 이상", ("070", "075", "080", "085", "086")),
+        ]
+        if set(age_by_code) != {code for _, codes in age_groups for code in codes}:
+            raise ValueError("Age classification changed; review before publication")
+        age_bands = [{"label": label, "value": int(sum(age_by_code[code] for code in codes))} for label, codes in age_groups]
+        if sum(row["value"] for row in age_bands) != latest_count:
+            raise ValueError("Age bands do not sum to the one-person household total")
+        regional_year = conn.execute("SELECT max(year) FROM observations WHERE dataset_id='DT_1PL1502' AND geography_code='31' AND dimension_2_code='000' AND measure_code='T00'").fetchone()[0]
+        region_rows = numeric_rows("SELECT geography_code AS code,geography_name AS name,year,value_raw FROM observations WHERE dataset_id='DT_1PL1502' AND year IN (2015,?) AND length(geography_code)=2 AND geography_code NOT IN ('00','03','04','05') AND dimension_2_code='000' AND measure_code='T00'", (regional_year,))
+        regions = {}
+        for row in region_rows:
+            item = regions.setdefault(row["code"], {"code": row["code"], "name": row["name"]})
+            item[str(row["year"])] = int(row["value"])
+            if row["year"] == regional_year: item["name"] = row["name"]
+        regions = sorted((row for row in regions.values() if str(regional_year) in row), key=lambda row: row[str(regional_year)], reverse=True)
+        if len(regions) != 17 or sum(row[str(regional_year)] for row in regions) != int(next(r["value"] for r in actual if r["year"] == regional_year)):
+            raise ValueError("Regional breakdown does not match the national total")
+        housing_year = conn.execute("SELECT max(year) FROM observations WHERE dataset_id='DT_1JU1501' AND geography_code='00'").fetchone()[0]
+        stock_rows = numeric_rows("SELECT measure_code AS code,measure_name AS name,value_raw FROM observations WHERE dataset_id='DT_1JU1501' AND year=? AND geography_code='00'", (housing_year,))
+        stock_by_code = {r["code"]: r for r in stock_rows}
+        housing_codes = (("T30", "아파트"), ("T20", "단독주택"), ("T50", "다세대주택"), ("T40", "연립주택"), ("T60", "비주거용 건물 내 주택"))
+        housing_stock = [{"label": label, "value": int(stock_by_code[code]["value"])} for code, label in housing_codes]
+        housing_total = int(stock_by_code["T10"]["value"])
+        if sum(row["value"] for row in housing_stock) != housing_total:
+            raise ValueError("Housing types do not sum to total housing stock")
+        area_year = conn.execute("SELECT max(year) FROM observations WHERE dataset_id='DT_1JC1521' AND geography_code='00'").fetchone()[0]
+        area_rows = numeric_rows("SELECT dimension_2_code AS code,dimension_2_name AS name,value_raw FROM observations WHERE dataset_id='DT_1JC1521' AND year=? AND geography_code='00' AND measure_code='T30'", (area_year,))
+        housing_area = [{"label": row["name"], "value": row["value"]} for row in area_rows if row["code"] in ("00", "10", "20", "30", "40", "50", "60")]
+        housing_area.sort(key=lambda row: (row["label"] != "계", -row["value"]))
+        coverage = []
+        for table, (driver, _, mode) in TABLES.items():
+            row = conn.execute("SELECT min(year) AS first_year,max(year) AS last_year,count(*) AS records FROM observations WHERE dataset_id=?", (table,)).fetchone()
+            coverage.append({"table_id": table, "title": TABLE_TITLES[table], "driver": driver, "status": mode,
+                             "first_year": row["first_year"], "latest_year": row["last_year"], "records": row["records"], "source_url": source_url(table)})
         raw_root = ROOT / "data" / "raw"
         change_dates = [path.name for path in raw_root.iterdir() if path.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.name)] if raw_root.exists() else []
         data = {
@@ -269,9 +331,12 @@ def build():
             "actual": {"single_person_households": actual, "births": births, "marriages": marriages},
             "official_projection": {"single_person_households": projection},
             "catalog_count": qa["catalog"],
-            "coverage": [{"table_id": t, "status": "Official Projection" if t == "DT_1BZ0506" else "Actual",
-                          "latest_year": conn.execute("SELECT max(year) FROM observations WHERE dataset_id=?", (t,)).fetchone()[0]}
-                         for t in TABLES],
+            "coverage": coverage,
+            "dashboard": {"total_households": total_households, "household_size": household_size,
+                          "projection_total": projection_total, "age_year": latest_year, "age_bands": age_bands,
+                          "regional_year": regional_year, "regions": regions, "housing_year": housing_year,
+                          "housing_total": housing_total, "housing_stock": housing_stock,
+                          "area_year": area_year, "housing_area": housing_area},
         }
         SITE_DATA.parent.mkdir(parents=True, exist_ok=True)
         SITE_DATA.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
