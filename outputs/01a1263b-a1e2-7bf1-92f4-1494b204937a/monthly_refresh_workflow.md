@@ -3,28 +3,28 @@
 ## Schedule
 
 - Frequency: monthly, on the 10th at 09:30 (Asia/Seoul)
-- Mode: thread heartbeat
-- Notification: only when a material update, collection failure, or a decision request occurs
+- Mode: GitHub Actions (`.github/workflows/factbase-refresh.yml`), plus manual dispatch
+- Prerequisite: repository secret `KOSIS_API_KEY`
+- Publication: validated changes are committed to `main`; the published dashboard reads the public JSON on the next page load
 
 ## Scope and operating rules
 
 1. Start with the `P1 Collection Status` and `Source Registry` sheets in `korea_customer_life_fact_dataset_phase1.xlsx`.
-2. Check KOSIS and the cited first-party source for new releases or revisions since the recorded collection date.
+2. The automated collector checks the eight KOSIS tables already normalized in the DB. Other catalog sources remain a manual research queue.
 3. Keep **Actual** and **Official Projection** as separate observations. Do not fill historical series with forecast values or vice versa.
 4. Preserve table ID, source URL, release/collection date, unit, geographic grain, and any transformation in the raw-data and QA fields.
-5. When a published table's definition, ID, or classification changes, record the evidence in `Catalog Corrections`; do not silently overwrite the prior mapping.
+5. When a published table's definition, ID, classification or forecast vintage changes, stop the automated publication and review the mapping before rerunning.
 
 ## Monthly execution sequence
 
 | Step | Action | Output |
 |---|---|---|
-| 1 | Identify releases/revisions | change log with source and reference date |
-| 2 | Download official source data | date-stamped raw extract |
-| 3 | Validate unit, period, geography, and status | QA note / exception record |
-| 4 | Normalize into Fact Data Long | Actual/Projection-labelled records |
-| 5 | Refresh Key Series and Dashboard | updated decision-facing trends |
-| 6 | Update status and registry | reproducible catalog history |
-| 7 | Notify only if action is needed | concise Korean update |
+| 1 | Query the official KOSIS API | eight table responses; key stays in GitHub Secrets |
+| 2 | Validate table, year, national geography, dimensions, duplicates and status | fail before publication if a rule breaks |
+| 3 | Apply observations and preserve revisions | `data/factbase.sqlite` and `revisions` table |
+| 4 | Save changed source responses | `data/raw/YYYY-MM-DD/` |
+| 5 | Build the dashboard feed | `sites/korea-life-fact-base/dist/data/dashboard.json` |
+| 6 | Commit only verified changes | public GitHub `main`; website reads them directly |
 
 ## Priority queue
 
@@ -38,3 +38,5 @@
 - No mix of actuals and projections in one unlabelled series.
 - No aggregation across incompatible units or geographic levels.
 - Revision values are retained with an update note rather than silently replaced.
+- Official Projection values that differ from the stored 2022-base vintage are rejected until the new vintage is identified.
+- Missing API credentials or an API error fails the run and leaves the published DB and web feed unchanged.
