@@ -1,0 +1,11 @@
+# Local research and browser-session artifacts
+.artifact-work/
+.playwright-cli/
+
+# Reproducible deployment archives
+sites/**/site-source*.tar.gz
+
+# Generated previews and inspection output; retain the source workbooks and workflow notes
+outputs/**/*.png
+outputs/**/*.inspect.ndjson
+outputs/**/verification.txt
