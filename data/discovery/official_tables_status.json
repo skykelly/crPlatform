@@ -1,6 +1,6 @@
 {
  "run_at": "2026-10-12",
- "changed_observations": 17136,
+ "changed_observations": 154,
  "tables": {
   "DT_1LC0030": {
    "rows": 750
@@ -22,6 +22,9 @@
   },
   "DT_1DA7011S": {
    "rows": 176
+  },
+  "DT_1DE7100S": {
+   "rows": 154
   },
   "DT_1L9U105": {
    "rows": 6125
@@ -49,10 +52,7 @@
   },
   "DT_170002_B001": {
    "rows": 112
-  },
-  "DT_1DE7100S": {
-   "error": "ValueError: KOSIS error 21: 요청 변수값이 잘못되었습니다. 수록 시점 및 최근 수록 시점 개수에는 숫자만 사용해야 합니다."
   }
  },
- "ok_tables": "16/17"
+ "ok_tables": "17/17"
 }
