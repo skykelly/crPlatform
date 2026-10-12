@@ -1,0 +1,307 @@
+"""F1 R1 4유형 기록 생성 + 규칙 검증. 출력: 같은 폴더 records.jsonl
+실행: python3 build_records.py  (검증 오류가 있으면 exit 1)
+
+비율 계산 메모 (팩트베이스 DT_1JC1516·DT_1JC1517, 전국, 일반가구 기준)
+- 분모: DT_1JC1516 세대구성 '계' 일반가구 수
+- 3세대 이상 = '3세대 가구' + '4세대 이상 가구'
+- 한부모 = '모+미혼자녀' + '부+미혼자녀' (2024·2025만 수록)
+- 연령 구간: 20~39세 = 20~24·25~29·30~34·35~39세, 40~64세 = 40~44 … 60~64세, 65세 이상 = 65~69 … 85세 이상 (가구주 연령)
+"""
+import sys
+from pathlib import Path
+
+Q, R = "F1", "R1"
+KOSIS = "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId={}&conn_path=I2"
+SRC = {
+    # A: 팩트베이스(KOSIS API) · 공식 발표
+    "kosis_1516": {"url": KOSIS.format("DT_1JC1516"), "publisher": "국가데이터처 KOSIS (DT_1JC1516 세대구성 및 가구원수별 가구(일반가구) - 시군구)", "date": "2026-10-11", "grade": "A"},
+    "kosis_1517": {"url": KOSIS.format("DT_1JC1517"), "publisher": "국가데이터처 KOSIS (DT_1JC1517 가구주의 성·연령 및 세대구성별 가구(일반가구) - 시군구)", "date": "2026-10-11", "grade": "A"},
+    "kdi_census2025": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=284799", "publisher": "국가데이터처 보도자료 「2025년 인구주택총조사 결과(등록센서스 방식)」 (KDI 경제정보센터 게재)", "date": "2026-07-28", "grade": "A"},
+    "pdf_census2022": {"url": "https://files-scs.pstatic.net/2023/07/30/zGckBrFqEL/2022년+인구주택총조사+결과(등록센서스+방식)+보도자료.pdf", "publisher": "통계청 보도자료 「2022년 인구주택총조사 결과(등록센서스 방식)」", "date": "2023-07-27", "grade": "A"},
+    "kdi_elderly2026": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=287674", "publisher": "국가데이터처 보도자료 「2026 고령자 통계」 (KDI 경제정보센터 게재)", "date": "2026-10-01", "grade": "A"},
+    # B: 공식 통계를 인용한 주요 언론
+    "herald_census2025": {"url": "https://www.heraldk.com/article/2026072722090410402", "publisher": "헤럴드경제 (국가데이터처 2025 인구주택총조사 인용)", "date": "2026-07-27", "grade": "B"},
+    "nocut_census2025": {"url": "https://nocutnews.co.kr/news/6554377", "publisher": "노컷뉴스 (국가데이터처 2025 인구주택총조사 인용)", "date": "2026-07-28", "grade": "B"},
+    "ytn_census2025": {"url": "https://www.ytn.co.kr/_ln/0102_202607281324445082", "publisher": "YTN (국가데이터처 2025 인구주택총조사 인용)", "date": "2026-07-28", "grade": "B"},
+    "ytn_proj": {"url": "https://www.ytn.co.kr/_ln/0102_202409121243084009", "publisher": "YTN (통계청 장래가구추계 2022~2052 인용)", "date": "2024-09-12", "grade": "B"},
+    "etoday_proj": {"url": "https://www.etoday.co.kr/news/view/2400637", "publisher": "이투데이 (통계청 장래가구추계 2022~2052 인용)", "date": "2024-09-12", "grade": "B"},
+    "sbs_proj": {"url": "https://biz.sbs.co.kr/amp/article/20000206776", "publisher": "SBS Biz (통계청 장래가구추계 시도편 2022~2052 인용)", "date": "2024-12-12", "grade": "B"},
+    "newsis_proj": {"url": "https://www.newsis.com/view/NISX20241212_0002993974", "publisher": "뉴시스 (통계청 장래가구추계 시도편 2022~2052 인용)", "date": "2024-12-12", "grade": "B"},
+    "khan_pet": {"url": "https://www.khan.co.kr/article/202602121457001/", "publisher": "경향신문 (농림축산식품부 2025 반려동물 양육현황 조사 인용)", "date": "2026-02-12", "grade": "B"},
+    "newsseoul_pet": {"url": "https://www.newsseoul.co.kr/news/view/1065584423215514", "publisher": "뉴스서울 (농림축산식품부 발표 인용)", "date": "2026-02-12", "grade": "B"},
+    "dailyvet_pet2025": {"url": "https://www.dailyvet.co.kr/?p=273697", "publisher": "데일리벳 (농림축산식품부 2025 반려동물 양육현황 조사 인용)", "date": "2026-02-18", "grade": "B"},
+    "dailyvet_pet2024": {"url": "https://www.dailyvet.co.kr/news/policy/239355", "publisher": "데일리벳 (농림축산식품부 동물복지 국민의식조사 인용)", "date": "2025-03-11", "grade": "B"},
+    "newsis_1p2025": {"url": "https://www.newsis.com/view/NISX20251209_0003433761", "publisher": "뉴시스 (국가데이터처 2025 통계로 보는 1인 가구 인용)", "date": "2025-12-09", "grade": "B"},
+    "newdaily_housing": {"url": "https://biz.newdaily.co.kr/site/data/html/2025/11/15/2025111500090.html", "publisher": "뉴데일리 (국토교통부 2024년도 주거실태조사 인용)", "date": "2025-11-16", "grade": "B"},
+    "mt_marriage": {"url": "https://www.mt.co.kr/economy/2026/03/20/2026031915130297984", "publisher": "머니투데이 (국가데이터처 2025년 혼인·이혼 통계 인용)", "date": "2026-03-19", "grade": "B"},
+    "newsis_birth": {"url": "https://www.newsis.com/view/NISX20260225_0003525439", "publisher": "뉴시스 (국가데이터처 2025년 출생·사망통계(잠정) 인용)", "date": "2026-02-25", "grade": "B"},
+    "fn_census_start": {"url": "https://www.fnnews.com/news/202510211714379048", "publisher": "파이낸셜뉴스 (2025 인구주택총조사 실시 보도)", "date": "2025-10-21", "grade": "B"},
+    "segye_census_items": {"url": "https://www.segye.com/newsView/20250703515788", "publisher": "세계일보 (통계청 2025 인구주택총조사 조사항목 발표 인용)", "date": "2025-07-04", "grade": "B"},
+    "ytn_elderly2026": {"url": "https://www.ytn.co.kr/_ln/0102_202610012326386165", "publisher": "YTN (국가데이터처 2026 고령자 통계 인용)", "date": "2026-10-01", "grade": "B"},
+    "fn_partner": {"url": "https://www.fnnews.com/news/202510020822418789", "publisher": "파이낸셜뉴스 (생활동반자법 보도)", "date": "2025-10-05", "grade": "B"},
+    "tf_partner": {"url": "https://news.tf.co.kr/read/ogmeta/2250504.htm", "publisher": "더팩트 (생활동반자법 보도)", "date": "2025-10-06", "grade": "B"},
+}
+def src(*keys): return [dict(SRC[k], key=k) for k in keys]
+
+base = dict(question=Q, question_version="v1.0", first_seen=R, last_seen=R, status="유효", replaces=None, check_flags=[])
+records = []
+def add(**kw):
+    r = dict(base); r.update(kw); records.append(r)
+
+FB = "팩트베이스(KOSIS API) 값. "
+
+# ---------- 지표 (M) ----------
+# F1-K1 1인가구 비중
+add(id=f"{Q}-M-001", type="지표", indicator=f"{Q}-K1", importance=3, representative=True,
+    statement="2025년 1인가구는 일반가구의 36.6%다. 1년 전보다 0.6%p 늘었다. 2020년 이후 연평균 1.0%p씩 늘었으나 최근 1년 증가폭은 그 절반 수준이다.",
+    value=36.6, unit="%", as_of="2025", region="KR",
+    definition=FB + "인구주택총조사(등록센서스) 11월 1일 기준. 1인 가구 ÷ 일반가구(DT_1JC1516 세대구성 '계') × 100",
+    prev_value=36.1,
+    extra={"series": {"2015": 27.23, "2016": 27.87, "2017": 28.56, "2018": 29.27, "2019": 30.22, "2020": 31.75,
+                      "2021": 33.41, "2022": 34.46, "2023": 35.47, "2024": 36.09, "2025": 36.65},
+           "count": {"2024": 8044948, "2025": 8244308}},
+    sources=src("kosis_1516", "kdi_census2025"), verified=True)
+add(id=f"{Q}-M-002", type="지표", indicator=f"{Q}-K1", importance=3, representative=False,
+    statement="65세 이상 1인가구는 2025년 245만 6천 가구로 일반가구의 10.9%다. 1년 새 16만 7천 가구 늘어 같은 기간 1인가구 증가분(19만 9천 가구)의 84%를 차지했다.",
+    value=2455947, unit="가구", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1517 1인가구 중 가구주 65세 이상 5개 연령 구간 합. 비중은 일반가구 대비",
+    prev_value=2288807,
+    extra={"series": {"2015": 1223169, "2020": 1660711, "2021": 1824434, "2022": 1973416, "2023": 2138107, "2024": 2288807, "2025": 2455947},
+           "share_of_general": {"2015": 6.4, "2020": 7.94, "2023": 9.69, "2024": 10.27, "2025": 10.92}},
+    sources=src("kosis_1517", "herald_census2025"), verified=True)
+add(id=f"{Q}-M-003", type="지표", indicator=f"{Q}-K1", importance=2, representative=False,
+    statement="가구주 20~39세 1인가구는 2025년 278만 7천 가구로 2024년과 같은 수준이다(+627가구). 1인가구 안에서 이 연령대 비중은 2020년 35.9%에서 33.8%로 낮아졌다. 40~64세 1인가구는 295만 3천 가구로 1년 새 3만 가구 늘었다.",
+    value=2787138, unit="가구", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1517 1인가구 중 가구주 20~39세(4개 구간 합). 40~64세는 5개 구간 합",
+    prev_value=2786511,
+    extra={"series": {"2015": 1840345, "2020": 2382429, "2021": 2589586, "2022": 2685398, "2023": 2759571, "2024": 2786511, "2025": 2787138},
+           "age40_64": {"2020": 2524012, "2024": 2922565, "2025": 2953027}},
+    sources=src("kosis_1517"), verified=True)
+add(id=f"{Q}-M-004", type="지표", indicator=f"{Q}-K1", importance=1, representative=False,
+    statement="1인가구 성별 최다 연령대는 남자 30대(21.8%), 여자 60대(18.6%)다(2025년).",
+    value=21.8, unit="%", as_of="2025", region="KR",
+    definition="남자 1인가구 중 30대 비중. 국가데이터처 발표 인용 보도",
+    sources=src("ytn_census2025"), verified=True)
+# F1-K2 부부가구 비중
+add(id=f"{Q}-M-005", type="지표", indicator=f"{Q}-K2", importance=3, representative=True,
+    statement="2025년 부부로만 이뤄진 가구는 일반가구의 17.8%(400만 4천 가구)다. 1년 새 0.4%p 늘었다. 2020~2024년 연평균 증가폭(0.15%p)보다 컸다.",
+    value=17.8, unit="%", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1517 '1세대가구_부부' 합계 ÷ 일반가구 × 100",
+    prev_value=17.42,
+    extra={"series": {"2015": 15.6, "2016": 15.46, "2017": 15.88, "2018": 16.25, "2019": 16.66, "2020": 16.81,
+                      "2021": 17.1, "2022": 17.36, "2023": 17.23, "2024": 17.42, "2025": 17.8},
+           "count": {"2024": 3884245, "2025": 4003951}},
+    sources=src("kosis_1517", "kosis_1516"), verified=True)
+add(id=f"{Q}-M-006", type="지표", indicator=f"{Q}-K2", importance=3, representative=False,
+    statement="부부가구 중 가구주가 65세 이상인 비중은 2025년 53.6%다(2015년 41.3%). 2025년 늘어난 부부가구 11만 9,706가구 가운데 11만 8,725가구가 65세 이상 가구주였다. 가구주 20~39세 부부가구는 35만 1천 가구로 1년 새 3.7% 늘었다. 40~64세 부부가구는 2022년 156만 9천 가구에서 2025년 150만 5천 가구로 줄었다.",
+    value=53.6, unit="%", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1517 '1세대가구_부부' 중 가구주 65세 이상 ÷ 부부가구 합계 × 100",
+    prev_value=52.2,
+    extra={"series": {"2015": 41.3, "2020": 47.0, "2021": 48.1, "2022": 49.3, "2023": 50.8, "2024": 52.2, "2025": 53.6},
+           "age20_39_count": {"2020": 377479, "2023": 337107, "2024": 338756, "2025": 351374},
+           "age40_64_count": {"2020": 1489133, "2022": 1568950, "2024": 1516343, "2025": 1504707}},
+    sources=src("kosis_1517"), verified=True)
+# F1-K3 부부+미혼자녀
+add(id=f"{Q}-M-007", type="지표", indicator=f"{Q}-K3", importance=3, representative=True,
+    statement="2025년 부부와 미혼자녀로 이뤄진 가구는 일반가구의 25.2%(565만 8천 가구)다. 1년 새 0.5%p 줄었다. 2020~2024년 연평균 감소폭(0.85%p)보다 작았다.",
+    value=25.15, unit="%", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1517 '2세대가구_부부+미혼자녀' 합계 ÷ 일반가구 × 100",
+    prev_value=25.67,
+    extra={"series": {"2015": 32.18, "2016": 31.96, "2017": 31.31, "2018": 30.64, "2019": 29.8, "2020": 29.08,
+                      "2021": 27.89, "2022": 26.94, "2023": 26.25, "2024": 25.67, "2025": 25.15},
+           "count": {"2024": 5723684, "2025": 5657753}},
+    sources=src("kosis_1517", "kosis_1516"), verified=True)
+add(id=f"{Q}-M-008", type="지표", indicator=f"{Q}-K3", importance=2, representative=False,
+    statement="가구주 20~39세 부부+미혼자녀 가구는 2025년 84만 6천 가구다. 2020년 117만 4천 가구에서 28% 줄었다. 같은 기간 가구주 65세 이상인 부부+미혼자녀 가구는 45만 2천에서 61만 7천 가구로 늘었다.",
+    value=845950, unit="가구", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1517 '2세대가구_부부+미혼자녀' 중 가구주 20~39세(4개 구간 합)",
+    prev_value=875843,
+    extra={"series": {"2015": 1371169, "2020": 1173569, "2021": 1100704, "2022": 1011018, "2023": 929300, "2024": 875843, "2025": 845950},
+           "age65plus": {"2020": 452098, "2024": 567600, "2025": 617368}},
+    sources=src("kosis_1517"), verified=True)
+# F1-K4 한부모
+add(id=f"{Q}-M-009", type="지표", indicator=f"{Q}-K4", importance=3, representative=True,
+    statement="2025년 한부모와 미혼자녀로 이뤄진 가구(모+미혼자녀, 부+미혼자녀)는 일반가구의 8.9%(200만 2천 가구)다. 2024년 9.0%보다 0.1%p 낮다.",
+    value=8.9, unit="%", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1516 '모+미혼자녀'(151만 3천) + '부+미혼자녀'(49만) ÷ 일반가구 × 100",
+    prev_value=9.04,
+    extra={"series": {"2024": 9.04, "2025": 8.9}, "count": {"2024": 2016157, "2025": 2002226}},
+    check_flags=["확인 필요: 팩트베이스에 2024·2025년만 있어 3개 시점 이상 추세를 만들지 못했다. 2015~2023년 값을 KOSIS에서 보완",
+                 "확인 필요: 공식 보도의 '한부모 가구'(147만 7천)와 KOSIS 세대구성 합(200만 2천)의 정의 차이"],
+    sources=src("kosis_1516"), verified=True)
+add(id=f"{Q}-M-010", type="지표", indicator=f"{Q}-K4", importance=2, representative=False,
+    statement="공식 발표 기준 한부모 가구는 2025년 147만 7천 가구로 1년 새 1만 3천 가구(0.9%) 줄었다.",
+    value=1477000, unit="가구", as_of="2025", region="KR",
+    definition="국가데이터처 2025 인구주택총조사 발표의 '한부모 가구' 수(보도 인용). KOSIS 세대구성 합과 정의가 다름",
+    prev_value=1490000,
+    check_flags=["확인 필요: 보도자료 원문의 한부모 가구 정의(가구주 기준 여부) 미확인. 전년값 149만은 증감에서 역산"],
+    sources=src("herald_census2025"), verified=True)
+# F1-K5 3세대 이상
+add(id=f"{Q}-M-011", type="지표", indicator=f"{Q}-K5", importance=3, representative=True,
+    statement="2025년 3세대 이상 가구는 일반가구의 2.5%(56만 8천 가구)다. 2015년 5.4%에서 10년 새 절반 아래로 줄었다.",
+    value=2.53, unit="%", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1516 '3세대 가구' + '4세대 이상 가구' ÷ 일반가구 × 100",
+    prev_value=2.71,
+    extra={"series": {"2015": 5.44, "2016": 5.21, "2017": 4.86, "2018": 4.51, "2019": 4.16, "2020": 3.66,
+                      "2021": 3.29, "2022": 3.06, "2023": 2.91, "2024": 2.71, "2025": 2.53},
+           "count": {"2020": 764932, "2024": 605272, "2025": 568032}},
+    sources=src("kosis_1516"), verified=True)
+# F1-K6 비친족
+add(id=f"{Q}-M-012", type="지표", indicator=f"{Q}-K6", importance=3, representative=True,
+    statement="2025년 비친족 가구는 60만 4,720가구로 처음 60만 가구를 넘었다. 일반가구의 2.7%다. 1년 새 4.2% 늘어 2020~2024년 연평균 증가율(8.2%)의 절반 수준이었다.",
+    value=604720, unit="가구", as_of="2025", region="KR",
+    definition=FB + "DT_1JC1516 '비친족 가구'(친족이 아닌 사람끼리 사는 5인 이하 가구)",
+    prev_value=580413,
+    extra={"series": {"2015": 214421, "2016": 269444, "2017": 308659, "2018": 340367, "2019": 386968, "2020": 423459,
+                      "2021": 472660, "2022": 513889, "2023": 545008, "2024": 580413, "2025": 604720},
+           "share": {"2020": 2.02, "2024": 2.6, "2025": 2.69}},
+    sources=src("kosis_1516", "herald_census2025"), verified=True)
+# F1-K7 평균 가구원수
+add(id=f"{Q}-M-013", type="지표", indicator=f"{Q}-K7", importance=3, representative=True,
+    statement="2025년 일반가구 평균 가구원수는 2.16명이다. 1년 전보다 0.03명, 2020년보다 0.18명 줄었다. 1·2인 가구가 일반가구의 66.1%다.",
+    value=2.16, unit="명", as_of="2025", region="KR",
+    definition="인구주택총조사(등록센서스) 공식 발표 소수 둘째 자리 값. 팩트베이스 DT_1JC1516은 소수 첫째 자리(2.2)로만 수록",
+    prev_value=2.19,
+    extra={"series": {"2020": 2.34, "2021": 2.29, "2022": 2.25, "2024": 2.19, "2025": 2.16},
+           "factbase_rounded": {"2015": 2.5, "2020": 2.3, "2025": 2.2}},
+    check_flags=["확인 필요: 2024년 2.19명은 2025년 발표의 전년 대비 감소폭(0.03명)에서 역산. 2023년 값 미확보"],
+    sources=src("kdi_census2025", "nocut_census2025", "pdf_census2022", "kosis_1516"), verified=True)
+# F1-K8 반려동물
+add(id=f"{Q}-M-014", type="지표", indicator=f"{Q}-K8", importance=3, representative=True,
+    statement="2025년 반려동물을 기르는 가구는 29.2%다. 인구주택총조사 표본 3,000가구 방문 면접조사로 처음 국가승인통계로 집계했다. 반려동물 중 개가 80.5%, 고양이가 14.4%다.",
+    value=29.2, unit="%", as_of="2025", region="KR",
+    definition="농림축산식품부 2025 반려동물 양육현황 조사(현재 거주지에서 직접 기르는 가구, 가중치 적용, 95% 신뢰수준 ±1.79%p)",
+    check_flags=["확인 필요: 이전 동물복지 국민의식조사(온라인, 개인 응답)와 방법이 달라 직접 비교 불가. 추세 판정은 다음 공표부터"],
+    sources=src("khan_pet", "dailyvet_pet2025", "newsseoul_pet"), verified=True)
+add(id=f"{Q}-M-015", type="지표", indicator=f"{Q}-K8", importance=1, representative=False,
+    statement="동물복지 국민의식조사 기준 반려동물 양육 비율은 2015년 21.8%, 2019년 26.4%, 2024년 28.6%였다.",
+    value=28.6, unit="%", as_of="2024", region="KR",
+    definition="농림축산식품부 동물복지 국민의식조사(미승인 통계, 2019년부터 온라인 패널). 2025 양육현황 조사와 정의·방법이 다름",
+    extra={"series": {"2015": 21.8, "2019": 26.4, "2024": 28.6}},
+    check_flags=["확인 필요: 조사 방식이 연도마다 달라(전화→면접→온라인) 시계열 해석에 주의"],
+    sources=src("dailyvet_pet2024"), verified=True)
+# 공식 장래가구추계 (전망 근거 전용, 실적 아님)
+add(id=f"{Q}-M-016", type="지표", indicator=f"{Q}-K1", importance=2, representative=False,
+    statement="장래가구추계(2022년 기준)는 1인가구 비중이 2022년 34.1%에서 2052년 41.3%로 오른다고 본다. 가구주 65세 이상 가구 비중은 24.1%에서 50.6%로 오른다.",
+    value=41.3, unit="%", as_of="2052(추계)", region="KR",
+    definition="통계청 장래가구추계 2022~2052년 추계값. 실적이 아니며 전망 근거로만 쓴다",
+    sources=src("ytn_proj", "newsis_proj"), verified=True)
+add(id=f"{Q}-M-017", type="지표", indicator=f"{Q}-K2", importance=2, representative=False,
+    statement="장래가구추계는 부부가구 비중이 2022년 17.3%에서 2052년 22.8%로 오른다고 본다. 같은 해 부부+자녀 가구는 17.4%, 한부모+자녀 가구는 7.6%, 비친족 가구는 3.5%로 추계했다.",
+    value=22.8, unit="%", as_of="2052(추계)", region="KR",
+    definition="통계청 장래가구추계 2022~2052년(전국·시도편) 추계값. 추계의 가구 유형 분류는 인구주택총조사 세대구성과 다를 수 있음",
+    check_flags=["확인 필요: 추계 보도자료 원문의 2022년 기준값(부부+자녀·한부모·비친족)을 열지 못했다"],
+    sources=src("etoday_proj", "sbs_proj"), verified=True)
+add(id=f"{Q}-M-018", type="지표", indicator=f"{Q}-K7", importance=2, representative=False,
+    statement="장래가구추계는 평균 가구원수가 2022년 2.26명에서 2034년 2명 아래로 내려가고 2052년 1.81명이 된다고 본다.",
+    value=1.81, unit="명", as_of="2052(추계)", region="KR",
+    definition="통계청 장래가구추계 2022~2052년 추계값. 추계 기준 2022년 값(2.26)은 등록센서스 실적(2.25)과 다름",
+    sources=src("ytn_proj"), verified=True)
+
+# ---------- 사건 (E) ----------
+add(id=f"{Q}-E-001", type="사건", importance=3, date="2026-07-28", actor="국가데이터처",
+    statement="2025 인구주택총조사(등록센서스) 결과를 발표했다. 1인가구 비중 36.6%, 평균 가구원수 2.16명, 비친족 가구 첫 60만 돌파, 65세 이상 1인가구 10.9%가 주요 수치다.",
+    sources=src("kdi_census2025", "herald_census2025", "nocut_census2025"), verified=True)
+add(id=f"{Q}-E-002", type="사건", importance=2, date="2025-10-22", actor="국가데이터처",
+    statement="2025 인구주택총조사 표본조사(전체 가구의 약 20%, 약 500만 가구)를 시작했다. 가구주와의 관계 항목에 '비혼동거'가 처음 들어갔다. 표본 결과는 2026년 11월 공표 예정이다.",
+    sources=src("fn_census_start", "segye_census_items"), verified=True)
+add(id=f"{Q}-E-003", type="사건", importance=2, date="2026-02-12", actor="농림축산식품부",
+    statement="2025 반려동물 양육현황 조사를 처음 국가승인통계로 공표했다. 반려동물 양육가구 비율은 29.2%다.",
+    sources=src("khan_pet", "newsseoul_pet"), verified=True)
+add(id=f"{Q}-E-004", type="사건", importance=2, date="2025-12-09", actor="국가데이터처",
+    statement="「2025 통계로 보는 1인 가구」를 발표했다. 2024년 1인가구의 주거면적은 40㎡ 이하 49.6%, 40~60㎡ 24.6%, 60~85㎡ 18.0%, 85㎡ 초과 7.6%다. 연령대는 70세 이상(19.8%)이 가장 많다.",
+    sources=src("newsis_1p2025"), verified=True)
+add(id=f"{Q}-E-005", type="사건", importance=2, date="2025-11-16", actor="국토교통부",
+    statement="2024년도 주거실태조사 결과를 발표했다. 가구당 평균 주거면적은 68.1㎡, 1인당 36.0㎡다. 1인당 면적은 신혼부부 27.4㎡, 청년가구 31.1㎡, 고령가구 46.6㎡다. 신혼부부의 아파트 거주 비율은 73.4%다.",
+    sources=src("newdaily_housing"), verified=True)
+add(id=f"{Q}-E-006", type="사건", importance=2, date="2026-03-19", actor="국가데이터처",
+    statement="2025년 혼인·이혼 통계를 발표했다. 혼인은 24만 건으로 8.1% 늘어 3년 연속 증가했다. 이혼은 8만 8천 건으로 3.3% 줄었다.",
+    sources=src("mt_marriage"), verified=True)
+add(id=f"{Q}-E-007", type="사건", importance=2, date="2026-02-25", actor="국가데이터처",
+    statement="2025년 출생·사망통계(잠정)를 발표했다. 출생아는 25만 4,500명으로 6.8% 늘었고 합계출산율은 0.80명이다. 첫째아가 8.6% 늘어 증가분 대부분을 차지했다.",
+    sources=src("newsis_birth"), verified=True)
+add(id=f"{Q}-E-008", type="사건", importance=2, date="2026-10-01", actor="국가데이터처",
+    statement="「2026 고령자 통계」를 발표했다. 가구주가 65세 이상인 가구는 2026년 650만 7천 가구로 전체 가구의 28.8%이며 2038년 1천만 가구를 넘을 전망이다.",
+    check_flags=["확인 필요: 2026년 고령자 가구 수는 장래가구추계 기반 값으로 보인다. 보도자료 원문(PDF)에서 출처 확인"],
+    sources=src("kdi_elderly2026", "ytn_elderly2026"), verified=True)
+add(id=f"{Q}-E-009", type="사건", importance=1, date="2025-09-03", actor="국회(용혜인 의원)",
+    statement="성인 두 사람의 생활 공유·돌봄 관계를 법적으로 인정하는 생활동반자법이 22대 국회에 다시 발의됐다.",
+    check_flags=["확인 필요: 발의일이 9월 3일(더팩트)과 10월 3일(파이낸셜뉴스)로 엇갈린다. 국회 의안정보시스템 원문 미확인"],
+    sources=src("tf_partner", "fn_partner"), verified=False)
+
+# ---------- 해석 (I) ----------
+add(id=f"{Q}-I-001", type="해석", importance=3, target="1인가구 증가의 주체", direction="강화",
+    statement="1인가구 증가는 이어지지만 늘어나는 몫은 고령층이다. 2025년 증가분의 84%가 65세 이상 1인가구였고, 20~39세 1인가구는 늘지 않았다.",
+    basis=[f"{Q}-M-001", f"{Q}-M-002", f"{Q}-M-003"])
+add(id=f"{Q}-I-002", type="해석", importance=3, target="부부가구의 고령화", direction="강화",
+    statement="부부가구 증가는 자녀가 독립한 고령 부부에서 나온다. 2025년 늘어난 부부가구의 99%가 65세 이상 가구주였다. 청년 부부가구는 2025년 소폭 반등했다.",
+    basis=[f"{Q}-M-005", f"{Q}-M-006"])
+add(id=f"{Q}-I-003", type="해석", importance=3, target="부부+미혼자녀 가구 감소", direction="약화",
+    statement="부부+미혼자녀 가구 감소는 2025년에 느려졌다. 같은 해 혼인(+8.1%)과 첫째아 출생(+8.6%)이 늘었다. 다만 20~39세 가구주의 자녀 가구는 여전히 줄고 있어, 반등이 가구 구성에 이어지는지는 다음 발표로 확인해야 한다.",
+    basis=[f"{Q}-M-007", f"{Q}-M-008", f"{Q}-E-006", f"{Q}-E-007"])
+add(id=f"{Q}-I-004", type="해석", importance=2, target="다세대 동거", direction="약화",
+    statement="3세대 이상이 함께 사는 가구는 해마다 0.2%p 안팎씩 줄어 2.5%가 됐다. 평균 가구원수 감소의 한 원인이다.",
+    basis=[f"{Q}-M-011", f"{Q}-M-013"])
+add(id=f"{Q}-I-005", type="해석", importance=2, target="친족 밖 동거", direction="강화",
+    statement="친족이 아닌 사람끼리 사는 가구는 10년 새 2.8배가 됐다. 증가율은 낮아졌으나 수는 계속 늘고 있다. 2025년 표본조사에 '비혼동거' 항목이 생겨 이 집단의 내부 구성을 처음 나눠 볼 수 있게 된다.",
+    basis=[f"{Q}-M-012", f"{Q}-E-002"])
+add(id=f"{Q}-I-006", type="해석", importance=3, target="가구 소형화", direction="강화",
+    statement="가구는 계속 작아지고 있다. 평균 가구원수는 5년 새 0.18명 줄었고, 1·2인 가구가 세 집 중 두 집이다. 1인가구의 74%는 전용 60㎡ 이하에 산다.",
+    basis=[f"{Q}-M-013", f"{Q}-E-001", f"{Q}-E-004"])
+add(id=f"{Q}-I-007", type="해석", importance=1, target="반려동물과 사는 가구", direction="중립",
+    statement="반려동물을 기르는 가구는 열 집 중 세 집이다. 승인통계는 2025년이 첫 값이라 증가 여부는 아직 판단하지 않는다.",
+    basis=[f"{Q}-M-014", f"{Q}-M-015"])
+
+# ---------- 세부 전망 (F) ----------
+CENSUS26 = "국가데이터처 2026년 기준 인구주택총조사(등록센서스) 발표값과 KOSIS DT_1JC1516·DT_1JC1517 확인"
+add(id=f"{Q}-F-001", type="전망", importance=3, forecast_status="진행 중", result=None,
+    statement="2026년 기준 1인가구 비중은 37.0% 이상 37.25% 이하다. 증가폭은 0.6%p를 넘지 않는다.",
+    due="2027-08-31", condition="등록센서스 방식과 일반가구 정의가 유지된다",
+    method=CENSUS26, basis=[f"{Q}-M-001", f"{Q}-M-002", f"{Q}-M-003"])
+add(id=f"{Q}-F-002", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2026년 기준 1인가구 증가분의 70% 이상을 65세 이상 1인가구가 차지한다.",
+    due="2027-08-31", condition="없음",
+    method=CENSUS26 + " (DT_1JC1517 1인가구 가구주 연령별 증감)", basis=[f"{Q}-M-002", f"{Q}-M-003"])
+add(id=f"{Q}-F-003", type="전망", importance=3, forecast_status="진행 중", result=None,
+    statement="2026년 기준 부부+미혼자녀 가구 비중은 24.55% 이상이다. 감소폭이 0.6%p 이하로 유지된다.",
+    due="2027-08-31", condition="2026년 혼인 건수가 2025년보다 줄지 않는다",
+    method=CENSUS26, basis=[f"{Q}-M-007", f"{Q}-M-008", f"{Q}-E-006"])
+add(id=f"{Q}-F-004", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2026년 기준 비친족 가구는 62만 가구 이상 65만 가구 미만이다.",
+    due="2027-08-31", condition="없음",
+    method=CENSUS26 + " (DT_1JC1516 '비친족 가구')", basis=[f"{Q}-M-012"])
+add(id=f"{Q}-F-005", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2025 인구주택총조사 표본 결과에서 '비혼동거' 가구 집계가 처음 공표된다.",
+    due="2026-12-31", condition="표본 결과가 예정대로 2026년 11월에 공표된다",
+    method="국가데이터처 2025 인구주택총조사 표본 결과 보도자료 또는 KOSIS 통계표에 비혼동거 항목 집계가 실렸는지 확인",
+    basis=[f"{Q}-E-002", f"{Q}-M-012"])
+add(id=f"{Q}-F-006", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2026년 기준 평균 가구원수는 2.14명 이하다.",
+    due="2027-08-31", condition="없음",
+    method="국가데이터처 2026년 기준 인구주택총조사(등록센서스) 발표의 평균 가구원수", basis=[f"{Q}-M-013", f"{Q}-M-018"])
+
+# ---------- 메인 질문 시나리오 ----------
+add(id=f"{Q}-F-101", type="전망", importance=3, forecast_status="진행 중", scenario="낙관", result=None,
+    statement="2027년 말까지 혼인·출생 반등이 가구 구성에 나타난다. 부부+미혼자녀 가구의 감소가 느려지고, 1인가구 비중 증가폭도 작아진다. 가구 소형화는 이어지지만 속도는 둔화한다.",
+    milestones=[{"by": "2027-03", "text": "2026년 혼인 건수가 2025년(24만 건) 이상"},
+                {"by": "2027-07", "text": "2026년 기준 부부+미혼자녀 가구 비중 감소폭 0.6%p 이하"},
+                {"by": "2027-07", "text": "2026년 기준 1인가구 비중 증가폭 0.6%p 이하, 20~39세 1인가구 정체 지속"}],
+    due="2027-12-31", condition="혼인 증가가 2026년에도 이어지고 등록센서스 정의가 유지된다",
+    method="세 가지 중 두 가지 이상 충족 시 적중: (1) 2026년 혼인 건수 24만 건 이상 (2) 2026년 기준 부부+미혼자녀 비중 감소폭 0.6%p 이하 (3) 2026년 기준 1인가구 비중 증가폭 0.6%p 이하",
+    basis=[f"{Q}-M-001", f"{Q}-M-007", f"{Q}-E-006", f"{Q}-E-007"],
+    signposts=[{"id": f"{Q}-F-003", "on_hit": "낙관", "on_miss": "비관"},
+               {"id": f"{Q}-F-001", "on_hit": "낙관", "on_miss": "비관"}])
+add(id=f"{Q}-F-102", type="전망", importance=3, forecast_status="진행 중", scenario="비관", result=None,
+    statement="2027년 말까지 혼인 반등이 가구 구성으로 이어지지 않는다. 부부+미혼자녀 가구 감소가 다시 빨라지고, 고령 1인가구 증가로 1인가구 비중 증가폭이 커진다.",
+    milestones=[{"by": "2027-03", "text": "2026년 혼인 건수가 2025년보다 감소"},
+                {"by": "2027-07", "text": "2026년 기준 부부+미혼자녀 비중 감소폭 0.6%p 초과"},
+                {"by": "2027-07", "text": "2026년 기준 65세 이상 1인가구가 일반가구의 11.5% 이상"}],
+    due="2027-12-31", condition="없음", method="낙관 조건 중 하나 이하 충족 시 적중",
+    basis=[f"{Q}-M-002", f"{Q}-M-007", f"{Q}-M-008"],
+    signposts=[{"id": f"{Q}-F-003", "on_miss": "비관"}, {"id": f"{Q}-F-002", "on_hit": "비관"},
+               {"id": f"{Q}-F-006", "on_hit": "비관"}])
+
+# ---------- 공통 마무리: patches.jsonl 적용 → 검증 → records.jsonl ----------
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
+from validate import finish
+finish(records, Path(__file__).parent)

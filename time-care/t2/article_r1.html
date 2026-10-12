@@ -1,0 +1,337 @@
+<title>T2 자녀·부모 돌봄의 주도 주체 R1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;800&display=swap">
+<style>/* Layout: 연구 노트 한 단 — 답 → 서술형 해석 → 근거 표. 기록 번호가 본문의 각주 역할 */
+/* Color: LG 컬러 시스템 — Active Red는 신호(현재 경계·판정·진행), Heritage Red는 UI에 쓰지 않음 */
+:root {
+  /* Primary - Active Red */
+  --color-primary-50: #FFF5F8; --color-primary-100: #FEE3E2; --color-primary-200: #FDC0BE; --color-primary-300: #FE8A87;
+  --color-primary-400: #FF5F5B; --color-primary-500: #FD312E; --color-primary-600: #EA1917; --color-primary-700: #C4110F;
+  --color-primary-800: #8E0E0C; --color-primary-900: #5C0907;
+  /* Secondary - Heritage Red(로고 전용) + Warm Grey */
+  --color-secondary-500: #A50034;
+  --color-warm-100: #F6F3EB; --color-warm-200: #F0ECE4; --color-warm-300: #E6E1D6; --color-warm-500: #CBC8C2;
+  --logo-wordmark: #707070;
+  /* Neutral */
+  --color-neutral-0: #FFFFFF; --color-neutral-50: #F9FAFB; --color-neutral-100: #F3F5F7; --color-neutral-200: #ECEEF0;
+  --color-neutral-300: #DEE1E5; --color-neutral-500: #8F9298; --color-neutral-600: #767980; --color-neutral-700: #43474D;
+  --color-neutral-800: #212731; --color-neutral-900: #111111; --color-neutral-1000: #000000;
+  /* Semantic */
+  --color-success-bg: #E7F6EC; --color-success-fg: #08A53A; --color-warning-bg: #FFF6D6; --color-warning-fg: #B26A00;
+  --color-error-bg: #FEF3F3; --color-error-fg: #EA1917; --color-info-bg: #EAF5FF; --color-info-fg: #0C9AFF;
+  /* Surface */
+  --bg-base: #FFFFFF; --bg-subtle: #F3F5F7; --bg-warm: #F0ECE4; --bg-elevated: #FFFFFF; --bg-overlay: #FFFFFF; --bg-inverse: #111111;
+  /* Text */
+  --text-primary: #111111; --text-secondary: #666666; --text-tertiary: #8F8F8F; --text-on-primary: #FFFFFF; --text-disabled: #BBBBBB; --text-price: #EA1917;
+  /* Border */
+  --border-default: #DDDDDD; --border-subtle: #EEEEEE; --border-strong: #111111; --border-focus: #000000;
+  /* 역할 토큰 (페이지 전체가 이 이름으로 색을 쓴다) */
+  --signal: var(--color-primary-600);          /* 채움·게이지·현재 경계 */
+  --signal-ink: var(--color-primary-700);      /* 흰 바탕 위 빨간 글자 */
+  --signal-hover: var(--color-primary-700);
+  --signal-soft: var(--color-primary-50);
+  --shadow: 0 8px 28px rgba(17, 17, 17, .12);
+  --paper: var(--bg-base); --ink: var(--text-primary); --muted: var(--text-secondary); --rule: var(--border-default); --panel: var(--bg-subtle);
+  --accent: var(--signal); --accent-soft: var(--signal-soft);
+  --amber: var(--color-warning-fg); --amber-soft: var(--color-warning-bg);
+  --up: var(--color-success-fg); --down: var(--color-error-fg); --flat: var(--color-neutral-500);
+  --opt: var(--color-success-fg); --opt-soft: var(--color-success-bg); --pes: var(--color-error-fg); --pes-soft: var(--color-error-bg);
+  --display: "Noto Serif KR", "Apple SD Gothic Neo", serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg-base: #111111; --bg-subtle: #1A1D22; --bg-warm: #24211C; --bg-elevated: #212731; --bg-overlay: #212731; --bg-inverse: #F3F5F7;
+  --text-primary: #F3F5F7; --text-secondary: #A9ADB4; --text-tertiary: #8F9298; --text-disabled: #5A5E66; --text-price: #FF5F5B;
+  --border-default: #343A44; --border-subtle: #262B33; --border-strong: #F3F5F7; --border-focus: #FFFFFF;
+  --color-success-bg: #10291A; --color-success-fg: #3DD06B; --color-warning-bg: #2E2410; --color-warning-fg: #F2B33D;
+  --color-error-bg: #2E1414; --color-error-fg: #FF5F5B; --color-info-bg: #0F2333; --color-info-fg: #5BB8FF;
+  --signal: var(--color-primary-500); --signal-ink: var(--color-primary-400); --signal-hover: var(--color-primary-400); --signal-soft: #2A1414;
+  --shadow: 0 10px 32px rgba(0, 0, 0, .55); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg-base: #111111; --bg-subtle: #1A1D22; --bg-warm: #24211C; --bg-elevated: #212731; --bg-overlay: #212731; --bg-inverse: #F3F5F7;
+  --text-primary: #F3F5F7; --text-secondary: #A9ADB4; --text-tertiary: #8F9298; --text-disabled: #5A5E66; --text-price: #FF5F5B;
+  --border-default: #343A44; --border-subtle: #262B33; --border-strong: #F3F5F7; --border-focus: #FFFFFF;
+  --color-success-bg: #10291A; --color-success-fg: #3DD06B; --color-warning-bg: #2E2410; --color-warning-fg: #F2B33D;
+  --color-error-bg: #2E1414; --color-error-fg: #FF5F5B; --color-info-bg: #0F2333; --color-info-fg: #5BB8FF;
+  --signal: var(--color-primary-500); --signal-ink: var(--color-primary-400); --signal-hover: var(--color-primary-400); --signal-soft: #2A1414;
+  --shadow: 0 10px 32px rgba(0, 0, 0, .55); color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font: 400 16px/1.7 var(--body); padding: 0 20px; }
+main { max-width: 980px; margin: 0 auto; padding-block: 40px 72px; display: grid; gap: 60px; }
+.narrow { max-width: 70ch; }
+a { color: var(--ink); text-decoration-color: var(--signal); text-underline-offset: 3px; }
+a:hover { color: var(--signal-ink); }
+:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+code, .rid { font: 500 12px/1 var(--mono); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+h1 { font: 800 clamp(26px, 4.4vw, 40px)/1.25 var(--display); margin-top: 14px; }
+.question { margin: 16px 0 0; color: var(--muted); font-size: 15px; border-left: 2px solid var(--rule); padding-left: 14px; }
+h2 { font: 600 22px/1.3 var(--display); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h2 small { font: 400 13px var(--body); color: var(--muted); }
+section { display: grid; gap: 18px; min-width: 0; }
+.lead { margin: 0; max-width: 70ch; }
+.rid { display: inline-block; padding: 3px 5px; margin: 2px 2px 0 0; border-radius: 3px; background: var(--panel); color: var(--muted); text-decoration: none; vertical-align: 1px; cursor: pointer; }
+.rid:hover { color: var(--signal-ink); background: var(--signal-soft); }
+.rid:focus-visible { outline: 2px solid var(--border-focus); }
+/* 한 줄 답 */
+.answer { font: 600 clamp(20px, 2.8vw, 26px)/1.55 var(--display); margin: 0; }
+.answer-box { display: grid; gap: 20px; }
+.arows { margin: 0; border-top: 1px solid var(--ink); }
+.arow { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.arow dt { font-weight: 600; }
+.arow dd { margin: 0; min-width: 0; }
+/* 서술형 해석 */
+.narrative { display: grid; gap: 14px; max-width: 70ch; }
+.narrative p { margin: 0; }
+/* 표 */
+.tablewrap { overflow-x: auto; border-top: 1px solid var(--ink); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+th { text-align: left; font: 500 11px var(--mono); letter-spacing: .05em; color: var(--muted); padding: 10px 8px; border-bottom: 1px solid var(--rule); }
+td { padding: 12px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+td small { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; }
+.num { font: 500 15px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.muted { color: var(--muted); }
+.ind { font: 500 12px var(--mono); width: 150px; }
+.ind small { font-family: var(--body); }
+.tgt { font-weight: 600; width: 150px; }
+.asof { font: 400 13px var(--mono); white-space: nowrap; }
+.idc code { color: var(--muted); }
+.src { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.src a { color: var(--muted); }
+.grade { font: 500 10px var(--mono); margin-left: 4px; padding: 1px 4px; border: 1px solid currentColor; border-radius: 2px; }
+.gC { color: var(--amber); }
+.warn, .wk { font: 500 11px var(--mono); color: var(--amber); background: var(--amber-soft); padding: 2px 6px; border-radius: 2px; white-space: nowrap; }
+.dir { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 2px; color: var(--panel); white-space: nowrap; }
+.dir.up { background: var(--up); } .dir.down { background: var(--down); } .dir.flat { background: var(--flat); }
+.fstat { font: 500 11px var(--mono); border: 1px solid var(--signal); color: var(--signal-ink); padding: 2px 6px; border-radius: 2px; white-space: nowrap; }
+/* 사건 */
+.timeline { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.timeline li { display: grid; grid-template-columns: 110px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.timeline time { font: 500 13px var(--mono); color: var(--muted); padding-top: 2px; }
+.timeline li > div { min-width: 0; }
+/* 시나리오 */
+.scens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.scen { border-top: 3px solid var(--sc); background: var(--panel); padding: 18px 18px 14px; display: grid; gap: 14px; align-content: start; }
+.scen.opt { --sc: var(--opt); --scs: var(--opt-soft); }
+.scen.pes { --sc: var(--pes); --scs: var(--pes-soft); }
+.scen header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sk { font: 600 13px var(--mono); color: var(--sc); letter-spacing: .03em; }
+.scen header code { color: var(--muted); }
+.sstmt { margin: 0; font-size: 15px; }
+.ms { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--scs); display: grid; gap: 8px; }
+.ms li { display: grid; grid-template-columns: 70px 1fr; gap: 10px; font-size: 14px; }
+.ms time { font: 500 12px var(--mono); color: var(--sc); padding-top: 2px; }
+.sdl { margin: 0; display: grid; gap: 6px; font-size: 13px; }
+.sdl div { display: grid; grid-template-columns: 70px 1fr; gap: 10px; }
+.sdl dt { color: var(--muted); }
+.sdl dd { margin: 0; min-width: 0; }
+.side { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 2px; white-space: nowrap; margin-right: 4px; }
+.side.opt { color: var(--opt); background: var(--opt-soft); }
+.side.pes { color: var(--pes); background: var(--pes-soft); }
+.subhead { font: 600 15px var(--body); margin: 8px 0 0; }
+/* 사다리 */
+.ladder { border-top: 1px solid var(--ink); }
+.rung { display: grid; grid-template-columns: 150px 170px 170px 1fr; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.rung[data-frontier="y"] { background: linear-gradient(90deg, var(--amber-soft), transparent 70%); }
+.stage b { display: block; font: 600 18px/1.2 var(--display); }
+.stage span { font: 400 12px var(--mono); color: var(--muted); }
+.region { display: block; font: 500 11px var(--mono); color: var(--muted); letter-spacing: .04em; margin-bottom: 4px; }
+.pips { display: flex; align-items: center; gap: 4px; }
+.pip { width: 16px; height: 8px; border: 1px solid var(--accent); border-radius: 1px; }
+.pip.on { background: var(--accent); }
+.lv { margin-left: 8px; font-size: 14px; font-weight: 500; }
+.why { margin: 0; font-size: 14px; color: var(--muted); min-width: 0; }
+.frontier-note { font-size: 13px; color: var(--amber); font-family: var(--mono); margin: 0; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 18px; display: grid; gap: 6px; }
+:target { background: var(--accent-soft); }
+@media (max-width: 760px) {
+  .rung { grid-template-columns: 1fr 1fr; }
+  .rung .stage, .rung .why { grid-column: 1 / -1; }
+  .scens { grid-template-columns: 1fr; }
+  .arow, .timeline li { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* 주도권 지도 (C2) */
+.own { font: 500 12px var(--mono); padding: 3px 8px; border-radius: 2px; white-space: nowrap; display: inline-block; }
+.own.brand { color: var(--up); background: var(--opt-soft); }
+.own.platform { color: var(--signal-ink); background: var(--accent-soft); }
+.own.agent { color: var(--amber); background: var(--amber-soft); }
+.own.contest { color: var(--flat); border: 1px dashed var(--flat); }
+.mapgrid .rung { grid-template-columns: 110px 200px 120px 120px 1fr; }
+@media (max-width: 760px) { .mapgrid .rung { grid-template-columns: 1fr 1fr; } }
+/* 자율 수준 지도 (C4) */
+.mapgrid.auto .rung { grid-template-columns: 130px 220px 220px 1fr; }
+table.levels { min-width: 520px; }
+@media (max-width: 760px) { .mapgrid.auto .rung { grid-template-columns: 1fr; } }
+/* 역량 원장 (I1) */
+.mapgrid.ledger .rung { grid-template-columns: 200px 260px 1fr; }
+@media (max-width: 760px) { .mapgrid.ledger .rung { grid-template-columns: 1fr; } }
+
+/* I3 두 곡선 */
+.curves { display: grid; gap: 14px; margin: 8px 0 18px; }
+.curve { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.curve .cl { font: 600 13px var(--body); }
+.curve .cl small { display: block; font: 400 12px var(--mono); color: var(--muted); }
+.curve .bar { height: 26px; background: var(--accent-soft); border-radius: 2px; position: relative; }
+.curve .bar span { position: absolute; inset: 0 auto 0 0; display: flex; align-items: center; padding: 0 10px; font: 500 12px var(--mono); color: var(--text-on-primary); border-radius: 2px; white-space: nowrap; }
+.curve.inv .bar span { background: var(--accent); }
+.curve.rev .bar span { background: var(--up); }
+.gapnote { border-left: 3px solid var(--amber); padding: 6px 12px; background: var(--amber-soft); font-size: 14px; }
+.mapgrid.layers .rung { grid-template-columns: 150px 200px 110px 1fr; }
+@media (max-width: 720px) { .curve { grid-template-columns: 1fr; } .mapgrid.layers .rung { grid-template-columns: 1fr; } }
+
+/* S1 유입 저울 */
+.balance { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 8px 0 14px; }
+.balance .pan { border: 1px solid var(--rule); border-top: 3px solid var(--down); background: var(--panel); padding: 12px 16px; }
+.balance .pan.gain { border-top-color: var(--up); }
+.balance h4 { margin: 0 0 8px; font: 600 14px var(--body); }
+.balance ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.7; }
+@media (max-width: 720px) { .balance { grid-template-columns: 1fr; } }
+
+/* 판정 기준 패널과 툴팁 */
+.criteria { border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+.criteria summary { cursor: pointer; padding: 10px 14px; font: 600 14px var(--body); list-style: none; display: flex; align-items: center; gap: 8px; }
+.criteria summary::-webkit-details-marker { display: none; }
+.criteria summary::before { content: "+"; font: 600 15px/1 var(--mono); color: var(--signal-ink); width: 12px; }
+.criteria[open] summary::before { content: "−"; }
+.criteria summary small { font: 500 11px var(--mono); color: var(--muted); }
+.criteria summary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
+.crit-body { padding: 4px 14px 16px; display: grid; gap: 12px; }
+.crit-body h4 { margin: 6px 0 0; font: 600 13px var(--body); }
+table.crit { min-width: 640px; font-size: 13px; }
+table.crit td { padding: 9px 8px; }
+table.crit th, table.crit td:nth-child(-n+2) { white-space: nowrap; }
+table.crit .pips { white-space: nowrap; }
+.crit-rules { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+[data-tip] { position: relative; cursor: help; text-decoration: underline dotted var(--muted); text-underline-offset: 4px; text-decoration-thickness: 1px; }
+[data-tip]:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+[data-tip]:hover::after, [data-tip]:focus::after {
+  content: attr(data-tip); position: absolute; left: 0; top: calc(100% + 8px); z-index: 25; width: max-content; max-width: min(300px, 78vw);
+  white-space: normal; padding: 10px 12px; border-radius: 4px; background: var(--bg-inverse); color: var(--bg-base);
+  font: 400 13px/1.55 var(--body); letter-spacing: 0; text-transform: none; box-shadow: var(--shadow); pointer-events: none; }
+.lvcell [data-tip]:hover::after, .lvcell [data-tip]:focus::after { left: auto; right: 0; }
+@media (max-width: 760px) { .lvcell [data-tip]:hover::after, .lvcell [data-tip]:focus::after { right: auto; left: -60px; } }
+.pips { flex-wrap: wrap; row-gap: 4px; }
+.lv, .prov-tag { white-space: nowrap; }
+.pips.prov .pip { border-style: dashed; border-color: var(--muted); }
+.pips.prov .pip.on { border-style: solid; border-color: var(--signal); background: repeating-linear-gradient(135deg, var(--signal) 0 2px, transparent 2px 4px); }
+.prov-tag { display: inline-block; margin-left: 6px; font: 500 10px/1.4 var(--mono); color: var(--muted); border: 1px dashed var(--muted); border-radius: 2px; padding: 0 4px; vertical-align: 1px; cursor: help; }
+.prov-note { font-size: 13px; color: var(--muted); margin: 0; }
+.mapgrid.two .rung { grid-template-columns: 150px 200px 150px 1fr; }
+@media (max-width: 760px) { .mapgrid.two .rung { grid-template-columns: 1fr 1fr; } }
+.own.neutral { color: var(--ink); background: var(--panel); }
+</style>
+<main>
+  <header class="narrow">
+    <div class="eyebrow"><span>시간과 돌봄</span><span>T2 · Care Burden</span><span>R1 기준 회차 · 2026-10-12</span><span><a href="../../changes.html#T2">변경 이력</a></span></div>
+    <h1>자녀·부모 돌봄의 주도 주체</h1>
+    <p class="question">고정 질문 v1.0 — 자녀·부모 돌봄은 누가 맡으며, 가족에서 공공·시장·기술로 얼마나 넘어가는가?</p>
+  </header>
+  <section class="answer-box"><h2>한 줄 답</h2>
+    <p class="answer narrow">2026년 10월 현재 영유아 돌봄은 공공이 주도한다. 6세 미만의 81.8%가 어린이집·유치원을 이용한다(2024). 학령기 아동과 노부모 돌봄은 공공과 가족이 경합한다. 초1·2의 81.3%가 늘봄학교에 참여하지만 하루 2시간에 그치고, 장기요양 비용의 91.4%는 공단이 내지만 수급자의 약 80%가 집에서 돌봄을 받는다. 시장과 기술의 몫은 아직 작거나 수치가 없다. <a class="rid" href="#T2-I-001" title="영유아 돌봄은 이미 기관으로 넘어갔다. 6세 미만의 81.8%가 어린이집·유치원을 이용한다. 아동 수가 빠르게 줄어 기관 수도 함께 줄고 있으며, 이용 비율보다 공급망 유지가 쟁점이 됐다.">T2-I-001</a><a class="rid" href="#T2-I-002" title="초등 저학년 돌봄은 학교로 넘어오는 중이다. 초1·2의 81.3%가 늘봄학교에 참여하고, 2026년부터 초3 이용권과 방학 돌봄으로 대상이 넓어졌다. 다만 무상 프로그램은 하루 2시간이라 나머지 시간은 가족과 사교육이 맡는다.">T2-I-002</a><a class="rid" href="#T2-I-003" title="노부모 돌봄에서 공적 장기요양 이용이 해마다 6%씩 늘고 있다. 급여비의 91.4%를 공단이 부담해 비용은 공공이 대부분 진다. 65세 이상 1인가구가 연 7% 넘게 늘어 수요도 같이 커진다.">T2-I-003</a><a class="rid" href="#T2-I-004" title="노인 돌봄의 장소는 시설보다 집 쪽으로 옮겨 가고 있다. 수급자의 약 80%가 재가급여를 쓰고, 집에 계속 살겠다는 재가 수급자는 3년 사이 49.8%에서 69.4%로 늘었다. 집에서 돌보면 공공 서비스 사이의 시간을 가족이 메워야 한다.">T2-I-004</a><a class="rid" href="#T2-I-007" title="가사·돌봄을 민간 유료 서비스로 넘기는 흐름은 통계로 보이지 않는다. 가구당 가사서비스 지출은 월 1만~1만 5천 원 사이에 머문다. 공공 아이돌봄 이용 가구의 본인 부담은 월 35만 7천 원으로 소득 구간에 따라 크게 다르다.">T2-I-007</a></p><dl class="arows"><div class="arow"><dt>영유아</dt><dd>공공 주도(잠정). 기관 이용 81.8%, 반일제 이상 학원까지 84.3%. 기관 미이용 15.7%. <a class="rid" href="#T2-M-001" title="2024년 6세 미만 영유아의 81.8%가 어린이집(55.3%)이나 유치원(26.5%)을 이용했다. 반일제 이상 학원 2.5%를 더하면 기관 이용은 84.3%이고, 어느 기관도 이용하지 않는 영유아는 15.7%다.">T2-M-001</a></dd></div><div class="arow"><dt>학령기 아동</dt><dd>공공·가족 경합(잠정). 초1·2 늘봄 참여 81.3%(55만 2천 명), 초3 방과후 참여 42.4%. <a class="rid" href="#T2-M-004" title="2025년 늘봄학교에는 초등 1·2학년 약 55만 2천 명이 참여했다. 참여율은 81.3%다. 초1만 대상이던 2024년 2학기 참여율은 82.7%였다.">T2-M-004</a><a class="rid" href="#T2-M-005" title="2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다.">T2-M-005</a></dd></div><div class="arow"><dt>노부모</dt><dd>공공·가족 경합(잠정). 인정자 123만 5,045명(65세 이상의 약 11.2%), 급여비 91.4% 공단 부담, 수급자 약 80% 재가. <a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a><a class="rid" href="#T2-M-011" title="2025년 장기요양 급여비는 17조 6,840억 원으로 1년 전보다 9.3% 늘었다. 이 중 91.4%를 공단이 부담했고, 공단 부담금 가운데 재가급여가 10조 1,897억 원, 시설급여가 5조 9,455억 원이다.">T2-M-011</a><a class="rid" href="#T2-M-012" title="2025년 장기요양 인정자는 65세 이상 의료보장 적용인구 1,100만 3천 명의 약 11.2%다.">T2-M-012</a><a class="rid" href="#T2-M-010" title="2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다.">T2-M-010</a></dd></div><div class="arow"><dt>시장·기술</dt><dd>가구당 가사서비스 지출 월 1만 103원(2025, 명목). 돌봄 기기·앱 이용률 수치는 없다. <a class="rid" href="#T2-M-017" title="가구당 월평균 가사서비스 지출은 2019~2024년 1만 2천~1만 5천 원 사이였고, 2025년에는 1만 103원이다. 가계 소비지출에서 차지하는 몫은 작다.">T2-M-017</a></dd></div><div class="arow"><dt>가장 빠른 변화</dt><dd>65세 이상 1인가구 연 7.3% 증가, 장기요양 인정자 연 6.0% 증가. <a class="rid" href="#T2-M-013" title="2025년 가구주가 65세 이상인 1인가구는 245만 5,947가구로 1년 전보다 16만 7,140가구(7.3%) 늘었다. 2020년 166만 가구에서 5년 사이 1.48배가 됐다.">T2-M-013</a><a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a></dd></div></dl></section>
+  <section><h2>해석</h2><div class="narrative"><p>영유아 돌봄은 기관이 기본 경로다. 6세 미만의 81.8%가 어린이집·유치원에 다니고, 어디에도 다니지 않는 아이는 15.7%다. 어린이집 이용 아동은 2021년 118만 명에서 2025년 말 89만 명으로 줄었다. 어린이집은 2026년 상반기에만 982곳 줄었다. <a class="rid" href="#T2-M-001" title="2024년 6세 미만 영유아의 81.8%가 어린이집(55.3%)이나 유치원(26.5%)을 이용했다. 반일제 이상 학원 2.5%를 더하면 기관 이용은 84.3%이고, 어느 기관도 이용하지 않는 영유아는 15.7%다.">T2-M-001</a><a class="rid" href="#T2-M-002" title="어린이집 이용 아동은 2021년 118만 4,716명에서 2025년 말 88만 7,764명으로 4년 사이 25.1% 줄었다. 2026년 6월 말에는 80만 3,062명이다.">T2-M-002</a><a class="rid" href="#T2-E-006" title="2026년 6월 말 어린이집은 2만 5,082곳으로 2025년 말보다 982곳 줄었다. 같은 기간 0세 재원 아동은 12만 9,717명에서 9만 5,635명으로 줄었다.">T2-E-006</a><a class="rid" href="#T2-I-001" title="영유아 돌봄은 이미 기관으로 넘어갔다. 6세 미만의 81.8%가 어린이집·유치원을 이용한다. 아동 수가 빠르게 줄어 기관 수도 함께 줄고 있으며, 이용 비율보다 공급망 유지가 쟁점이 됐다.">T2-I-001</a></p><p>초등 저학년 돌봄은 학교로 넘어오는 중이다. 2025년 초1·2 55만 2천 명(81.3%)이 늘봄학교에 참여했다. 교육부는 2026년 늘봄학교를 &#x27;온동네 초등돌봄·교육&#x27;으로 바꾸고 초3에 연 50만 원 방과후 이용권을 준다. 무상 프로그램은 하루 2시간이라 하교 뒤 나머지 시간은 가족과 사교육이 나눠 맡는다. 사교육 몫은 이번 기록에 수치가 없다. <a class="rid" href="#T2-M-004" title="2025년 늘봄학교에는 초등 1·2학년 약 55만 2천 명이 참여했다. 참여율은 81.3%다. 초1만 대상이던 2024년 2학기 참여율은 82.7%였다.">T2-M-004</a><a class="rid" href="#T2-M-005" title="2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다.">T2-M-005</a><a class="rid" href="#T2-E-002" title="늘봄학교를 학교와 지역이 함께 맡는 &#x27;온동네 초등돌봄·교육&#x27;으로 바꾸는 2026년 추진방안을 발표했다. 초1·2는 매일 2시간 무상 프로그램을 유지하고, 초3에는 연 50만 원 방과후 이용권을 준다. 예산은 1,060억 원이다.">T2-E-002</a><a class="rid" href="#T2-I-002" title="초등 저학년 돌봄은 학교로 넘어오는 중이다. 초1·2의 81.3%가 늘봄학교에 참여하고, 2026년부터 초3 이용권과 방학 돌봄으로 대상이 넓어졌다. 다만 무상 프로그램은 하루 2시간이라 나머지 시간은 가족과 사교육이 맡는다.">T2-I-002</a></p><p>노부모 돌봄에서는 공적 장기요양 이용이 해마다 6%씩 는다. 2025년 인정자는 123만 5,045명, 급여비는 17조 6,840억 원이다. 비용의 91.4%를 공단이 내므로 비용 기준으로는 공공이 크다. 반면 수급자의 약 80%가 재가급여를 쓰고, 집에 계속 살겠다는 재가 수급자는 69.4%로 늘었다. 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다. <a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a><a class="rid" href="#T2-M-011" title="2025년 장기요양 급여비는 17조 6,840억 원으로 1년 전보다 9.3% 늘었다. 이 중 91.4%를 공단이 부담했고, 공단 부담금 가운데 재가급여가 10조 1,897억 원, 시설급여가 5조 9,455억 원이다.">T2-M-011</a><a class="rid" href="#T2-M-010" title="2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다.">T2-M-010</a><a class="rid" href="#T2-E-007" title="2025 장기요양실태조사 결과를 발표했다. 재가급여 수급자의 69.4%가 건강이 나빠져도 지금 집에 살기를 원했다(2022년 49.8%). 재가 수급자 가족의 43.5%는 집에서 계속 돌보겠다고 답했다(2022년 29.5%). 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다.">T2-E-007</a><a class="rid" href="#T2-I-003" title="노부모 돌봄에서 공적 장기요양 이용이 해마다 6%씩 늘고 있다. 급여비의 91.4%를 공단이 부담해 비용은 공공이 대부분 진다. 65세 이상 1인가구가 연 7% 넘게 늘어 수요도 같이 커진다.">T2-I-003</a><a class="rid" href="#T2-I-004" title="노인 돌봄의 장소는 시설보다 집 쪽으로 옮겨 가고 있다. 수급자의 약 80%가 재가급여를 쓰고, 집에 계속 살겠다는 재가 수급자는 3년 사이 49.8%에서 69.4%로 늘었다. 집에서 돌보면 공공 서비스 사이의 시간을 가족이 메워야 한다.">T2-I-004</a></p><p>가정 방문형 공공 아이돌봄은 대기가 늘고 있다. 2025년 신청은 18만 3,794가구, 대기는 1만 1,645가구, 평균 대기일은 39.4일이다. 가족 안에서는 맞벌이 남편의 가사노동이 5년 사이 13분 늘었지만, 아내가 여전히 하루 2시간 넘게 더 쓴다. <a class="rid" href="#T2-M-015" title="2025년 정부 아이돌봄서비스 신청 가구는 18만 3,794가구로 1년 전보다 4만 4,286가구 늘었다. 같은 해 연계를 기다린 대기 가구는 1만 1,645가구, 평균 대기일은 39.4일이다.">T2-M-015</a><a class="rid" href="#T2-E-003" title="성평등가족부 자료를 인용해 2025년 아이돌봄서비스 대기 가구가 1만 1,645가구로 1년 사이 22% 늘었다고 공개했다.">T2-E-003</a><a class="rid" href="#T2-I-005" title="가정으로 찾아가는 공공 아이돌봄은 수요를 따라가지 못한다. 2025년 신청은 18만 가구를 넘었지만 대기 가구가 1만 1,645가구로 늘고 평균 대기일도 39.4일로 길어졌다. 2026년 소득 기준 확대로 신청은 더 늘 수 있다.">T2-I-005</a><a class="rid" href="#T2-M-007" title="2024년 18세 미만 자녀를 둔 맞벌이 가구에서 아내의 가사노동은 하루 3시간 32분, 남편은 1시간 24분이다. 5년 전보다 아내는 17분 줄고 남편은 13분 늘었다.">T2-M-007</a><a class="rid" href="#T2-I-006" title="가족 안에서는 남편 몫이 조금씩 커진다. 18세 미만 자녀를 둔 맞벌이 가구에서 남편의 가사노동은 5년 사이 13분 늘고 아내는 17분 줄었다. 그래도 아내가 남편보다 하루 2시간 넘게 더 쓴다.">T2-I-006</a></p><p>민간 유료 서비스로의 이전은 통계로 보이지 않는다. 가구당 가사서비스 지출은 월 1만~1만 5천 원 사이다. 돌봄 기기·앱의 가구 이용률은 공식 수치가 없어 기술은 판정에서 &#x27;보조&#x27;로만 둔다. <a class="rid" href="#T2-M-017" title="가구당 월평균 가사서비스 지출은 2019~2024년 1만 2천~1만 5천 원 사이였고, 2025년에는 1만 103원이다. 가계 소비지출에서 차지하는 몫은 작다.">T2-M-017</a><a class="rid" href="#T2-M-018" title="2025년 아이돌봄서비스 이용 가구의 본인 부담은 월평균 35만 7천 원이다. 소득 구간별로 가형 25만 원, 마형 76만 3천 원으로 차이가 크다.">T2-M-018</a><a class="rid" href="#T2-I-007" title="가사·돌봄을 민간 유료 서비스로 넘기는 흐름은 통계로 보이지 않는다. 가구당 가사서비스 지출은 월 1만~1만 5천 원 사이에 머문다. 공공 아이돌봄 이용 가구의 본인 부담은 월 35만 7천 원으로 소득 구간에 따라 크게 다르다.">T2-I-007</a></p></div>
+    <div class="tablewrap"><table><thead><tr><th>방향</th><th>대상</th><th>해석</th><th>근거</th><th>기록</th></tr></thead><tbody><tr id="T2-I-001"><td><span class="dir up">강화</span></td>
+  <td class="tgt">영유아 돌봄의 공공 이전</td><td>영유아 돌봄은 이미 기관으로 넘어갔다. 6세 미만의 81.8%가 어린이집·유치원을 이용한다. 아동 수가 빠르게 줄어 기관 수도 함께 줄고 있으며, 이용 비율보다 공급망 유지가 쟁점이 됐다.</td><td><a class="rid" href="#T2-M-001" title="2024년 6세 미만 영유아의 81.8%가 어린이집(55.3%)이나 유치원(26.5%)을 이용했다. 반일제 이상 학원 2.5%를 더하면 기관 이용은 84.3%이고, 어느 기관도 이용하지 않는 영유아는 15.7%다.">T2-M-001</a><a class="rid" href="#T2-M-002" title="어린이집 이용 아동은 2021년 118만 4,716명에서 2025년 말 88만 7,764명으로 4년 사이 25.1% 줄었다. 2026년 6월 말에는 80만 3,062명이다.">T2-M-002</a><a class="rid" href="#T2-E-006" title="2026년 6월 말 어린이집은 2만 5,082곳으로 2025년 말보다 982곳 줄었다. 같은 기간 0세 재원 아동은 12만 9,717명에서 9만 5,635명으로 줄었다.">T2-E-006</a></td><td class="idc"><code>T2-I-001</code></td></tr><tr id="T2-I-002"><td><span class="dir up">강화</span></td>
+  <td class="tgt">초등 돌봄의 공공 이전</td><td>초등 저학년 돌봄은 학교로 넘어오는 중이다. 초1·2의 81.3%가 늘봄학교에 참여하고, 2026년부터 초3 이용권과 방학 돌봄으로 대상이 넓어졌다. 다만 무상 프로그램은 하루 2시간이라 나머지 시간은 가족과 사교육이 맡는다.</td><td><a class="rid" href="#T2-M-004" title="2025년 늘봄학교에는 초등 1·2학년 약 55만 2천 명이 참여했다. 참여율은 81.3%다. 초1만 대상이던 2024년 2학기 참여율은 82.7%였다.">T2-M-004</a><a class="rid" href="#T2-M-005" title="2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다.">T2-M-005</a><a class="rid" href="#T2-M-006" title="2026년 여름방학 초등 돌봄·교육 참여 예정 학생은 초1~6 합계 97만 2천 명으로 2025년보다 4만 2천 명(4.5%) 많다. 초3은 17만 8천 명으로 16.3% 늘었다.">T2-M-006</a><a class="rid" href="#T2-E-002" title="늘봄학교를 학교와 지역이 함께 맡는 &#x27;온동네 초등돌봄·교육&#x27;으로 바꾸는 2026년 추진방안을 발표했다. 초1·2는 매일 2시간 무상 프로그램을 유지하고, 초3에는 연 50만 원 방과후 이용권을 준다. 예산은 1,060억 원이다.">T2-E-002</a><a class="rid" href="#T2-E-005" title="2026년 여름방학 초등 돌봄·교육 참여 예정 학생이 97만 2천 명이라고 발표했다. 17개 시군구를 방학 중 돌봄 우수모델로 골랐다.">T2-E-005</a></td><td class="idc"><code>T2-I-002</code></td></tr><tr id="T2-I-003"><td><span class="dir up">강화</span></td>
+  <td class="tgt">노부모 돌봄의 공적 보험 이용</td><td>노부모 돌봄에서 공적 장기요양 이용이 해마다 6%씩 늘고 있다. 급여비의 91.4%를 공단이 부담해 비용은 공공이 대부분 진다. 65세 이상 1인가구가 연 7% 넘게 늘어 수요도 같이 커진다.</td><td><a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a><a class="rid" href="#T2-M-011" title="2025년 장기요양 급여비는 17조 6,840억 원으로 1년 전보다 9.3% 늘었다. 이 중 91.4%를 공단이 부담했고, 공단 부담금 가운데 재가급여가 10조 1,897억 원, 시설급여가 5조 9,455억 원이다.">T2-M-011</a><a class="rid" href="#T2-M-013" title="2025년 가구주가 65세 이상인 1인가구는 245만 5,947가구로 1년 전보다 16만 7,140가구(7.3%) 늘었다. 2020년 166만 가구에서 5년 사이 1.48배가 됐다.">T2-M-013</a><a class="rid" href="#T2-E-004" title="2025 노인장기요양보험 통계연보를 발간했다. 인정자 123만 5,045명, 급여비 17조 6,840억 원으로 둘 다 역대 최대다.">T2-E-004</a></td><td class="idc"><code>T2-I-003</code></td></tr><tr id="T2-I-004"><td><span class="dir up">강화</span></td>
+  <td class="tgt">집에서 받는 노인 돌봄(재가) 선호</td><td>노인 돌봄의 장소는 시설보다 집 쪽으로 옮겨 가고 있다. 수급자의 약 80%가 재가급여를 쓰고, 집에 계속 살겠다는 재가 수급자는 3년 사이 49.8%에서 69.4%로 늘었다. 집에서 돌보면 공공 서비스 사이의 시간을 가족이 메워야 한다.</td><td><a class="rid" href="#T2-M-010" title="2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다.">T2-M-010</a><a class="rid" href="#T2-E-007" title="2025 장기요양실태조사 결과를 발표했다. 재가급여 수급자의 69.4%가 건강이 나빠져도 지금 집에 살기를 원했다(2022년 49.8%). 재가 수급자 가족의 43.5%는 집에서 계속 돌보겠다고 답했다(2022년 29.5%). 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다.">T2-E-007</a></td><td class="idc"><code>T2-I-004</code></td></tr><tr id="T2-I-005"><td><span class="dir down">약화</span></td>
+  <td class="tgt">공공 아이돌봄(가정 방문형) 공급 여력</td><td>가정으로 찾아가는 공공 아이돌봄은 수요를 따라가지 못한다. 2025년 신청은 18만 가구를 넘었지만 대기 가구가 1만 1,645가구로 늘고 평균 대기일도 39.4일로 길어졌다. 2026년 소득 기준 확대로 신청은 더 늘 수 있다.</td><td><a class="rid" href="#T2-M-015" title="2025년 정부 아이돌봄서비스 신청 가구는 18만 3,794가구로 1년 전보다 4만 4,286가구 늘었다. 같은 해 연계를 기다린 대기 가구는 1만 1,645가구, 평균 대기일은 39.4일이다.">T2-M-015</a><a class="rid" href="#T2-E-001" title="2026년부터 아이돌봄서비스 정부 지원 소득 기준을 중위소득 200% 이하에서 250% 이하로 넓힌다고 밝혔다. 아이돌봄사 국가자격제와 민간 돌봄기관 등록제는 2026년 4월 23일 시행 예정이다.">T2-E-001</a><a class="rid" href="#T2-E-003" title="성평등가족부 자료를 인용해 2025년 아이돌봄서비스 대기 가구가 1만 1,645가구로 1년 사이 22% 늘었다고 공개했다.">T2-E-003</a><a class="rid" href="#T2-E-008" title="2025 아이돌봄서비스 실태조사 결과를 발표했다. 전반 만족도는 5점 만점에 3.9점, 연계 대기기간 만족도는 2.9점이다. 이용 가구의 19.1%가 3개월 이상 기다렸다.">T2-E-008</a></td><td class="idc"><code>T2-I-005</code></td></tr><tr id="T2-I-006"><td><span class="dir up">강화</span></td>
+  <td class="tgt">가족 안 돌봄 분담(남편 몫)</td><td>가족 안에서는 남편 몫이 조금씩 커진다. 18세 미만 자녀를 둔 맞벌이 가구에서 남편의 가사노동은 5년 사이 13분 늘고 아내는 17분 줄었다. 그래도 아내가 남편보다 하루 2시간 넘게 더 쓴다.</td><td><a class="rid" href="#T2-M-007" title="2024년 18세 미만 자녀를 둔 맞벌이 가구에서 아내의 가사노동은 하루 3시간 32분, 남편은 1시간 24분이다. 5년 전보다 아내는 17분 줄고 남편은 13분 늘었다.">T2-M-007</a><a class="rid" href="#T2-M-008" title="생활시간조사 원자료 분석에서 맞벌이 부부의 가사·돌봄 시간 격차는 2014년 180분에서 2024년 103분으로 줄었다. 2024년 아내는 181분, 남편은 78분이다.">T2-M-008</a></td><td class="idc"><code>T2-I-006</code></td></tr><tr id="T2-I-007"><td><span class="dir flat">중립</span></td>
+  <td class="tgt">가사·돌봄의 시장 이전</td><td>가사·돌봄을 민간 유료 서비스로 넘기는 흐름은 통계로 보이지 않는다. 가구당 가사서비스 지출은 월 1만~1만 5천 원 사이에 머문다. 공공 아이돌봄 이용 가구의 본인 부담은 월 35만 7천 원으로 소득 구간에 따라 크게 다르다.</td><td><a class="rid" href="#T2-M-017" title="가구당 월평균 가사서비스 지출은 2019~2024년 1만 2천~1만 5천 원 사이였고, 2025년에는 1만 103원이다. 가계 소비지출에서 차지하는 몫은 작다.">T2-M-017</a><a class="rid" href="#T2-M-018" title="2025년 아이돌봄서비스 이용 가구의 본인 부담은 월평균 35만 7천 원이다. 소득 구간별로 가형 25만 원, 마형 76만 3천 원으로 차이가 크다.">T2-M-018</a></td><td class="idc"><code>T2-I-007</code></td></tr></tbody></table></div>
+    <h3 class="subhead">라이프스테이지별로 보면</h3>
+    <div class="tablewrap"><table><thead><tr><th>라이프스테이지</th><th>무엇이 바뀌나</th><th>근거</th></tr></thead><tbody><tr><td class="tgt">청년 1인</td><td>돌봄을 맡거나 받는 쪽으로서의 지표가 없다.</td><td><span class=muted>근거 없음</span></td></tr><tr><td class="tgt">신혼·무자녀 부부</td><td>돌봄 대상이 아직 없는 단계라 직접 근거가 없다.</td><td><span class=muted>근거 없음</span></td></tr><tr><td class="tgt">자녀양육 가구</td><td>영유아기는 기관 이용이 81.8%로 공공 의존이 크다. 초등 저학년은 늘봄 참여가 81.3%지만 하루 2시간이다. 맞벌이 아내의 가사노동은 하루 3시간 32분으로 남편보다 2시간 8분 길다. 영유아 가구 양육비는 월 111만 6천 원이다.</td><td><a class="rid" href="#T2-M-001" title="2024년 6세 미만 영유아의 81.8%가 어린이집(55.3%)이나 유치원(26.5%)을 이용했다. 반일제 이상 학원 2.5%를 더하면 기관 이용은 84.3%이고, 어느 기관도 이용하지 않는 영유아는 15.7%다.">T2-M-001</a><a class="rid" href="#T2-M-004" title="2025년 늘봄학교에는 초등 1·2학년 약 55만 2천 명이 참여했다. 참여율은 81.3%다. 초1만 대상이던 2024년 2학기 참여율은 82.7%였다.">T2-M-004</a><a class="rid" href="#T2-M-007" title="2024년 18세 미만 자녀를 둔 맞벌이 가구에서 아내의 가사노동은 하루 3시간 32분, 남편은 1시간 24분이다. 5년 전보다 아내는 17분 줄고 남편은 13분 늘었다.">T2-M-007</a><a class="rid" href="#T2-M-019" title="2024년 영유아 가구의 월평균 총 양육비는 111만 6천 원으로 2021년 97만 6천 원보다 14만 원 늘었다. 가구 소득 대비 비중은 19.3%에서 17.8%로 낮아졌다.">T2-M-019</a></td></tr><tr><td class="tgt">중장년</td><td>노부모 돌봄을 맡는 가족 세대다. 장기요양 수급자 가족의 51.6%가 돌봄 부담을 느끼고, 재가 수급자 가족의 43.5%가 집에서 계속 돌보겠다고 했다. 돌보는 가족의 연령별 수치는 없다.</td><td><a class="rid" href="#T2-E-007" title="2025 장기요양실태조사 결과를 발표했다. 재가급여 수급자의 69.4%가 건강이 나빠져도 지금 집에 살기를 원했다(2022년 49.8%). 재가 수급자 가족의 43.5%는 집에서 계속 돌보겠다고 답했다(2022년 29.5%). 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다.">T2-E-007</a><a class="rid" href="#T2-M-010" title="2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다.">T2-M-010</a></td></tr><tr><td class="tgt">고령 가구</td><td>65세 이상 1인가구가 245만 6천 가구로 일반가구의 10.9%다. 장기요양 수급자의 45.8%가 혼자 살고, 재가 수급자의 69.4%가 집에 계속 살기를 원한다. 혼자 사는 노인이 집에서 받는 공적 돌봄 수요가 커진다.</td><td><a class="rid" href="#T2-M-013" title="2025년 가구주가 65세 이상인 1인가구는 245만 5,947가구로 1년 전보다 16만 7,140가구(7.3%) 늘었다. 2020년 166만 가구에서 5년 사이 1.48배가 됐다.">T2-M-013</a><a class="rid" href="#T2-M-014" title="65세 이상 1인가구는 2025년 일반가구의 10.9%로 2020년 7.9%보다 3.0%p 높다.">T2-M-014</a><a class="rid" href="#T2-M-010" title="2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다.">T2-M-010</a><a class="rid" href="#T2-E-007" title="2025 장기요양실태조사 결과를 발표했다. 재가급여 수급자의 69.4%가 건강이 나빠져도 지금 집에 살기를 원했다(2022년 49.8%). 재가 수급자 가족의 43.5%는 집에서 계속 돌보겠다고 답했다(2022년 29.5%). 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다.">T2-E-007</a></td></tr></tbody></table></div>
+    <h3 class="subhead">평형대별로 보면</h3>
+    <div class="tablewrap"><table><thead><tr><th>평형대</th><th>무엇이 바뀌나</th><th>근거</th></tr></thead><tbody><tr><td class="tgt">소형 (전용 60㎡ 이하)</td><td>평형대별 돌봄 수요·지출 수치가 없다. 65세 이상 1인가구와 재가 돌봄의 주거면적 분포는 다음 회차에 인구주택총조사 사용면적 표로 확인한다.</td><td><span class=muted>근거 없음</span></td></tr><tr><td class="tgt">중형 (60~85㎡)</td><td>평형대별 돌봄 수요·지출 수치가 없다.</td><td><span class=muted>근거 없음</span></td></tr><tr><td class="tgt">대형 (85㎡ 초과)</td><td>평형대별 돌봄 수요·지출 수치가 없다. 3세대 동거 가구의 주거면적 분포는 다음 회차 확인 대상이다.</td><td><span class=muted>근거 없음</span></td></tr></tbody></table></div></section>
+  <section><h2>주요 사건 <small>최신순 · 원문 확인된 것만</small></h2><p class="lead">최근 12개월 사건은 공공 돌봄의 범위를 넓히는 제도 개편(초등돌봄 전환, 아이돌봄 소득 기준 확대)과 그 수요 압력을 보여 주는 통계 발표(장기요양 통계연보, 장기요양실태조사, 아이돌봄 대기)로 나뉜다.</p><ul class="timeline"><li id="T2-E-009"><time>2026-08-26</time><div><b>교육부</b> 2026 교육기본통계를 발표했다. 유·초·중등 학생은 536만 2,281명으로 1년 사이 18만 9천 명 줄었다.
+  <div class="src"><a href="https://eiec.kdi.re.kr/policy/materialView.do?num=285801" target="_blank" rel="noopener">교육부 보도자료 (KDI 경제정보센터 게재, 2026 교육기본통계)</a><span class="grade gA">A</span> <code>T2-E-009</code></div></div></li><li id="T2-E-008"><time>2026-08-13</time><div><b>성평등가족부</b> 2025 아이돌봄서비스 실태조사 결과를 발표했다. 전반 만족도는 5점 만점에 3.9점, 연계 대기기간 만족도는 2.9점이다. 이용 가구의 19.1%가 3개월 이상 기다렸다.
+  <div class="src"><a href="https://www.mt.co.kr/policy/2026/08/13/2026081309083244523" target="_blank" rel="noopener">머니투데이 (성평등가족부 2025 아이돌봄서비스 실태조사 인용)</a><span class="grade gB">B</span> <code>T2-E-008</code></div></div></li><li id="T2-E-007"><time>2026-08-06</time><div><b>보건복지부</b> 2025 장기요양실태조사 결과를 발표했다. 재가급여 수급자의 69.4%가 건강이 나빠져도 지금 집에 살기를 원했다(2022년 49.8%). 재가 수급자 가족의 43.5%는 집에서 계속 돌보겠다고 답했다(2022년 29.5%). 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다.
+  <div class="src"><a href="https://eiec.kdi.re.kr/policy/materialView.do?num=285126" target="_blank" rel="noopener">보건복지부 보도자료 (KDI 경제정보센터 게재, 2025 장기요양실태조사)</a><span class="grade gA">A</span> · <a href="https://www.newsis.com/view/NISX20260806_0003738299" target="_blank" rel="noopener">뉴시스 (보건복지부 2025 장기요양실태조사 인용)</a><span class="grade gB">B</span> <code>T2-E-007</code></div></div></li><li id="T2-E-006"><time>2026-08-05</time><div><b>한국사회보장정보원 자료(언론 보도)</b> 2026년 6월 말 어린이집은 2만 5,082곳으로 2025년 말보다 982곳 줄었다. 같은 기간 0세 재원 아동은 12만 9,717명에서 9만 5,635명으로 줄었다.
+  <div class="src"><a href="https://www.segye.com/newsView/20260805510173" target="_blank" rel="noopener">세계일보 (한국사회보장정보원 어린이집 현황 인용)</a><span class="grade gB">B</span> <code>T2-E-006</code></div></div></li><li id="T2-E-005"><time>2026-07-22</time><div><b>교육부</b> 2026년 여름방학 초등 돌봄·교육 참여 예정 학생이 97만 2천 명이라고 발표했다. 17개 시군구를 방학 중 돌봄 우수모델로 골랐다.
+  <div class="src"><a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284544" target="_blank" rel="noopener">교육부 보도자료 (KDI 경제정보센터 게재, 2026 여름방학 초등돌봄·교육)</a><span class="grade gA">A</span> · <a href="https://www.fnnews.com/news/202607221158349746" target="_blank" rel="noopener">파이낸셜뉴스 (교육부 여름방학 초등돌봄 발표 인용)</a><span class="grade gB">B</span> <code>T2-E-005</code></div></div></li><li id="T2-E-004"><time>2026-06-30</time><div><b>국민건강보험공단</b> 2025 노인장기요양보험 통계연보를 발간했다. 인정자 123만 5,045명, 급여비 17조 6,840억 원으로 둘 다 역대 최대다.
+  <div class="src"><a href="https://www.segye.com/newsView/20260630504464" target="_blank" rel="noopener">세계일보 (국민건강보험공단 2025 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span> · <a href="https://bravo.etoday.co.kr/view/atc_view/19530" target="_blank" rel="noopener">브라보마이라이프 (국민건강보험공단 2025 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span> <code>T2-E-004</code></div></div></li><li id="T2-E-003"><time>2026-06-22</time><div><b>국회 김한규 의원실</b> 성평등가족부 자료를 인용해 2025년 아이돌봄서비스 대기 가구가 1만 1,645가구로 1년 사이 22% 늘었다고 공개했다.
+  <div class="src"><a href="https://view.asiae.co.kr/article/2026062215333962687" target="_blank" rel="noopener">아시아경제 (김한규 의원실 제출 성평등가족부 자료 인용)</a><span class="grade gB">B</span> <code>T2-E-003</code></div></div></li><li id="T2-E-002"><time>2026-02-03</time><div><b>교육부</b> 늘봄학교를 학교와 지역이 함께 맡는 &#x27;온동네 초등돌봄·교육&#x27;으로 바꾸는 2026년 추진방안을 발표했다. 초1·2는 매일 2시간 무상 프로그램을 유지하고, 초3에는 연 50만 원 방과후 이용권을 준다. 예산은 1,060억 원이다.
+  <div class="src"><a href="https://www.fnnews.com/news/202602031824532493" target="_blank" rel="noopener">파이낸셜뉴스 (교육부 2026 온동네 초등돌봄·교육 추진방안 인용)</a><span class="grade gB">B</span> <code>T2-E-002</code></div></div></li><li id="T2-E-001"><time>2025-12-31</time><div><b>성평등가족부</b> 2026년부터 아이돌봄서비스 정부 지원 소득 기준을 중위소득 200% 이하에서 250% 이하로 넓힌다고 밝혔다. 아이돌봄사 국가자격제와 민간 돌봄기관 등록제는 2026년 4월 23일 시행 예정이다.
+  <div class="src"><a href="https://mobile.newsis.com/view/NISX20251230_0003459745" target="_blank" rel="noopener">뉴시스 (성평등가족부 2026년 시행 사업 인용)</a><span class="grade gB">B</span> <code>T2-E-001</code></div></div></li></ul></section>
+  <section><h2>전망 <small>2027년 말까지 무엇이 갈림길인가</small></h2><p class="lead">갈림길은 공공 서비스가 대기와 참여 상한을 넘어서느냐다. 초3 방과후 참여율 60%, 장기요양 인정자 130만 명, 아이돌봄 대기 1만 가구가 2027년에 확인할 세 기준이다.</p>
+    <div class="scens"><article class="scen opt" id="T2-F-101"><header><span class="sk">낙관 · Optimistic</span><code>T2-F-101</code></header>
+  <p class="sstmt">2027년 말까지 학령기 아동과 노부모 돌봄에서 공공 몫이 더 커진다. 초3까지 학교 돌봄이 자리 잡고, 공적 장기요양 이용이 늘며, 공공 아이돌봄 대기가 줄어 가족이 맡던 시간 일부가 제도로 넘어간다.</p><ol class="ms"><li><time>2027-03</time><span>2026년 초3 방과후학교 참여율 60% 이상</span></li><li><time>2027-06</time><span>2026년 말 장기요양 인정자 130만 명 이상</span></li><li><time>2027-10</time><span>2026년 아이돌봄서비스 대기 가구 1만 가구 아래</span></li></ol>
+  <dl class="sdl"><div><dt>판정 시점</dt><dd>2027-12-31</dd></div><div><dt>판정 방법</dt><dd>세 가지 중 두 가지 이상 충족 시 적중: (1) 2026년 초3 방과후 참여율 60% 이상 (2) 2026년 말 장기요양 인정자 130만 명 이상 (3) 2026년 아이돌봄 대기 가구 1만 가구 미만</dd></div>
+  <div><dt>전제</dt><dd>초3 방과후 이용권 예산과 아이돌봄 소득 기준 확대가 2027년에도 유지된다</dd></div><div><dt>근거</dt><dd><a class="rid" href="#T2-M-005" title="2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다.">T2-M-005</a><a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a><a class="rid" href="#T2-M-015" title="2025년 정부 아이돌봄서비스 신청 가구는 18만 3,794가구로 1년 전보다 4만 4,286가구 늘었다. 같은 해 연계를 기다린 대기 가구는 1만 1,645가구, 평균 대기일은 39.4일이다.">T2-M-015</a><a class="rid" href="#T2-E-002" title="늘봄학교를 학교와 지역이 함께 맡는 &#x27;온동네 초등돌봄·교육&#x27;으로 바꾸는 2026년 추진방안을 발표했다. 초1·2는 매일 2시간 무상 프로그램을 유지하고, 초3에는 연 50만 원 방과후 이용권을 준다. 예산은 1,060억 원이다.">T2-E-002</a></dd></div></dl></article><article class="scen pes" id="T2-F-102"><header><span class="sk">비관 · Pessimistic</span><code>T2-F-102</code></header>
+  <p class="sstmt">2027년 말에도 학령기 아동과 노부모 돌봄은 가족과 공공이 나눠 맡는 경합 상태에 머문다. 공공 서비스는 대기와 참여 상한에 막히고, 집에서 받는 돌봄이 늘면서 가족이 메우는 시간이 줄지 않는다.</p><ol class="ms"><li><time>2027-03</time><span>2026년 초3 방과후학교 참여율 60% 미달</span></li><li><time>2027-06</time><span>장기요양 인정자 증가율이 65세 이상 1인가구 증가율에 못 미침</span></li><li><time>2027-10</time><span>2026년 아이돌봄서비스 대기 가구 1만 가구 이상</span></li></ol>
+  <dl class="sdl"><div><dt>판정 시점</dt><dd>2027-12-31</dd></div><div><dt>판정 방법</dt><dd>낙관 조건 중 하나 이하 충족 시 적중</dd></div>
+  <div><dt>전제</dt><dd>없음</dd></div><div><dt>근거</dt><dd><a class="rid" href="#T2-M-005" title="2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다.">T2-M-005</a><a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a><a class="rid" href="#T2-M-013" title="2025년 가구주가 65세 이상인 1인가구는 245만 5,947가구로 1년 전보다 16만 7,140가구(7.3%) 늘었다. 2020년 166만 가구에서 5년 사이 1.48배가 됐다.">T2-M-013</a><a class="rid" href="#T2-M-015" title="2025년 정부 아이돌봄서비스 신청 가구는 18만 3,794가구로 1년 전보다 4만 4,286가구 늘었다. 같은 해 연계를 기다린 대기 가구는 1만 1,645가구, 평균 대기일은 39.4일이다.">T2-M-015</a></dd></div></dl></article></div>
+    <h3 class="subhead">세부 판정 근거</h3>
+    <p class="lead muted">각 세부 전망이 적중하거나 빗나갔을 때 어느 시나리오 쪽 신호인지 표시했다. 확인 시점이 오면 확인 방법대로 판정한다.</p>
+    <div class="tablewrap"><table><thead><tr><th>세부 전망</th><th>확인 시점</th><th>적중 시</th><th>빗나갈 시</th><th>상태</th><th>근거</th></tr></thead><tbody><tr id="T2-F-004"><td class="stmt">2026년 초등 3학년 방과후학교 참여율은 교육부 목표 60%에 못 미칠 것이다.<small>확인 방법: 교육부의 2026년 초등돌봄·교육 실적 발표 또는 2027년 추진방안에 실린 초3 방과후 참여율 확인</small></td>
+  <td class="asof">2027-03-31</td><td><span class="side pes">비관</span></td><td><span class="side opt">낙관</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#T2-M-005" title="2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다.">T2-M-005</a><a class="rid" href="#T2-E-002" title="늘봄학교를 학교와 지역이 함께 맡는 &#x27;온동네 초등돌봄·교육&#x27;으로 바꾸는 2026년 추진방안을 발표했다. 초1·2는 매일 2시간 무상 프로그램을 유지하고, 초3에는 연 50만 원 방과후 이용권을 준다. 예산은 1,060억 원이다.">T2-E-002</a></td></tr><tr id="T2-F-003"><td class="stmt">2026년 12월 말 어린이집 이용 아동은 85만 명 아래일 것이다.<small>확인 방법: 교육부 2026 보육통계(12월 말 기준) 또는 한국사회보장정보원 집계의 어린이집 아동 수 확인</small></td>
+  <td class="asof">2027-04-30</td><td><span class="muted">—</span></td><td><span class="muted">—</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#T2-M-002" title="어린이집 이용 아동은 2021년 118만 4,716명에서 2025년 말 88만 7,764명으로 4년 사이 25.1% 줄었다. 2026년 6월 말에는 80만 3,062명이다.">T2-M-002</a><a class="rid" href="#T2-E-006" title="2026년 6월 말 어린이집은 2만 5,082곳으로 2025년 말보다 982곳 줄었다. 같은 기간 0세 재원 아동은 12만 9,717명에서 9만 5,635명으로 줄었다.">T2-E-006</a></td></tr><tr id="T2-F-001"><td class="stmt">2026년 말 노인장기요양보험 인정자는 130만 명 이상일 것이다.<small>확인 방법: 국민건강보험공단 2026 노인장기요양보험 통계연보(2027년 6월 말 발간 예상)의 인정자 수 확인</small></td>
+  <td class="asof">2027-07-31</td><td><span class="side opt">낙관</span></td><td><span class="side pes">비관</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a><a class="rid" href="#T2-E-004" title="2025 노인장기요양보험 통계연보를 발간했다. 인정자 123만 5,045명, 급여비 17조 6,840억 원으로 둘 다 역대 최대다.">T2-E-004</a></td></tr><tr id="T2-F-002"><td class="stmt">2026년 가구주가 65세 이상인 1인가구는 260만 가구 이상일 것이다.<small>확인 방법: 국가데이터처 2026 인구주택총조사 등록센서스의 성·연령별 1인가구(KOSIS DT_1JC1517) 65세 이상 합계 확인</small></td>
+  <td class="asof">2027-10-31</td><td><span class="side pes">비관</span></td><td><span class="muted">—</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#T2-M-013" title="2025년 가구주가 65세 이상인 1인가구는 245만 5,947가구로 1년 전보다 16만 7,140가구(7.3%) 늘었다. 2020년 166만 가구에서 5년 사이 1.48배가 됐다.">T2-M-013</a></td></tr><tr id="T2-F-005"><td class="stmt">2026년 아이돌봄서비스 대기 가구는 1만 가구 이상일 것이다.<small>확인 방법: 2027년 국정감사 제출 자료 또는 성평등가족부 발표의 2026년 아이돌봄서비스 대기 가구 수 확인</small></td>
+  <td class="asof">2027-10-31</td><td><span class="side pes">비관</span></td><td><span class="side opt">낙관</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#T2-M-015" title="2025년 정부 아이돌봄서비스 신청 가구는 18만 3,794가구로 1년 전보다 4만 4,286가구 늘었다. 같은 해 연계를 기다린 대기 가구는 1만 1,645가구, 평균 대기일은 39.4일이다.">T2-M-015</a><a class="rid" href="#T2-E-001" title="2026년부터 아이돌봄서비스 정부 지원 소득 기준을 중위소득 200% 이하에서 250% 이하로 넓힌다고 밝혔다. 아이돌봄사 국가자격제와 민간 돌봄기관 등록제는 2026년 4월 23일 시행 예정이다.">T2-E-001</a><a class="rid" href="#T2-E-003" title="성평등가족부 자료를 인용해 2025년 아이돌봄서비스 대기 가구가 1만 1,645가구로 1년 사이 22% 늘었다고 공개했다.">T2-E-003</a></td></tr></tbody></table></div></section>
+  <section><h2>판정 <small>돌봄 대상별 주도 주체 지도</small></h2><p class="lead">돌봄 대상마다 시간과 비용·이용 기준으로 주도 주체를 정했다. 주체의 몫을 직접 재는 수치(가족 돌봄 시간 비중, 공공·민간 비용 분담 전체)가 없어 세 칸 모두 잠정이다.</p><div class="tablewrap"><table><thead><tr><th>돌봄 대상</th><th>주도 주체</th><th>다음 주체</th><th>메모</th><th>근거</th></tr></thead><tbody><tr><td class="tgt">영유아</td><td><span class="own brand">공공</span><span class="prov-tag" title="기준을 직접 재는 수치가 없어 간접 근거로 판정">잠정</span></td>
+  <td><span class="own neutral">가족</span></td><td>6세 미만 81.8%가 어린이집·유치원 이용(2024). 가족의 돌봄 시간 몫은 직접 수치 없음.</td><td><a class="rid" href="#T2-M-001" title="2024년 6세 미만 영유아의 81.8%가 어린이집(55.3%)이나 유치원(26.5%)을 이용했다. 반일제 이상 학원 2.5%를 더하면 기관 이용은 84.3%이고, 어느 기관도 이용하지 않는 영유아는 15.7%다.">T2-M-001</a><a class="rid" href="#T2-M-002" title="어린이집 이용 아동은 2021년 118만 4,716명에서 2025년 말 88만 7,764명으로 4년 사이 25.1% 줄었다. 2026년 6월 말에는 80만 3,062명이다.">T2-M-002</a></td></tr><tr><td class="tgt">학령기 아동</td><td><span class="own contest">경합</span><span class="prov-tag" title="기준을 직접 재는 수치가 없어 간접 근거로 판정">잠정</span></td>
+  <td><span class=muted>—</span></td><td>이용은 공공(초1·2 늘봄 81.3%), 시간은 가족(무상 프로그램 하루 2시간). 초3은 방과후 42.4%로 과반 아래. 시장(사교육) 몫 미확보.</td><td><a class="rid" href="#T2-M-004" title="2025년 늘봄학교에는 초등 1·2학년 약 55만 2천 명이 참여했다. 참여율은 81.3%다. 초1만 대상이던 2024년 2학기 참여율은 82.7%였다.">T2-M-004</a><a class="rid" href="#T2-M-005" title="2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다.">T2-M-005</a><a class="rid" href="#T2-M-007" title="2024년 18세 미만 자녀를 둔 맞벌이 가구에서 아내의 가사노동은 하루 3시간 32분, 남편은 1시간 24분이다. 5년 전보다 아내는 17분 줄고 남편은 13분 늘었다.">T2-M-007</a></td></tr><tr><td class="tgt">노부모</td><td><span class="own contest">경합</span><span class="prov-tag" title="기준을 직접 재는 수치가 없어 간접 근거로 판정">잠정</span></td>
+  <td><span class=muted>—</span></td><td>비용은 공공(급여비 91.4% 공단 부담), 장소와 시간은 가족(수급자 약 80% 재가, 가족 51.6% 부담). 인정자는 65세 이상의 약 11.2%.</td><td><a class="rid" href="#T2-M-009" title="2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.">T2-M-009</a><a class="rid" href="#T2-M-011" title="2025년 장기요양 급여비는 17조 6,840억 원으로 1년 전보다 9.3% 늘었다. 이 중 91.4%를 공단이 부담했고, 공단 부담금 가운데 재가급여가 10조 1,897억 원, 시설급여가 5조 9,455억 원이다.">T2-M-011</a><a class="rid" href="#T2-M-012" title="2025년 장기요양 인정자는 65세 이상 의료보장 적용인구 1,100만 3천 명의 약 11.2%다.">T2-M-012</a><a class="rid" href="#T2-M-010" title="2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다.">T2-M-010</a><a class="rid" href="#T2-E-007" title="2025 장기요양실태조사 결과를 발표했다. 재가급여 수급자의 69.4%가 건강이 나빠져도 지금 집에 살기를 원했다(2022년 49.8%). 재가 수급자 가족의 43.5%는 집에서 계속 돌보겠다고 답했다(2022년 29.5%). 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다.">T2-E-007</a></td></tr></tbody></table></div><details class="criteria"><summary>판정 기준 보기</summary><div class="crit-body"><h4>주도 주체</h4><div class="tablewrap"><table class="crit"><thead><tr><th>주체</th><th>뜻</th><th>기준</th></tr></thead><tbody><tr><td><span class="own neutral">가족</span></td><td>가족 구성원이 시간·비용 대부분을 진다.</td><td>돌봄 시간 또는 비용의 50% 이상이 가족 내부</td></tr><tr><td><span class="own brand">공공</span></td><td>국가·지자체 제도가 주된 공급자다.</td><td>제도 이용률이 대상 인구의 50% 이상, 또는 공공 재원이 비용의 과반</td></tr><tr><td><span class="own platform">시장</span></td><td>민간 유료 서비스가 주된 공급자다.</td><td>유료 서비스 이용률 또는 가구 지출이 가장 큰 몫</td></tr><tr><td><span class="own agent">기술</span></td><td>기기·플랫폼이 돌봄의 일부를 대신한다.</td><td>돌봄 목적 기기·앱 이용률 25% 이상 (그 미만은 &#x27;보조&#x27;로만 표기)</td></tr><tr><td><span class="own contest">경합</span></td><td>두 주체의 몫이 비슷하다.</td><td>상위 두 주체의 차이가 10%p 이내</td></tr></tbody></table></div><h4>판정 규칙</h4><ul class="crit-rules"><li>돌봄 대상(영유아·학령기 아동·노부모)마다 시간과 비용 기준으로 주도 주체를 정한다.</li><li>시간 근거(생활시간조사)와 비용·이용 근거(보육·장기요양 통계, 가계동향)가 엇갈리면 &#x27;경합&#x27;으로 둔다.</li><li>주체의 몫을 직접 재는 수치가 없으면 &#x27;잠정&#x27;으로 둔다.</li></ul></div></details></section>
+  <section><h2>핵심 지표 <small>추적 지표 7/7개 값 확보</small></h2><p class="lead">추적 지표 7개 모두 값을 확보했다. 다만 K3(가족 돌봄 시간)은 &#x27;가족 및 가구원 돌보기&#x27; 단독 시간이 아닌 맞벌이 가사노동 값이고, K6(아이돌봄서비스)은 이용 가구가 아닌 신청 가구 값이다. K4는 재가급여 이용자 단독 수가 없다. 다음 회차에 생활시간조사 원표, 성평등가족부 이용 실적, 장기요양 통계연보 급여 종류별 수급자 표를 먼저 찾는다.</p>
+    <div class="tablewrap"><table><thead><tr><th>추적 지표</th><th>내용 · 출처</th><th style="text-align:right">현재값</th><th>기준 시점</th><th>기록</th></tr></thead><tbody><tr id="T2-M-001"><td class="ind">T2-K1<small>영유아 기관 이용률</small></td>
+  <td class="stmt">2024년 6세 미만 영유아의 81.8%가 어린이집(55.3%)이나 유치원(26.5%)을 이용했다. 반일제 이상 학원 2.5%를 더하면 기관 이용은 84.3%이고, 어느 기관도 이용하지 않는 영유아는 15.7%다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.etoday.co.kr/news/view/2471950" target="_blank" rel="noopener">이투데이 (교육부 2024 전국보육실태조사 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">81.8%</td><td class="asof">2024<small>KR</small></td><td class="idc"><code>T2-M-001</code></td></tr><tr id="T2-M-002"><td class="ind">T2-K1<small>영유아 기관 이용률</small></td>
+  <td class="stmt">어린이집 이용 아동은 2021년 118만 4,716명에서 2025년 말 88만 7,764명으로 4년 사이 25.1% 줄었다. 2026년 6월 말에는 80만 3,062명이다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.segye.com/newsView/20260805510173" target="_blank" rel="noopener">세계일보 (한국사회보장정보원 어린이집 현황 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">887,764 명</td><td class="asof">2025-12<small>KR</small></td><td class="idc"><code>T2-M-002</code></td></tr><tr id="T2-M-003"><td class="ind">T2-K1<small>영유아 기관 이용률</small></td>
+  <td class="stmt">2025년 4월 1일 기준 유치원 원아는 48만 1,525명으로 1년 전보다 1만 7,079명(3.4%) 줄었다. <span class="warn">확인 필요</span><div class="src"><a href="https://view.asiae.co.kr/article/2025082809583626415" target="_blank" rel="noopener">아시아경제 (교육부 2025 교육기본통계 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">481,525 명</td><td class="asof">2025-04<small>KR</small></td><td class="idc"><code>T2-M-003</code></td></tr><tr id="T2-M-004"><td class="ind">T2-K2<small>초등 방과후 돌봄 참여</small></td>
+  <td class="stmt">2025년 늘봄학교에는 초등 1·2학년 약 55만 2천 명이 참여했다. 참여율은 81.3%다. 초1만 대상이던 2024년 2학기 참여율은 82.7%였다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.fnnews.com/news/202602031824532493" target="_blank" rel="noopener">파이낸셜뉴스 (교육부 2026 온동네 초등돌봄·교육 추진방안 인용)</a><span class="grade gB">B</span> · <a href="https://www.fnnews.com/news/202410161036379096" target="_blank" rel="noopener">파이낸셜뉴스 (교육부 늘봄학교 지원본부 회의 자료 인용)</a><span class="grade gB">B</span> · <a href="https://m.korea.kr/briefing/policyBriefingView.do?newsId=156623694" target="_blank" rel="noopener">교육부 브리핑 (대한민국 정책브리핑, 2024학년도 늘봄학교 참여 현황)</a><span class="grade gA">A</span></div></td>
+  <td class="num">552,000 명</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-004</code></td></tr><tr id="T2-M-005"><td class="ind">T2-K2<small>초등 방과후 돌봄 참여</small></td>
+  <td class="stmt">2025년 초등 3학년 방과후학교 참여율은 42.4%다. 교육부는 2026년 목표를 60%로 잡았다. <div class="src"><a href="https://www.fnnews.com/news/202602031824532493" target="_blank" rel="noopener">파이낸셜뉴스 (교육부 2026 온동네 초등돌봄·교육 추진방안 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">42.4%</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-005</code></td></tr><tr id="T2-M-006"><td class="ind">T2-K2<small>초등 방과후 돌봄 참여</small></td>
+  <td class="stmt">2026년 여름방학 초등 돌봄·교육 참여 예정 학생은 초1~6 합계 97만 2천 명으로 2025년보다 4만 2천 명(4.5%) 많다. 초3은 17만 8천 명으로 16.3% 늘었다. <div class="src"><a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284544" target="_blank" rel="noopener">교육부 보도자료 (KDI 경제정보센터 게재, 2026 여름방학 초등돌봄·교육)</a><span class="grade gA">A</span> · <a href="https://www.fnnews.com/news/202607221158349746" target="_blank" rel="noopener">파이낸셜뉴스 (교육부 여름방학 초등돌봄 발표 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">972,000 명</td><td class="asof">2026-07<small>KR</small></td><td class="idc"><code>T2-M-006</code></td></tr><tr id="T2-M-007"><td class="ind">T2-K3<small>가족 돌봄 시간</small></td>
+  <td class="stmt">2024년 18세 미만 자녀를 둔 맞벌이 가구에서 아내의 가사노동은 하루 3시간 32분, 남편은 1시간 24분이다. 5년 전보다 아내는 17분 줄고 남편은 13분 늘었다. <span class="warn">확인 필요</span><div class="src"><a href="https://v.daum.net/v/20250728120242915" target="_blank" rel="noopener">다음뉴스 게재 기사 (통계청 2024년 생활시간조사 인용)</a><span class="grade gB">B</span> · <a href="https://eiec.kdi.re.kr/policy/materialView.do?num=269141" target="_blank" rel="noopener">통계청 보도자료 (KDI 경제정보센터 게재, 2024년 생활시간조사 결과)</a><span class="grade gA">A</span></div></td>
+  <td class="num">212 분/일</td><td class="asof">2024<small>KR</small></td><td class="idc"><code>T2-M-007</code></td></tr><tr id="T2-M-008"><td class="ind">T2-K3<small>가족 돌봄 시간</small></td>
+  <td class="stmt">생활시간조사 원자료 분석에서 맞벌이 부부의 가사·돌봄 시간 격차는 2014년 180분에서 2024년 103분으로 줄었다. 2024년 아내는 181분, 남편은 78분이다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.newsis.com/view/NISX20260515_0003631826" target="_blank" rel="noopener">뉴시스 (생활시간조사 25주년 학술대회 발표 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">103 분/일</td><td class="asof">2024<small>KR</small></td><td class="idc"><code>T2-M-008</code></td></tr><tr id="T2-M-009"><td class="ind">T2-K4<small>장기요양 인정자·재가급여 이용자</small></td>
+  <td class="stmt">2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.segye.com/newsView/20260630504464" target="_blank" rel="noopener">세계일보 (국민건강보험공단 2025 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span> · <a href="https://bravo.etoday.co.kr/view/atc_view/19530" target="_blank" rel="noopener">브라보마이라이프 (국민건강보험공단 2025 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span> · <a href="https://www.kukinews.com/article/view/kuk202506300146" target="_blank" rel="noopener">쿠키뉴스 (국민건강보험공단 2024 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">1,235,045 명</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-009</code></td></tr><tr id="T2-M-010"><td class="ind">T2-K4<small>장기요양 인정자·재가급여 이용자</small></td>
+  <td class="stmt">2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.segye.com/newsView/20260630504464" target="_blank" rel="noopener">세계일보 (국민건강보험공단 2025 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span> · <a href="https://www.newsis.com/view/NISX20260806_0003738299" target="_blank" rel="noopener">뉴시스 (보건복지부 2025 장기요양실태조사 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">1,207,651 명</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-010</code></td></tr><tr id="T2-M-011"><td class="ind">T2-K4<small>장기요양 인정자·재가급여 이용자</small></td>
+  <td class="stmt">2025년 장기요양 급여비는 17조 6,840억 원으로 1년 전보다 9.3% 늘었다. 이 중 91.4%를 공단이 부담했고, 공단 부담금 가운데 재가급여가 10조 1,897억 원, 시설급여가 5조 9,455억 원이다. <div class="src"><a href="https://bravo.etoday.co.kr/view/atc_view/19535" target="_blank" rel="noopener">브라보마이라이프 (2025 노인장기요양보험 통계연보 급여비 인용)</a><span class="grade gB">B</span> · <a href="https://www.segye.com/newsView/20260630504464" target="_blank" rel="noopener">세계일보 (국민건강보험공단 2025 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">176,840 억 원</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-011</code></td></tr><tr id="T2-M-012"><td class="ind">T2-K4<small>장기요양 인정자·재가급여 이용자</small></td>
+  <td class="stmt">2025년 장기요양 인정자는 65세 이상 의료보장 적용인구 1,100만 3천 명의 약 11.2%다. <span class="warn">확인 필요</span><div class="src"><a href="https://bravo.etoday.co.kr/view/atc_view/19530" target="_blank" rel="noopener">브라보마이라이프 (국민건강보험공단 2025 노인장기요양보험 통계연보 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">11.2%</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-012</code></td></tr><tr id="T2-M-013"><td class="ind">T2-K5<small>독거노인 가구</small></td>
+  <td class="stmt">2025년 가구주가 65세 이상인 1인가구는 245만 5,947가구로 1년 전보다 16만 7,140가구(7.3%) 늘었다. 2020년 166만 가구에서 5년 사이 1.48배가 됐다. <div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1JC1517&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1JC1517 인구총조사 성·연령별 1인가구·일반가구)</a><span class="grade gA">A</span></div></td>
+  <td class="num">2,455,947 가구</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-013</code></td></tr><tr id="T2-M-014"><td class="ind">T2-K5<small>독거노인 가구</small></td>
+  <td class="stmt">65세 이상 1인가구는 2025년 일반가구의 10.9%로 2020년 7.9%보다 3.0%p 높다. <div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1JC1517&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1JC1517 인구총조사 성·연령별 1인가구·일반가구)</a><span class="grade gA">A</span></div></td>
+  <td class="num">10.9%</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-014</code></td></tr><tr id="T2-M-015"><td class="ind">T2-K6<small>아이돌봄서비스 이용 가구</small></td>
+  <td class="stmt">2025년 정부 아이돌봄서비스 신청 가구는 18만 3,794가구로 1년 전보다 4만 4,286가구 늘었다. 같은 해 연계를 기다린 대기 가구는 1만 1,645가구, 평균 대기일은 39.4일이다. <span class="warn">확인 필요</span><div class="src"><a href="https://view.asiae.co.kr/article/2026062215333962687" target="_blank" rel="noopener">아시아경제 (김한규 의원실 제출 성평등가족부 자료 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">183,794 가구</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-015</code></td></tr><tr id="T2-M-016"><td class="ind">T2-K6<small>아이돌봄서비스 이용 가구</small></td>
+  <td class="stmt">정부는 2025년 아이돌봄서비스 지원 규모를 11만 가구에서 12만 가구로 늘리고 지원 소득 기준을 중위소득 150%에서 200% 이하로 넓혔다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.newsis.com/view/NISX20250113_0003029586" target="_blank" rel="noopener">뉴시스 (여성가족부 2025 아이돌봄서비스 개편 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">120,000 가구</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-016</code></td></tr><tr id="T2-M-017"><td class="ind">T2-K7<small>가사·돌봄 서비스 지출</small></td>
+  <td class="stmt">가구당 월평균 가사서비스 지출은 2019~2024년 1만 2천~1만 5천 원 사이였고, 2025년에는 1만 103원이다. 가계 소비지출에서 차지하는 몫은 작다. <span class="warn">확인 필요</span><div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1L9U101&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1L9U101 가구당 월평균 가계수지, 전국 1인 이상)</a><span class="grade gA">A</span></div></td>
+  <td class="num">10,103 원/월</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-017</code></td></tr><tr id="T2-M-018"><td class="ind">T2-K7<small>가사·돌봄 서비스 지출</small></td>
+  <td class="stmt">2025년 아이돌봄서비스 이용 가구의 본인 부담은 월평균 35만 7천 원이다. 소득 구간별로 가형 25만 원, 마형 76만 3천 원으로 차이가 크다. <div class="src"><a href="https://www.mt.co.kr/policy/2026/08/13/2026081309083244523" target="_blank" rel="noopener">머니투데이 (성평등가족부 2025 아이돌봄서비스 실태조사 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">357,000 원/월</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>T2-M-018</code></td></tr><tr id="T2-M-019"><td class="ind">T2-K7<small>가사·돌봄 서비스 지출</small></td>
+  <td class="stmt">2024년 영유아 가구의 월평균 총 양육비는 111만 6천 원으로 2021년 97만 6천 원보다 14만 원 늘었다. 가구 소득 대비 비중은 19.3%에서 17.8%로 낮아졌다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.etoday.co.kr/news/view/2471950" target="_blank" rel="noopener">이투데이 (교육부 2024 전국보육실태조사 인용)</a><span class="grade gB">B</span> · <a href="https://www.segye.com/newsView/20250520515637" target="_blank" rel="noopener">세계일보 (교육부 2024 전국보육실태조사 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">1,116,000 원/월</td><td class="asof">2024<small>KR</small></td><td class="idc"><code>T2-M-019</code></td></tr></tbody></table></div>
+    <h3 class="subhead">추적 지표 목록 v1.0</h3>
+    <div class="tablewrap"><table><thead><tr><th>ID</th><th>지표 · 정의</th><th>우선 출처</th><th>발표 시기</th><th>이번 회차</th></tr></thead><tbody><tr><td class="ind">T2-K1</td><td>영유아 기관 이용률<small>0~5세 중 어린이집·유치원 이용 비율</small></td><td>보건복지부 보육통계·교육부 유아교육통계</td>
+  <td>전국보육실태조사 3년 주기(2021·2024 조사) · 2024년 결과 2025-05-20 보도 · 다음 2027년 조사(발표 시기 확인 필요). 보조: 보육통계 연 1회(2025년 12월 말 기준 2026-02 게시), 교육기본통계 연 1회(2026-08-26 발표)</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">T2-K2</td><td>초등 방과후 돌봄 참여<small>늘봄학교·초등돌봄 참여 학생 수</small></td><td>교육부</td>
+  <td>정기 공표 주기 없음(교육부 수시 발표) · 2025년 실적 2026-02-03 추진방안에서 공개 · 다음 2027년 초 추진방안 예상(확인 필요)</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">T2-K3</td><td>가족 돌봄 시간<small>가족 및 가구원 돌보기 평균시간(자녀·성인 가족)</small></td><td>국가데이터처 생활시간조사</td>
+  <td>5년 주기 · 2024년 조사 2025-07-28 발표 · 다음 2029년 조사(발표 시기 확인 필요)</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">T2-K4</td><td>장기요양 인정자·재가급여 이용자<small>노인장기요양 인정자 수, 재가급여 이용자</small></td><td>국민건강보험공단 노인장기요양보험통계 · 팩트베이스 L07</td>
+  <td>연 1회, 6월 말 통계연보 발간 · 2025년 기준 2026-06-30 발간 · 다음 2027년 6월 말 예상</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">T2-K5</td><td>독거노인 가구<small>65세 이상 1인가구</small></td><td>국가데이터처 인구주택총조사·고령자통계 · 팩트베이스 D01</td>
+  <td>연 1회(인구주택총조사 등록센서스) · 2025년 기준 값 KOSIS 수록(2026-10-10 수집) · 발표일·다음 발표 확인 필요</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">T2-K6</td><td>아이돌봄서비스 이용 가구<small>정부 아이돌봄서비스 이용 가구</small></td><td>성평등가족부 아이돌봄서비스 통계</td>
+  <td>이용 실적 공표 주기 확인 필요 · 신청·대기 현황은 국정감사 자료(2026-06-22 보도) · 실태조사 2025년 조사 2026-08-13 발표</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">T2-K7</td><td>가사·돌봄 서비스 지출<small>가구당 월평균 가사·돌봄 서비스 지출</small></td><td>국가데이터처 가계동향조사 · 팩트베이스 S04</td>
+  <td>분기·연 1회(가계동향조사) · 2025년 연간값 KOSIS 수록(2026-10-11 수집) · 다음 발표 시기 확인 필요</td><td><span class="own brand">확보</span></td></tr></tbody></table></div></section>
+  <section><h2>미확인·경고 <small>본문 판단에서 빼거나 주의해서 쓴 기록</small></h2>
+    <div class="tablewrap"><table><thead><tr><th>기록</th><th>구분</th><th>진술</th><th>사유</th></tr></thead><tbody><tr><td><code>T2-M-001</code></td><td><span class="wk">확인 필요</span></td><td>2024년 6세 미만 영유아의 81.8%가 어린이집(55.3%)이나 유치원(26.5%)을 이용했다. 반일제 이상 학원 2.5%를 더하면 기관 이용은 84.3%이고, 어느 기관도 이용하지 않는 영유아는 15.7%다.</td><td class="muted">확인 필요: 교육부 원문 보고서 미확인. 표본조사 값이라 행정통계 기반 이용률과 정의가 다르다; 확인 필요: 2021년 조사의 같은 항목 비교값 미확보</td></tr><tr><td><code>T2-M-002</code></td><td><span class="wk">확인 필요</span></td><td>어린이집 이용 아동은 2021년 118만 4,716명에서 2025년 말 88만 7,764명으로 4년 사이 25.1% 줄었다. 2026년 6월 말에는 80만 3,062명이다.</td><td class="muted">확인 필요: 2026년 6월 값은 연중 시점이라 연말 값과 바로 비교하지 않는다</td></tr><tr><td><code>T2-M-003</code></td><td><span class="wk">확인 필요</span></td><td>2025년 4월 1일 기준 유치원 원아는 48만 1,525명으로 1년 전보다 1만 7,079명(3.4%) 줄었다.</td><td class="muted">확인 필요: 2026 교육기본통계(2026-08-26 발표)의 유치원 원아 수는 첨부 원문에서 다시 확인</td></tr><tr><td><code>T2-M-004</code></td><td><span class="wk">확인 필요</span></td><td>2025년 늘봄학교에는 초등 1·2학년 약 55만 2천 명이 참여했다. 참여율은 81.3%다. 초1만 대상이던 2024년 2학기 참여율은 82.7%였다.</td><td class="muted">확인 필요: 2025년 참여 학생 수는 교육부 원문 보도자료가 아닌 언론 인용값</td></tr><tr><td><code>T2-M-007</code></td><td><span class="wk">확인 필요</span></td><td>2024년 18세 미만 자녀를 둔 맞벌이 가구에서 아내의 가사노동은 하루 3시간 32분, 남편은 1시간 24분이다. 5년 전보다 아내는 17분 줄고 남편은 13분 늘었다.</td><td class="muted">확인 필요: &#x27;가족 및 가구원 돌보기&#x27; 단독 평균시간(전체 인구 요일평균)은 통계청 보고서 원표에서 다시 확인; 확인 필요: 2019년 값은 기사 증감폭으로 역산</td></tr><tr><td><code>T2-M-008</code></td><td><span class="wk">확인 필요</span></td><td>생활시간조사 원자료 분석에서 맞벌이 부부의 가사·돌봄 시간 격차는 2014년 180분에서 2024년 103분으로 줄었다. 2024년 아내는 181분, 남편은 78분이다.</td><td class="muted">확인 필요: 연구자 분석값으로 통계청 공표 정의(18세 미만 자녀 맞벌이 가구)와 대상이 다르다</td></tr><tr><td><code>T2-M-009</code></td><td><span class="wk">확인 필요</span></td><td>2025년 노인장기요양보험 인정자는 123만 5,045명으로 1년 전보다 7만 15명(6.0%) 늘었다. 2024년에도 6.1% 늘었다.</td><td class="muted">확인 필요: 재가급여 이용자 수 단독 값은 통계연보 원표에서 확보해야 한다</td></tr><tr><td><code>T2-M-010</code></td><td><span class="wk">확인 필요</span></td><td>2025년 실제로 급여를 이용한 장기요양 수급자는 120만 7,651명이다. 2025 장기요양실태조사에서 수급자의 약 80%는 재가급여, 약 20%는 시설급여를 이용했다. 수급자의 45.8%는 혼자 산다.</td><td class="muted">확인 필요: 재가·시설 비율은 표본조사 값이라 통계연보 급여 종류별 수급자 수와 다를 수 있다</td></tr><tr><td><code>T2-M-012</code></td><td><span class="wk">확인 필요</span></td><td>2025년 장기요양 인정자는 65세 이상 의료보장 적용인구 1,100만 3천 명의 약 11.2%다.</td><td class="muted">확인 필요: 공단 공식 노인인구 대비 인정률이 아닌 계산값</td></tr><tr><td><code>T2-M-015</code></td><td><span class="wk">확인 필요</span></td><td>2025년 정부 아이돌봄서비스 신청 가구는 18만 3,794가구로 1년 전보다 4만 4,286가구 늘었다. 같은 해 연계를 기다린 대기 가구는 1만 1,645가구, 평균 대기일은 39.4일이다.</td><td class="muted">확인 필요: 지표 정의(이용 가구)와 달리 신청 가구 값이다. 이용 가구 실적은 성평등가족부 원자료에서 확보; 확인 필요: 2024년 신청 가구는 기사 증가폭으로 역산</td></tr><tr><td><code>T2-M-016</code></td><td><span class="wk">확인 필요</span></td><td>정부는 2025년 아이돌봄서비스 지원 규모를 11만 가구에서 12만 가구로 늘리고 지원 소득 기준을 중위소득 150%에서 200% 이하로 넓혔다.</td><td class="muted">확인 필요: 목표치이며 이용 실적이 아니다</td></tr><tr><td><code>T2-M-017</code></td><td><span class="wk">확인 필요</span></td><td>가구당 월평균 가사서비스 지출은 2019~2024년 1만 2천~1만 5천 원 사이였고, 2025년에는 1만 103원이다. 가계 소비지출에서 차지하는 몫은 작다.</td><td class="muted">확인 필요: 2025년 값이 전년보다 25.7% 낮다. 지출 분류 개편 여부를 KOSIS 주석에서 확인; 확인 필요: 명목값이며 소비자물가로 실질화하지 않았다</td></tr><tr><td><code>T2-M-019</code></td><td><span class="wk">확인 필요</span></td><td>2024년 영유아 가구의 월평균 총 양육비는 111만 6천 원으로 2021년 97만 6천 원보다 14만 원 늘었다. 가구 소득 대비 비중은 19.3%에서 17.8%로 낮아졌다.</td><td class="muted">확인 필요: 가사·돌봄 서비스 지출과 범위가 다르다(양육 관련 총지출)</td></tr><tr><td><code>T2-E-007</code></td><td><span class="wk">확인 필요</span></td><td>2025 장기요양실태조사 결과를 발표했다. 재가급여 수급자의 69.4%가 건강이 나빠져도 지금 집에 살기를 원했다(2022년 49.8%). 재가 수급자 가족의 43.5%는 집에서 계속 돌보겠다고 답했다(2022년 29.5%). 수급자 가족의 51.6%는 여전히 돌봄 부담을 느낀다.</td><td class="muted">확인 필요: 발표일은 언론 기준 8월 6일, 정책자료 게재일은 8월 7일</td></tr></tbody></table></div></section>
+  <footer>
+    <span>이 글은 4유형 기록 42건(지표 19 · 사건 9 · 해석 7 · 전망 7)에서 생성했습니다. 문장 옆 번호를 누르면 해당 기록으로 이동합니다.</span>
+    <span>출처 등급 A = 1차 조사·공식 통계, B = 주요 언론·2차 보도·연구기관, C = 블로그·출처 불명(원문 확인 전까지 판단에 쓰지 않음).</span>
+  </footer>
+</main>

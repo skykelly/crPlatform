@@ -1,0 +1,221 @@
+"""T1 R1 4유형 기록 생성 + 규칙 검증. 출력: 같은 폴더 records.jsonl
+실행: python3 build_records.py  (검증 오류가 있으면 exit 1)
+"""
+import sys
+from pathlib import Path
+
+Q, R = "T1", "R1"
+KOSIS_TS = "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1TS202001&conn_path=I2"
+SRC = {
+    "kosis_ts": {"url": KOSIS_TS, "publisher": "국가데이터처 KOSIS (DT_1TS202001 생활시간조사 평균시간)", "date": "2026-10-11", "grade": "A"},
+    "kosis_d05": {"url": "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1ES4F09S&conn_path=I2", "publisher": "국가데이터처 KOSIS (DT_1ES4F09S 시도별 맞벌이 가구)", "date": "2026-10-11", "grade": "A"},
+    "kdi_tus": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=269141", "publisher": "통계청 2024년 생활시간조사 결과 보도자료 (KDI 경제교육·정보센터 게재)", "date": "2025-07-28", "grade": "A"},
+    "sisa": {"url": "https://www.sisajournal.com/news/articleView.html?idxno=341096", "publisher": "시사저널 (통계청 2024 생활시간조사 인용)", "date": "2025-07-28", "grade": "B"},
+    "newsis_sleep": {"url": "https://www.newsis.com/view/NISX20250728_0003268438", "publisher": "뉴시스 (통계청 2024 생활시간조사 인용)", "date": "2025-07-28", "grade": "B"},
+    "newsis_work": {"url": "https://www.newsis.com/view/NISX20250728_0003268832", "publisher": "뉴시스 (통계청 2024 생활시간조사 인용)", "date": "2025-07-28", "grade": "B"},
+    "banron": {"url": "https://www.banronbodo.com/news/articleView.html?idxno=30678", "publisher": "반론보도닷컴 (통계청 2024 생활시간조사 인용)", "date": "2025-07-30", "grade": "B"},
+    "hankook": {"url": "https://www.hankookilbo.com/News/Read/A2025102016260005647", "publisher": "한국일보 (국가데이터처 생활시간조사 인용)", "date": "2025-10-25", "grade": "B"},
+    "daum_res": {"url": "https://v.daum.net/v/20260516082510773", "publisher": "뉴시스 보도 (서울대 연구, 2014~2024 생활시간조사 분석)", "date": "2026-05-16", "grade": "B"},
+    "khan": {"url": "https://www.khan.co.kr/article/202505010816001", "publisher": "경향신문 (통계청 2024년 8월 근로형태별 부가조사 인용)", "date": "2025-05-01", "grade": "B"},
+    "kdi_aug25": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=272406", "publisher": "국가데이터처 2025년 8월 근로형태별 부가조사 결과 (KDI 경제교육·정보센터 게재)", "date": "2025-10-22", "grade": "A"},
+    "kdi_kdca": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=271819", "publisher": "질병관리청 2024년 국민건강영양조사 결과 (KDI 경제교육·정보센터 게재)", "date": "2025-09-30", "grade": "A"},
+    "kdi_decl": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=275541", "publisher": "고용노동부 실노동시간 단축 노사정 공동선언 (KDI 경제교육·정보센터 게재)", "date": "2025-12-31", "grade": "A"},
+    "kdi_flex": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=280072", "publisher": "고용노동부·국토교통부 유연근무 확산 기업 간담회 (KDI 경제교육·정보센터 게재)", "date": "2026-04-24", "grade": "A"},
+    "kdi_wlb": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=282906", "publisher": "고용노동부 워라밸+4.5 프로젝트 성과 (KDI 경제교육·정보센터 게재)", "date": "2026-06-18", "grade": "A"},
+    "kdi_biz": {"url": "https://eiec.kdi.re.kr/policy/materialView.do?num=287627", "publisher": "고용노동부 2026년 8월 사업체노동력조사 결과 (KDI 경제교육·정보센터 게재)", "date": "2026-09-30", "grade": "A"},
+    "herald": {"url": "https://www.heraldk.com/article/2026050722034659663", "publisher": "헤럴드경제 (국가데이터처 학술대회 보도)", "date": "2026-05-07", "grade": "B"},
+    "krei": {"url": "https://krei.re.kr/foodSurvey/page/287?cmd=view&pst=504384&pageIndex=1", "publisher": "한국농촌경제연구원 식품소비행태조사 2025 결과발표대회 자료집 게시글", "date": "2025-12-04", "grade": "B"},
+}
+def src(*keys): return [dict(SRC[k], key=k) for k in keys]
+
+base = dict(question=Q, question_version="v1.0", first_seen=R, last_seen=R, status="유효", replaces=None, check_flags=[])
+records = []
+def add(**kw):
+    r = dict(base); r.update(kw); records.append(r)
+
+# ---------- 지표 (M) ----------
+add(id=f"{Q}-M-001", type="지표", indicator=f"{Q}-K1", importance=3, representative=True,
+    statement="2024년 10세 이상 가정관리 시간은 하루 1시간 34분(94분)으로 2019년과 같다. 2014년은 92분이다.",
+    value=94, unit="분/일", as_of="2024", region="KR",
+    definition="팩트베이스(KOSIS API) 값. 생활시간조사 행동분류 '가정관리' 평균시간, 10세 이상 전체. 가족 돌보기는 포함하지 않음",
+    prev_value=94, extra={"series": {"2014": 92, "2019": 94, "2024": 94}}, sources=src("kosis_ts"), verified=True,
+    check_flags=["확인 필요: 성별·맞벌이별 평균시간은 KOSIS 원표를 열지 못해 팩트베이스의 전체 값만 확보"])
+add(id=f"{Q}-M-002", type="지표", indicator=f"{Q}-K1", importance=2,
+    statement="2024년 가사노동 시간(가정관리와 가족 돌보기 합산 추정)은 하루 1시간 52분(112분)으로 5년 전보다 4분 줄었다.",
+    value=112, unit="분/일", as_of="2024", region="KR", definition="언론이 인용한 통계청 발표값, 10세 이상 전체, 2019년 값은 증감분으로 역산",
+    prev_value=116, sources=src("sisa", "banron"), verified=True,
+    check_flags=["확인 필요: 가정관리(94분)와 가사노동(112분)의 분류 범위 차이를 통계청 원문 표로 확인", "확인 필요: 2019년 116분은 증감분 역산값"])
+add(id=f"{Q}-M-003", type="지표", indicator=f"{Q}-K1", importance=3,
+    statement="18세 미만 자녀가 있는 맞벌이 가구에서 2024년 하루 가사노동은 남편 1시간 24분, 아내 3시간 32분이다. 격차는 128분이고 5년 전보다 남편은 13분 늘고 아내는 17분 줄었다.",
+    value=128, unit="분/일(부부 격차)", as_of="2024", region="KR",
+    definition="맞벌이 가구 중 18세 미만 자녀가 있는 가구의 부부 가사노동 시간 차(아내-남편). 2019년 값은 증감분으로 역산",
+    prev_value=158, extra={"husband_min": 84, "wife_min": 212, "husband_2019_min": 71, "wife_2019_min": 229},
+    sources=src("banron", "hankook"), verified=True,
+    check_flags=["확인 필요: 2019년 값(남편 71분, 아내 229분)은 증감분 역산", "확인 필요: 같은 조사의 부부 합계 표(동거 부부 아내 3시간 45분, 남편 1시간 5분)와 정의가 달라 통계청 원문 표로 대조"])
+add(id=f"{Q}-M-004", type="지표", indicator=f"{Q}-K1", importance=2,
+    statement="서울대 연구는 자녀가 있는 맞벌이 부부의 가사·돌봄 시간 격차가 2014년 180분에서 2024년 103분으로 77분 줄었다고 분석했다. 2024년 아내는 181분, 남편은 78분이다.",
+    value=103, unit="분/일(부부 격차)", as_of="2024", region="KR",
+    definition="2014·2019·2024 생활시간조사 분석, 자녀 있는 맞벌이 부부의 가사·돌봄 시간 차. 10년 비교",
+    prev_value=180, extra={"series": {"2014": 180, "2024": 103}, "wife_min": 181, "husband_min": 78},
+    sources=src("daum_res"), verified=True,
+    check_flags=["확인 필요: M-003(128분)과 자녀 연령·돌봄 포함 범위가 달라 직접 비교 불가"])
+add(id=f"{Q}-M-005", type="지표", indicator=f"{Q}-K2", importance=3, representative=True,
+    statement="2024년 10세 이상 평균 수면시간은 8시간 4분(484분)으로 2019년보다 8분 줄었다. 조사 시작 이후 첫 감소이다.",
+    value=484, unit="분/일", as_of="2024", region="KR",
+    definition="팩트베이스(KOSIS API) 값. 생활시간조사 수면(중분류) 평균시간, 10세 이상 전체",
+    prev_value=492, extra={"series": {"2014": 479, "2019": 492, "2024": 484},
+        "note": "평일 7시간 45분, 토요일 8시간 31분, 일요일 8시간 49분. 60세 이상 14분 감소, 50대가 7시간 40분으로 가장 짧음. 잠들기 어렵다는 응답 11.9%(2019년 7.3%)"},
+    sources=src("kosis_ts", "sisa", "newsis_sleep"), verified=True,
+    check_flags=["확인 필요: 뉴시스는 2024년 8시간 1분, 2019년 8시간 9분으로 보도해 KOSIS 값(8시간 4분, 8시간 12분)과 3분 차이. KOSIS 값을 채택"])
+add(id=f"{Q}-M-006", type="지표", indicator=f"{Q}-K3", importance=3, representative=True,
+    statement="2024년 여가시간은 하루 5시간 8분(308분)으로 5년 전보다 21분 늘었다. 이 중 미디어 이용은 2시간 43분으로 17분 늘었다.",
+    value=308, unit="분/일", as_of="2024", region="KR",
+    definition="생활시간조사 여가시간 전체(10세 이상). 추적 지표의 '교제 및 여가활동' 분류와 같은지 원표로 확인 필요. 2019년 값은 증감분으로 역산",
+    prev_value=287, extra={"media_min": 163, "media_prev_min": 146, "sports_leisure_min": 35, "sports_leisure_prev_min": 30},
+    sources=src("kdi_tus", "sisa"), verified=True,
+    check_flags=["확인 필요: 여가시간 전체와 교제 및 여가활동 분류의 범위 차이", "확인 필요: 팩트베이스 LS07에는 값이 없어 보도 인용값을 사용"])
+add(id=f"{Q}-M-007", type="지표", indicator=f"{Q}-K5", importance=2, representative=True,
+    statement="2024년 8월 임금근로자 중 유연근무제 활용률은 15.0%이고 활용자 중 재택·원격근무 비중은 15.9%이다. 곱하면 임금근로자 대비 약 2.4%이다.",
+    value=2.4, unit="%", as_of="2024-08", region="KR",
+    definition="임금근로자 중 재택·원격근무 활용 비율의 추정치(활용률 15.0% x 활용자 중 재택 15.9%). 복수 응답",
+    prev_value=None, extra={"flex_rate": 15.0, "flex_rate_change_pp": -0.6, "telework_share_of_users": 15.9},
+    sources=src("khan"), verified=True,
+    check_flags=["확인 필요: 2.4%는 두 발표값의 곱한 추정치이며 통계청 직접 발표값이 아님", "확인 필요: 2025년 8월 조사(2025-10-22 발표)의 재택 수치는 원문을 열지 못함"])
+add(id=f"{Q}-M-008", type="지표", indicator=f"{Q}-K6", importance=3, representative=True,
+    statement="2025년 유배우 가구 중 맞벌이 가구 비중은 48.6%로 전년보다 0.6%p 늘었다. 2015년 44.2%보다 4.4%p 높다.",
+    value=48.6, unit="%", as_of="2025", region="KR",
+    definition="팩트베이스(KOSIS API) 값. 유배우 가구 중 맞벌이 가구 비율(지역별고용조사)",
+    prev_value=48.0, extra={"series": {"2015": 44.2, "2019": 45.5, "2020": 45.0, "2021": 45.9, "2022": 46.1, "2023": 48.2, "2024": 48.0, "2025": 48.6}},
+    sources=src("kosis_d05"), verified=True)
+add(id=f"{Q}-M-009", type="지표", indicator=f"{Q}-K8", importance=2, representative=True,
+    statement="2024년 평일 아침식사를 한 사람 비율은 63.7%로 5년 전보다 4.0%p 줄었다. 거르는 비율은 36.3%로 계산된다. 식사 시간은 1시간 54분으로 1분 줄었고 아침을 혼자 먹는 비율은 41.7%이다.",
+    value=36.3, unit="%", as_of="2024", region="KR",
+    definition="생활시간조사 일기 기준 평일 아침식사 미실시 비율(100%에서 섭취 비율 63.7%를 뺀 계산값). 국민건강영양조사 결식률과 정의가 다름",
+    prev_value=32.3, extra={"breakfast_eaten": 63.7, "lunch_eaten": 85.6, "dinner_eaten": 78.3, "alone_breakfast": 41.7, "meal_time_min": 114, "meal_time_prev_min": 115},
+    sources=src("sisa", "banron"), verified=True,
+    check_flags=["확인 필요: 국민건강영양조사 아침식사 결식률(질병관리청)은 원문 수치를 열지 못해 생활시간조사 기반 대리값 사용", "확인 필요: 36.3%와 32.3%는 섭취 비율에서 계산한 값"])
+add(id=f"{Q}-M-010", type="지표", indicator=f"{Q}-K4", importance=3,
+    statement="2024년 10세 이상 일 시간은 하루 3시간 7분(187분)으로 5년 전보다 6분 줄었다. 취업자 일 시간은 5시간 5분으로 14분 줄었다. 주 52시간 초과 근로자 비율은 2014년 29.5%에서 2024년 14.8%로 낮아졌다.",
+    value=187, unit="분/일", as_of="2024", region="KR",
+    definition="생활시간조사 일 시간(10세 이상 전체, 구직 포함). 주당 평균 취업시간(경제활동인구조사)이 아닌 대리값",
+    prev_value=193, extra={"employed_min": 305, "employed_prev_min": 319, "over52h_share": {"2014": 29.5, "2024": 14.8}},
+    sources=src("sisa", "newsis_work", "daum_res"), verified=True,
+    check_flags=["확인 필요: 추적 지표 정의(취업자 주당 평균 취업시간, 시간)와 달라 경제활동인구조사 원표 수치로 교체 필요"])
+add(id=f"{Q}-M-011", type="지표", indicator=f"{Q}-K3", importance=2,
+    statement="무자녀 비혼 가구의 10년간 변화에서 남성은 수동여가(TV 시청·휴식)가 하루 20.9분 늘고 유급노동이 22.8분, 대면교제가 9.9분 줄었다.",
+    value=20.9, unit="분/일(2014년 대비 증가)", as_of="2024", region="KR",
+    definition="비혼 무자녀 가구 남성의 수동여가 시간 변화(2014 대비 2024). 여성은 수동여가 15.8분 증가, 유급노동 49.1분 감소, 대면교제 6.7분 감소",
+    prev_value=None, sources=src("daum_res"), verified=True)
+add(id=f"{Q}-M-012", type="지표", indicator=f"{Q}-K9", importance=2,
+    statement="2024년 개인관리(위생·미용·의료 등) 시간은 하루 1시간 34분(94분)으로 5년 전 1시간 27분보다 7분 늘었고, 스포츠·레포츠 활동은 35분으로 5분 늘었다.",
+    value=94, unit="분/일", as_of="2024", region="KR",
+    definition="생활시간조사 기타 개인유지(개인관리) 평균시간. 유산소 신체활동 실천율(%)이 아닌 건강관리 영역 대리값",
+    prev_value=87, extra={"sports_min": 35, "sports_prev_min": 30}, sources=src("newsis_sleep", "sisa"), verified=True,
+    check_flags=["확인 필요: 질병관리청 유산소 신체활동 실천율 수치는 원문을 열지 못함. 2024년 결과가 2015~2024년 정체라는 정성 서술만 확인(E-002)"])
+
+# ---------- 사건 (E) ----------
+add(id=f"{Q}-E-001", type="사건", importance=3, date="2025-07-28", actor="통계청(현 국가데이터처)",
+    statement="2024년 생활시간조사 결과를 발표했다. 수면은 처음 줄었고 여가와 미디어 이용이 늘었으며 필수 11시간 32분, 의무 7시간 20분, 여가 5시간 8분으로 집계했다.",
+    sources=src("kdi_tus"), verified=True)
+add(id=f"{Q}-E-002", type="사건", importance=2, date="2025-09-30", actor="질병관리청",
+    statement="2024년 국민건강영양조사 결과를 발표했다. 성인 유산소 신체활동 실천율은 2015~2024년 정체이고 전년과도 큰 변화가 없다고 밝혔다.",
+    sources=src("kdi_kdca"), verified=True)
+add(id=f"{Q}-E-003", type="사건", importance=2, date="2025-10-22", actor="국가데이터처",
+    statement="2025년 8월 경제활동인구조사 근로형태별 부가조사 결과를 발표했다. 비정규직 근로자 주당 평균 취업시간은 28.2시간으로 1년 전보다 0.6시간 늘었다.",
+    sources=src("kdi_aug25"), verified=True)
+add(id=f"{Q}-E-004", type="사건", importance=3, date="2025-12-30", actor="고용노동부·노사정",
+    statement="노사정이 실노동시간 단축 공동선언을 했다. 2026년 추진 과제로 포괄임금 오남용 방지, 근무시간 외 업무지시 제한, 실근로시간단축지원법 제정, 야간노동자 건강보호, 연차 사용 활성화를 정했다.",
+    sources=src("kdi_decl"), verified=True)
+add(id=f"{Q}-E-005", type="사건", importance=2, date="2026-04-24", actor="고용노동부·국토교통부",
+    statement="고유가 대응으로 시차출퇴근과 재택근무 등 유연근무 확산을 위한 기업 간담회를 열고 장려금, 시스템 설치비, 컨설팅 지원과 육아기 10시 출근제 요건 완화를 밝혔다.",
+    sources=src("kdi_flex"), verified=True)
+add(id=f"{Q}-E-006", type="사건", importance=1, date="2026-05-08", actor="국가데이터처",
+    statement="생활시간조사 25주년 학술대회를 열었다. 일·돌봄·여가 변화, 정보통신기기 이용과 수면, 식사 패턴 등을 다뤘다.",
+    sources=src("herald"), verified=True)
+add(id=f"{Q}-E-007", type="사건", importance=2, date="2026-05-16", actor="서울대 연구진",
+    statement="2014~2024 생활시간조사를 분석해 자녀 있는 맞벌이 부부의 가사·돌봄 시간 격차가 77분 줄었다고 학술대회에서 발표했다.",
+    sources=src("daum_res"), verified=True)
+add(id=f"{Q}-E-008", type="사건", importance=2, date="2026-06-18", actor="고용노동부",
+    statement="워라밸+4.5 프로젝트 상반기 성과를 공개했다. 참여 기업은 191곳으로 목표의 86.8%이고, 95%가 주당 2시간 이상, 23%가 4시간 이상 실노동시간을 줄였다.",
+    sources=src("kdi_wlb"), verified=True)
+add(id=f"{Q}-E-009", type="사건", importance=1, date="2025-12-04", actor="한국농촌경제연구원",
+    statement="2025년 식품소비행태조사 결과발표대회 자료집을 공개했다. 외식·배달·간편식 이용 빈도는 첨부 원문을 열지 못해 수치를 확보하지 못했다.",
+    sources=src("krei"), verified=True)
+add(id=f"{Q}-E-010", type="사건", importance=2, date="2026-09-30", actor="고용노동부",
+    statement="2026년 8월 사업체노동력조사를 발표했다. 직전 값인 7월 월평균 근로시간은 161.9시간으로 1년 전보다 7.0시간(4.1%) 줄었다.",
+    sources=src("kdi_biz"), verified=True,
+    check_flags=["확인 필요: 사업체 상용근로자 기준 월 근로시간이며 근로일수 차이가 반영된 값. 취업자 주당 평균 취업시간과 정의가 다름"])
+
+# ---------- 해석 (I) ----------
+add(id=f"{Q}-I-001", type="해석", importance=3, target="일에서 여가·미디어로의 시간 이동", direction="강화",
+    statement="일 시간은 줄고 여가와 미디어 이용은 늘었다. 5년간 일은 6분, 여가는 21분, 미디어는 17분 바뀌었다. 장시간 근로자 비중 감소와 사업체 근로시간 감소가 같은 방향이다.",
+    basis=[f"{Q}-M-010", f"{Q}-M-006", f"{Q}-E-010"])
+add(id=f"{Q}-I-002", type="해석", importance=3, target="수면 시간 증가 추세", direction="약화",
+    statement="수면은 2014년 이후 늘다가 2024년 처음 줄었다. 감소폭은 8분으로 작지만 60세 이상과 20대에서 크고 잠들기 어렵다는 응답이 늘었다.",
+    basis=[f"{Q}-M-005"])
+add(id=f"{Q}-I-003", type="해석", importance=3, target="맞벌이 부부의 가사 분담 격차", direction="약화",
+    statement="부부 가사 시간 격차는 줄고 있으나 아내 부담이 여전히 크다. 남편 시간은 늘고 아내 시간은 줄어 격차가 5년간 30분 안팎, 10년간 77분 줄었다. 두 분석의 범위가 달라 크기는 병기한다.",
+    basis=[f"{Q}-M-003", f"{Q}-M-004"])
+add(id=f"{Q}-I-004", type="해석", importance=2, target="가사 시간 총량", direction="중립",
+    statement="가사 시간 총량은 변화가 작다. 가정관리는 94분으로 같고 가사노동은 4분 줄었다. 가사는 시간 감소보다 분담의 변화가 크다.",
+    basis=[f"{Q}-M-001", f"{Q}-M-002"])
+add(id=f"{Q}-I-005", type="해석", importance=2, target="식사의 개인화", direction="강화",
+    statement="식사 시간은 같지만 아침식사 비율이 4.0%p 줄고 혼자 먹는 비율이 모든 끼니에서 늘었다. 가정 내 식사 준비와 식사 형태가 바뀌는 쪽이다.",
+    basis=[f"{Q}-M-009"])
+add(id=f"{Q}-I-006", type="해석", importance=2, target="재택·유연근무 확산", direction="중립",
+    statement="2024년 유연근무제 활용률은 15.0%로 전년보다 0.6%p 낮았고 재택은 활용자의 15.9%이다. 2026년 정부가 확산 정책을 내놓았으나 활용률 반등은 확인되지 않았다.",
+    basis=[f"{Q}-M-007", f"{Q}-E-005"])
+add(id=f"{Q}-I-007", type="해석", importance=2, target="맞벌이 구조 정착", direction="강화",
+    statement="맞벌이 가구 비중이 2015년 44.2%에서 2025년 48.6%로 올랐다. 시간 부족과 가사 외부화 수요의 구조적 배경이다.",
+    basis=[f"{Q}-M-008"])
+
+# ---------- 세부 전망 (F) ----------
+add(id=f"{Q}-F-001", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2026년 8월 임금근로자 유연근무제 활용률은 15.0%를 넘을 것이다.", due="2026-12-31", condition="없음",
+    method="국가데이터처 2026년 8월 경제활동인구조사 근로형태별 부가조사 결과(예상 발표 2026년 10월 하순) 확인",
+    basis=[f"{Q}-M-007", f"{Q}-E-005"])
+add(id=f"{Q}-F-002", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2026년 사업체노동력조사 12월 월평균 근로시간은 전년 같은 달보다 줄 것이다.", due="2027-03-31", condition="없음",
+    method="고용노동부 2026년 12월 사업체노동력조사 결과(예상 발표 2027년 2월)의 전년 동월 대비 월평균 근로시간 확인. 근로일수 차이는 병기",
+    basis=[f"{Q}-E-010"])
+add(id=f"{Q}-F-003", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="실근로시간단축지원법이 2027년 6월까지 국회를 통과할 것이다.", due="2027-06-30", condition="없음",
+    method="국회 의안정보시스템과 국가법령정보센터에서 법률 공포 여부 확인",
+    basis=[f"{Q}-E-004"])
+add(id=f"{Q}-F-004", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="워라밸+4.5 프로젝트 참여 기업은 2026년 말 220곳 이상일 것이다.", due="2027-03-31", condition="없음",
+    method="고용노동부 연간 성과 보도자료 확인. 220곳은 상반기 191곳이 목표의 86.8%라는 발표에서 역산한 목표치이며 원문 목표 확인 필요",
+    basis=[f"{Q}-E-008"])
+add(id=f"{Q}-F-005", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2026년 유배우 가구 중 맞벌이 가구 비중은 48.6% 이상일 것이다.", due="2027-12-31", condition="없음",
+    method="국가데이터처 지역별고용조사 맞벌이 가구 2026년 값(KOSIS DT_1ES4F09S) 확인",
+    basis=[f"{Q}-M-008"])
+add(id=f"{Q}-F-006", type="전망", importance=2, forecast_status="진행 중", result=None,
+    statement="2025년 국민건강영양조사에서 성인 유산소 신체활동 실천율은 2024년과 비슷할 것이다(정체).", due="2026-12-31", condition="없음",
+    method="질병관리청 2025년 국민건강영양조사 결과(발표 시기 확인 필요, 전년은 9월 30일)에서 실천율 전년 대비 변화 확인",
+    basis=[f"{Q}-E-002"])
+
+# ---------- 시나리오 ----------
+add(id=f"{Q}-F-101", type="전망", importance=3, forecast_status="진행 중", scenario="낙관", result=None,
+    statement="2027년 말까지 일 시간 감소가 유지되고 유연근무가 늘어 가구가 쓸 수 있는 시간이 커진다. 남은 시간은 수면 회복과 부부 가사 분담 개선으로 이어진다.",
+    milestones=[{"by": "2026-12", "text": "2026년 8월 유연근무제 활용률이 15.0%를 넘는다."},
+                {"by": "2027-03", "text": "2026년 12월 월평균 근로시간이 전년 같은 달보다 줄고 워라밸+4.5 참여 기업이 220곳을 넘는다."},
+                {"by": "2027-06", "text": "실근로시간단축지원법이 공포된다."}],
+    due="2027-12-31", condition="없음",
+    method="세 가지 중 두 가지 이상 충족 시 적중: (1) 2026년 8월 유연근무제 활용률 15.0% 초과 (2) 2026년 12월 사업체 월평균 근로시간 전년 동월 대비 감소 (3) 실근로시간단축지원법 공포",
+    basis=[f"{Q}-M-007", f"{Q}-M-010", f"{Q}-E-010"],
+    signposts=[{"id": f"{Q}-F-001", "on_hit": "낙관", "on_miss": "비관"}, {"id": f"{Q}-F-002", "on_hit": "낙관", "on_miss": "비관"},
+               {"id": f"{Q}-F-003", "on_hit": "낙관", "on_miss": "비관"}, {"id": f"{Q}-F-004", "on_hit": "낙관"}])
+add(id=f"{Q}-F-102", type="전망", importance=3, forecast_status="진행 중", scenario="비관",
+    result=None,
+    statement="2027년 말까지 근로시간 감소가 정책 참여 기업에 머물고 유연근무 활용률이 오르지 않는다. 맞벌이 증가로 시간 부족이 커지고 수면 감소와 가사 격차 해소 지연이 이어진다.",
+    milestones=[{"by": "2026-12", "text": "2026년 8월 유연근무제 활용률이 15.0% 이하에 머문다."},
+                {"by": "2027-03", "text": "2026년 12월 월평균 근로시간이 전년 같은 달 이상이다."},
+                {"by": "2027-06", "text": "실근로시간단축지원법이 국회를 통과하지 못한다."}],
+    due="2027-12-31", condition="없음", method="낙관 시나리오 조건 중 하나 이하 충족 시 적중",
+    basis=[f"{Q}-M-007", f"{Q}-M-008", f"{Q}-M-005"],
+    signposts=[{"id": f"{Q}-F-001", "on_miss": "비관"}, {"id": f"{Q}-F-002", "on_miss": "비관"}, {"id": f"{Q}-F-003", "on_miss": "비관"}])
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
+from validate import finish
+finish(records, Path(__file__).parent)

@@ -1,0 +1,335 @@
+<title>H2 집의 공간과 기능을 바꾸는 요인 R1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;800&display=swap">
+<style>/* Layout: 연구 노트 한 단 — 답 → 서술형 해석 → 근거 표. 기록 번호가 본문의 각주 역할 */
+/* Color: LG 컬러 시스템 — Active Red는 신호(현재 경계·판정·진행), Heritage Red는 UI에 쓰지 않음 */
+:root {
+  /* Primary - Active Red */
+  --color-primary-50: #FFF5F8; --color-primary-100: #FEE3E2; --color-primary-200: #FDC0BE; --color-primary-300: #FE8A87;
+  --color-primary-400: #FF5F5B; --color-primary-500: #FD312E; --color-primary-600: #EA1917; --color-primary-700: #C4110F;
+  --color-primary-800: #8E0E0C; --color-primary-900: #5C0907;
+  /* Secondary - Heritage Red(로고 전용) + Warm Grey */
+  --color-secondary-500: #A50034;
+  --color-warm-100: #F6F3EB; --color-warm-200: #F0ECE4; --color-warm-300: #E6E1D6; --color-warm-500: #CBC8C2;
+  --logo-wordmark: #707070;
+  /* Neutral */
+  --color-neutral-0: #FFFFFF; --color-neutral-50: #F9FAFB; --color-neutral-100: #F3F5F7; --color-neutral-200: #ECEEF0;
+  --color-neutral-300: #DEE1E5; --color-neutral-500: #8F9298; --color-neutral-600: #767980; --color-neutral-700: #43474D;
+  --color-neutral-800: #212731; --color-neutral-900: #111111; --color-neutral-1000: #000000;
+  /* Semantic */
+  --color-success-bg: #E7F6EC; --color-success-fg: #08A53A; --color-warning-bg: #FFF6D6; --color-warning-fg: #B26A00;
+  --color-error-bg: #FEF3F3; --color-error-fg: #EA1917; --color-info-bg: #EAF5FF; --color-info-fg: #0C9AFF;
+  /* Surface */
+  --bg-base: #FFFFFF; --bg-subtle: #F3F5F7; --bg-warm: #F0ECE4; --bg-elevated: #FFFFFF; --bg-overlay: #FFFFFF; --bg-inverse: #111111;
+  /* Text */
+  --text-primary: #111111; --text-secondary: #666666; --text-tertiary: #8F8F8F; --text-on-primary: #FFFFFF; --text-disabled: #BBBBBB; --text-price: #EA1917;
+  /* Border */
+  --border-default: #DDDDDD; --border-subtle: #EEEEEE; --border-strong: #111111; --border-focus: #000000;
+  /* 역할 토큰 (페이지 전체가 이 이름으로 색을 쓴다) */
+  --signal: var(--color-primary-600);          /* 채움·게이지·현재 경계 */
+  --signal-ink: var(--color-primary-700);      /* 흰 바탕 위 빨간 글자 */
+  --signal-hover: var(--color-primary-700);
+  --signal-soft: var(--color-primary-50);
+  --shadow: 0 8px 28px rgba(17, 17, 17, .12);
+  --paper: var(--bg-base); --ink: var(--text-primary); --muted: var(--text-secondary); --rule: var(--border-default); --panel: var(--bg-subtle);
+  --accent: var(--signal); --accent-soft: var(--signal-soft);
+  --amber: var(--color-warning-fg); --amber-soft: var(--color-warning-bg);
+  --up: var(--color-success-fg); --down: var(--color-error-fg); --flat: var(--color-neutral-500);
+  --opt: var(--color-success-fg); --opt-soft: var(--color-success-bg); --pes: var(--color-error-fg); --pes-soft: var(--color-error-bg);
+  --display: "Noto Serif KR", "Apple SD Gothic Neo", serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg-base: #111111; --bg-subtle: #1A1D22; --bg-warm: #24211C; --bg-elevated: #212731; --bg-overlay: #212731; --bg-inverse: #F3F5F7;
+  --text-primary: #F3F5F7; --text-secondary: #A9ADB4; --text-tertiary: #8F9298; --text-disabled: #5A5E66; --text-price: #FF5F5B;
+  --border-default: #343A44; --border-subtle: #262B33; --border-strong: #F3F5F7; --border-focus: #FFFFFF;
+  --color-success-bg: #10291A; --color-success-fg: #3DD06B; --color-warning-bg: #2E2410; --color-warning-fg: #F2B33D;
+  --color-error-bg: #2E1414; --color-error-fg: #FF5F5B; --color-info-bg: #0F2333; --color-info-fg: #5BB8FF;
+  --signal: var(--color-primary-500); --signal-ink: var(--color-primary-400); --signal-hover: var(--color-primary-400); --signal-soft: #2A1414;
+  --shadow: 0 10px 32px rgba(0, 0, 0, .55); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg-base: #111111; --bg-subtle: #1A1D22; --bg-warm: #24211C; --bg-elevated: #212731; --bg-overlay: #212731; --bg-inverse: #F3F5F7;
+  --text-primary: #F3F5F7; --text-secondary: #A9ADB4; --text-tertiary: #8F9298; --text-disabled: #5A5E66; --text-price: #FF5F5B;
+  --border-default: #343A44; --border-subtle: #262B33; --border-strong: #F3F5F7; --border-focus: #FFFFFF;
+  --color-success-bg: #10291A; --color-success-fg: #3DD06B; --color-warning-bg: #2E2410; --color-warning-fg: #F2B33D;
+  --color-error-bg: #2E1414; --color-error-fg: #FF5F5B; --color-info-bg: #0F2333; --color-info-fg: #5BB8FF;
+  --signal: var(--color-primary-500); --signal-ink: var(--color-primary-400); --signal-hover: var(--color-primary-400); --signal-soft: #2A1414;
+  --shadow: 0 10px 32px rgba(0, 0, 0, .55); color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font: 400 16px/1.7 var(--body); padding: 0 20px; }
+main { max-width: 980px; margin: 0 auto; padding-block: 40px 72px; display: grid; gap: 60px; }
+.narrow { max-width: 70ch; }
+a { color: var(--ink); text-decoration-color: var(--signal); text-underline-offset: 3px; }
+a:hover { color: var(--signal-ink); }
+:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+code, .rid { font: 500 12px/1 var(--mono); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+h1 { font: 800 clamp(26px, 4.4vw, 40px)/1.25 var(--display); margin-top: 14px; }
+.question { margin: 16px 0 0; color: var(--muted); font-size: 15px; border-left: 2px solid var(--rule); padding-left: 14px; }
+h2 { font: 600 22px/1.3 var(--display); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h2 small { font: 400 13px var(--body); color: var(--muted); }
+section { display: grid; gap: 18px; min-width: 0; }
+.lead { margin: 0; max-width: 70ch; }
+.rid { display: inline-block; padding: 3px 5px; margin: 2px 2px 0 0; border-radius: 3px; background: var(--panel); color: var(--muted); text-decoration: none; vertical-align: 1px; cursor: pointer; }
+.rid:hover { color: var(--signal-ink); background: var(--signal-soft); }
+.rid:focus-visible { outline: 2px solid var(--border-focus); }
+/* 한 줄 답 */
+.answer { font: 600 clamp(20px, 2.8vw, 26px)/1.55 var(--display); margin: 0; }
+.answer-box { display: grid; gap: 20px; }
+.arows { margin: 0; border-top: 1px solid var(--ink); }
+.arow { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.arow dt { font-weight: 600; }
+.arow dd { margin: 0; min-width: 0; }
+/* 서술형 해석 */
+.narrative { display: grid; gap: 14px; max-width: 70ch; }
+.narrative p { margin: 0; }
+/* 표 */
+.tablewrap { overflow-x: auto; border-top: 1px solid var(--ink); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+th { text-align: left; font: 500 11px var(--mono); letter-spacing: .05em; color: var(--muted); padding: 10px 8px; border-bottom: 1px solid var(--rule); }
+td { padding: 12px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+td small { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; }
+.num { font: 500 15px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.muted { color: var(--muted); }
+.ind { font: 500 12px var(--mono); width: 150px; }
+.ind small { font-family: var(--body); }
+.tgt { font-weight: 600; width: 150px; }
+.asof { font: 400 13px var(--mono); white-space: nowrap; }
+.idc code { color: var(--muted); }
+.src { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.src a { color: var(--muted); }
+.grade { font: 500 10px var(--mono); margin-left: 4px; padding: 1px 4px; border: 1px solid currentColor; border-radius: 2px; }
+.gC { color: var(--amber); }
+.warn, .wk { font: 500 11px var(--mono); color: var(--amber); background: var(--amber-soft); padding: 2px 6px; border-radius: 2px; white-space: nowrap; }
+.dir { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 2px; color: var(--panel); white-space: nowrap; }
+.dir.up { background: var(--up); } .dir.down { background: var(--down); } .dir.flat { background: var(--flat); }
+.fstat { font: 500 11px var(--mono); border: 1px solid var(--signal); color: var(--signal-ink); padding: 2px 6px; border-radius: 2px; white-space: nowrap; }
+/* 사건 */
+.timeline { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.timeline li { display: grid; grid-template-columns: 110px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.timeline time { font: 500 13px var(--mono); color: var(--muted); padding-top: 2px; }
+.timeline li > div { min-width: 0; }
+/* 시나리오 */
+.scens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.scen { border-top: 3px solid var(--sc); background: var(--panel); padding: 18px 18px 14px; display: grid; gap: 14px; align-content: start; }
+.scen.opt { --sc: var(--opt); --scs: var(--opt-soft); }
+.scen.pes { --sc: var(--pes); --scs: var(--pes-soft); }
+.scen header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sk { font: 600 13px var(--mono); color: var(--sc); letter-spacing: .03em; }
+.scen header code { color: var(--muted); }
+.sstmt { margin: 0; font-size: 15px; }
+.ms { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--scs); display: grid; gap: 8px; }
+.ms li { display: grid; grid-template-columns: 70px 1fr; gap: 10px; font-size: 14px; }
+.ms time { font: 500 12px var(--mono); color: var(--sc); padding-top: 2px; }
+.sdl { margin: 0; display: grid; gap: 6px; font-size: 13px; }
+.sdl div { display: grid; grid-template-columns: 70px 1fr; gap: 10px; }
+.sdl dt { color: var(--muted); }
+.sdl dd { margin: 0; min-width: 0; }
+.side { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 2px; white-space: nowrap; margin-right: 4px; }
+.side.opt { color: var(--opt); background: var(--opt-soft); }
+.side.pes { color: var(--pes); background: var(--pes-soft); }
+.subhead { font: 600 15px var(--body); margin: 8px 0 0; }
+/* 사다리 */
+.ladder { border-top: 1px solid var(--ink); }
+.rung { display: grid; grid-template-columns: 150px 170px 170px 1fr; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.rung[data-frontier="y"] { background: linear-gradient(90deg, var(--amber-soft), transparent 70%); }
+.stage b { display: block; font: 600 18px/1.2 var(--display); }
+.stage span { font: 400 12px var(--mono); color: var(--muted); }
+.region { display: block; font: 500 11px var(--mono); color: var(--muted); letter-spacing: .04em; margin-bottom: 4px; }
+.pips { display: flex; align-items: center; gap: 4px; }
+.pip { width: 16px; height: 8px; border: 1px solid var(--accent); border-radius: 1px; }
+.pip.on { background: var(--accent); }
+.lv { margin-left: 8px; font-size: 14px; font-weight: 500; }
+.why { margin: 0; font-size: 14px; color: var(--muted); min-width: 0; }
+.frontier-note { font-size: 13px; color: var(--amber); font-family: var(--mono); margin: 0; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 18px; display: grid; gap: 6px; }
+:target { background: var(--accent-soft); }
+@media (max-width: 760px) {
+  .rung { grid-template-columns: 1fr 1fr; }
+  .rung .stage, .rung .why { grid-column: 1 / -1; }
+  .scens { grid-template-columns: 1fr; }
+  .arow, .timeline li { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* 주도권 지도 (C2) */
+.own { font: 500 12px var(--mono); padding: 3px 8px; border-radius: 2px; white-space: nowrap; display: inline-block; }
+.own.brand { color: var(--up); background: var(--opt-soft); }
+.own.platform { color: var(--signal-ink); background: var(--accent-soft); }
+.own.agent { color: var(--amber); background: var(--amber-soft); }
+.own.contest { color: var(--flat); border: 1px dashed var(--flat); }
+.mapgrid .rung { grid-template-columns: 110px 200px 120px 120px 1fr; }
+@media (max-width: 760px) { .mapgrid .rung { grid-template-columns: 1fr 1fr; } }
+/* 자율 수준 지도 (C4) */
+.mapgrid.auto .rung { grid-template-columns: 130px 220px 220px 1fr; }
+table.levels { min-width: 520px; }
+@media (max-width: 760px) { .mapgrid.auto .rung { grid-template-columns: 1fr; } }
+/* 역량 원장 (I1) */
+.mapgrid.ledger .rung { grid-template-columns: 200px 260px 1fr; }
+@media (max-width: 760px) { .mapgrid.ledger .rung { grid-template-columns: 1fr; } }
+
+/* I3 두 곡선 */
+.curves { display: grid; gap: 14px; margin: 8px 0 18px; }
+.curve { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; }
+.curve .cl { font: 600 13px var(--body); }
+.curve .cl small { display: block; font: 400 12px var(--mono); color: var(--muted); }
+.curve .bar { height: 26px; background: var(--accent-soft); border-radius: 2px; position: relative; }
+.curve .bar span { position: absolute; inset: 0 auto 0 0; display: flex; align-items: center; padding: 0 10px; font: 500 12px var(--mono); color: var(--text-on-primary); border-radius: 2px; white-space: nowrap; }
+.curve.inv .bar span { background: var(--accent); }
+.curve.rev .bar span { background: var(--up); }
+.gapnote { border-left: 3px solid var(--amber); padding: 6px 12px; background: var(--amber-soft); font-size: 14px; }
+.mapgrid.layers .rung { grid-template-columns: 150px 200px 110px 1fr; }
+@media (max-width: 720px) { .curve { grid-template-columns: 1fr; } .mapgrid.layers .rung { grid-template-columns: 1fr; } }
+
+/* S1 유입 저울 */
+.balance { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 8px 0 14px; }
+.balance .pan { border: 1px solid var(--rule); border-top: 3px solid var(--down); background: var(--panel); padding: 12px 16px; }
+.balance .pan.gain { border-top-color: var(--up); }
+.balance h4 { margin: 0 0 8px; font: 600 14px var(--body); }
+.balance ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.7; }
+@media (max-width: 720px) { .balance { grid-template-columns: 1fr; } }
+
+/* 판정 기준 패널과 툴팁 */
+.criteria { border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+.criteria summary { cursor: pointer; padding: 10px 14px; font: 600 14px var(--body); list-style: none; display: flex; align-items: center; gap: 8px; }
+.criteria summary::-webkit-details-marker { display: none; }
+.criteria summary::before { content: "+"; font: 600 15px/1 var(--mono); color: var(--signal-ink); width: 12px; }
+.criteria[open] summary::before { content: "−"; }
+.criteria summary small { font: 500 11px var(--mono); color: var(--muted); }
+.criteria summary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
+.crit-body { padding: 4px 14px 16px; display: grid; gap: 12px; }
+.crit-body h4 { margin: 6px 0 0; font: 600 13px var(--body); }
+table.crit { min-width: 640px; font-size: 13px; }
+table.crit td { padding: 9px 8px; }
+table.crit th, table.crit td:nth-child(-n+2) { white-space: nowrap; }
+table.crit .pips { white-space: nowrap; }
+.crit-rules { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+[data-tip] { position: relative; cursor: help; text-decoration: underline dotted var(--muted); text-underline-offset: 4px; text-decoration-thickness: 1px; }
+[data-tip]:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+[data-tip]:hover::after, [data-tip]:focus::after {
+  content: attr(data-tip); position: absolute; left: 0; top: calc(100% + 8px); z-index: 25; width: max-content; max-width: min(300px, 78vw);
+  white-space: normal; padding: 10px 12px; border-radius: 4px; background: var(--bg-inverse); color: var(--bg-base);
+  font: 400 13px/1.55 var(--body); letter-spacing: 0; text-transform: none; box-shadow: var(--shadow); pointer-events: none; }
+.lvcell [data-tip]:hover::after, .lvcell [data-tip]:focus::after { left: auto; right: 0; }
+@media (max-width: 760px) { .lvcell [data-tip]:hover::after, .lvcell [data-tip]:focus::after { right: auto; left: -60px; } }
+.pips { flex-wrap: wrap; row-gap: 4px; }
+.lv, .prov-tag { white-space: nowrap; }
+.pips.prov .pip { border-style: dashed; border-color: var(--muted); }
+.pips.prov .pip.on { border-style: solid; border-color: var(--signal); background: repeating-linear-gradient(135deg, var(--signal) 0 2px, transparent 2px 4px); }
+.prov-tag { display: inline-block; margin-left: 6px; font: 500 10px/1.4 var(--mono); color: var(--muted); border: 1px dashed var(--muted); border-radius: 2px; padding: 0 4px; vertical-align: 1px; cursor: help; }
+.prov-note { font-size: 13px; color: var(--muted); margin: 0; }
+.mapgrid.two .rung { grid-template-columns: 150px 200px 150px 1fr; }
+@media (max-width: 760px) { .mapgrid.two .rung { grid-template-columns: 1fr 1fr; } }
+.own.neutral { color: var(--ink); background: var(--panel); }
+</style>
+<main>
+  <header class="narrow">
+    <div class="eyebrow"><span>집과 공간</span><span>H2 · Drivers of Home Change</span><span>R1 기준 회차 · 2026-10-12</span><span><a href="../../changes.html#H2">변경 이력</a></span></div>
+    <h1>집의 공간과 기능을 바꾸는 요인</h1>
+    <p class="question">고정 질문 v1.0 — 무엇이 집의 공간과 기능을 바꾸고 있으며, 어떤 공간·기능이 생기고 사라지는가?</p>
+  </header>
+  <section class="answer-box"><h2>한 줄 답</h2>
+    <p class="answer narrow">2026년 10월 현재 집을 바꾸는 요인은 1위 주택 노후화(30년 이상 주택 30.6%, 1년 +2.6%p), 2위 고령화(65세 이상 가구주 가구 28.3%, 증가 가속), 3위 1인화(36.6%, 증가 둔화) 순이다. 바뀌는 곳은 욕실·주방·설비 교체와 욕실·바닥·문턱의 안전 개조이며, 창호·단열과 난방 설비 교체는 공공 지원으로 시작 단계다. 에너지비·반려동물은 근거가 간접적이고, 재택은 영향이 줄고 있다. <a class="rid" href="#H2-M-007" title="2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.">H2-M-007</a><a class="rid" href="#H2-M-013" title="가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다.">H2-M-013</a><a class="rid" href="#H2-M-011" title="1인가구는 2025년 일반가구의 36.6%다. 2020~2024년에는 해마다 평균 1.1%p 늘었으나 2025년에는 0.5%p 늘었다.">H2-M-011</a><a class="rid" href="#H2-I-001" title="30년 이상 주택이 30%를 넘었고 1년에 2.6%p씩 늘고 있다. 집의 기능 변화는 새 공간 추가보다 낡은 욕실·주방·설비를 바꾸는 개조가 중심이다. 자발적 이사 이유 1위가 시설·설비 향상이고, 매매가 늘자 리모델링 부문 실적이 먼저 좋아졌다.">H2-I-001</a><a class="rid" href="#H2-I-002" title="65세 이상 가구주 가구 비중의 증가 속도가 빨라졌다. 반면 욕실 안전손잡이, 단차 제거, 낙상 방지 바닥재를 갖춘 비율은 18~25%에 그친다. 고령 가구가 살던 집에 머물수록 안전 개조 수요와 실제 설치 사이의 차이가 커진다.">H2-I-002</a></p><dl class="arows"><div class="arow"><dt>가장 큰 요인</dt><dd>주택 노후화. 30년 이상 주택이 618만 1천 호(30.6%)이고 5년 새 11.2%p 늘었다. <a class="rid" href="#H2-M-007" title="2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.">H2-M-007</a><a class="rid" href="#H2-E-006" title="국가데이터처가 2025 인구주택총조사 결과를 발표했다. 총주택은 2,018만 1천 호로 처음 2천만 호를 넘었다. 30년 이상 주택은 30.6%, 1인가구는 36.6%, 65세 이상 1인가구는 10.9%였다.">H2-E-006</a></dd></div><div class="arow"><dt>가장 빨라진 요인</dt><dd>고령화. 65세 이상 가구주 가구 비중이 2025년 1.4%p 늘어 직전 연평균(1.1%p)보다 빠르다. <a class="rid" href="#H2-M-013" title="가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다.">H2-M-013</a></dd></div><div class="arow"><dt>늘어나는 공간·기능</dt><dd>욕실·주방·설비 교체, 욕실 손잡이·문턱·바닥 안전 개조, 창호·단열, 경로당 등 동네 고령자 공간. <a class="rid" href="#H2-I-001" title="30년 이상 주택이 30%를 넘었고 1년에 2.6%p씩 늘고 있다. 집의 기능 변화는 새 공간 추가보다 낡은 욕실·주방·설비를 바꾸는 개조가 중심이다. 자발적 이사 이유 1위가 시설·설비 향상이고, 매매가 늘자 리모델링 부문 실적이 먼저 좋아졌다.">H2-I-001</a><a class="rid" href="#H2-I-002" title="65세 이상 가구주 가구 비중의 증가 속도가 빨라졌다. 반면 욕실 안전손잡이, 단차 제거, 낙상 방지 바닥재를 갖춘 비율은 18~25%에 그친다. 고령 가구가 살던 집에 머물수록 안전 개조 수요와 실제 설치 사이의 차이가 커진다.">H2-I-002</a><a class="rid" href="#H2-I-003" title="공공 그린리모델링은 집 밖의 고령자 생활 공간을 먼저 고친다. 선정 동수가 261동에서 318동으로 늘었고 두 해 모두 경로당이 가장 많다. 민간 주택 이자지원도 고령·신혼 가구를 우대하며 재개됐다.">H2-I-003</a></dd></div><div class="arow"><dt>줄어드는 공간·기능</dt><dd>신축 빌트인 가구 물량과 홈오피스 수요. 사라졌다고 확인된 공간은 없다. <a class="rid" href="#H2-E-009" title="한샘의 2026년 상반기 매출은 9.6% 줄었으나 리모델링 부문(리하우스) 공헌이익은 113억 원 늘었다. 현대리바트 매출은 14% 줄었고 신축 현장용 빌트인 등 B2B(기업 간 거래) 물량 감소가 컸다.">H2-E-009</a><a class="rid" href="#H2-I-006" title="유연근무제 활용률은 2021년 16.8%에서 2024년 15.0%로 내려왔다. 재택을 위한 별도 업무 공간 수요는 커지는 쪽이 아니다.">H2-I-006</a></dd></div></dl></section>
+  <section><h2>해석</h2><div class="narrative"><p>집의 변화는 새 공간을 더하기보다 낡은 공간을 고치는 쪽으로 움직인다. 2025년 30년 이상 주택은 전체의 30.6%로 1년 새 2.6%p 늘었다. 20년 이상 주택은 56.0%다. <a class="rid" href="#H2-M-007" title="2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.">H2-M-007</a><a class="rid" href="#H2-E-006" title="국가데이터처가 2025 인구주택총조사 결과를 발표했다. 총주택은 2,018만 1천 호로 처음 2천만 호를 넘었다. 30년 이상 주택은 30.6%, 1인가구는 36.6%, 65세 이상 1인가구는 10.9%였다.">H2-E-006</a></p><p>고치는 곳은 욕실·주방·설비가 중심이다. 2024년 주거실태조사에서 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다. 2026년 상반기 가구업계에서는 매출이 줄어도 리모델링 부문 이익은 늘었다. 다만 가구의 주택유지·수선 지출은 2025년 월 26,866원으로 2024년보다 줄었다. <a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a><a class="rid" href="#H2-E-009" title="한샘의 2026년 상반기 매출은 9.6% 줄었으나 리모델링 부문(리하우스) 공헌이익은 113억 원 늘었다. 현대리바트 매출은 14% 줄었고 신축 현장용 빌트인 등 B2B(기업 간 거래) 물량 감소가 컸다.">H2-E-009</a><a class="rid" href="#H2-M-002" title="가구당 월평균 주택유지·수선 지출은 2025년 26,866원으로 2024년(30,363원)보다 줄었다. 2021년 37,115원이 최근 7년 중 가장 높았다.">H2-M-002</a></p><p>고령화는 집 안 안전 기능을 요구한다. 65세 이상 가구주 가구는 28.3%이고 65세 이상 1인가구는 10.9%다. 그러나 욕실 안전손잡이를 갖춘 노인은 18.2%, 낙상 방지 바닥재는 24.7%에 그친다. <a class="rid" href="#H2-M-013" title="가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다.">H2-M-013</a><a class="rid" href="#H2-M-014" title="65세 이상 1인가구는 2025년 245만 6천 가구로 일반가구의 10.9%다. 1년 새 7.3% 늘었다. 고령자가 있는 가구는 33.3%다.">H2-M-014</a><a class="rid" href="#H2-M-012" title="2023년 노인실태조사에서 노인 배려 설비가 있는 집에 사는 노인은 28.5%다. 욕실 안전손잡이 설치는 18.2%, 단차 제거는 22.6%, 낙상 방지 바닥재는 24.7%다.">H2-M-012</a></p><p>공공 지원은 집 밖 고령자 공간과 단열부터 고친다. 공공 그린리모델링 선정은 318동으로 늘었고 경로당이 가장 많다. 민간 그린리모델링 이자지원은 2026년 3월 재개됐다. <a class="rid" href="#H2-M-005" title="국토교통부는 2026년 공공건축물 그린리모델링 대상으로 318동을 선정했다. 2025년 261동보다 57동 많다.">H2-M-005</a><a class="rid" href="#H2-E-004" title="국토교통부가 2026년 공공건축물 그린리모델링 2.0 대상 318동을 선정했다. 신청은 535동이었다. 경로당이 217동으로 가장 많았다.">H2-E-004</a><a class="rid" href="#H2-E-003" title="국토교통부가 2024년 멈췄던 민간 그린리모델링 이자지원을 재개했다. 지원율은 기본 4.5%, 에너지 성능 30% 이상 개선이나 고령·신혼·다자녀 가구는 5.5%다. 에너지 진단 컨설팅을 새로 넣었다.">H2-E-003</a></p><p>에너지비는 지출 쪽에서 압력이 있으나 집 구조를 바꾸는 힘은 아직 작다. 가구당 에너지 소비는 줄었고 주택용 전기요금은 13분기 동결됐다. 난방 전기화는 단독주택 시범 단계다. <a class="rid" href="#H2-M-008" title="2023년 에너지총조사(2022년 실적)에서 가구당 에너지 소비는 2.7% 줄었다. 가정 부문 소비는 2019~2022년 연평균 0.4% 감소했다.">H2-M-008</a><a class="rid" href="#H2-M-009" title="가구당 월평균 주거·수도·광열 지출은 2025년 360,650원으로 2019년(276,589원)보다 30.4% 많다. 2025년 증가율은 2.6%로 직전 5년 연평균(4.9%)보다 낮다.">H2-M-009</a><a class="rid" href="#H2-E-005" title="한국전력이 2026년 3분기 전기요금을 동결했다. 주택용은 13분기 연속 동결이다. 연료비조정단가는 kWh당 +5원을 유지했다.">H2-E-005</a><a class="rid" href="#H2-E-007" title="기후에너지환경부가 제주에서 난방 전기화 지원사업 첫 공기열 히트펌프 설치를 알렸다. 2026년 국비 약 145억 원으로 온난지역 단독주택의 화석연료 보일러를 바꾼다.">H2-E-007</a></p><p>1인가구는 규모가 가장 크지만 증가 속도가 느려졌다. 재택은 유연근무제 활용률이 내려가 공간 요인으로서 약해졌다. 반려동물 양육 가구는 29.2%이나 집 안 공간 변화를 잰 통계는 없다. <a class="rid" href="#H2-M-011" title="1인가구는 2025년 일반가구의 36.6%다. 2020~2024년에는 해마다 평균 1.1%p 늘었으나 2025년에는 0.5%p 늘었다.">H2-M-011</a><a class="rid" href="#H2-M-004" title="유연근무제(재택·원격근무 포함)를 활용한 임금근로자 비율은 2021년 16.8%에서 2024년 15.0%로 낮아졌다.">H2-M-004</a><a class="rid" href="#H2-E-002" title="농림축산식품부가 2025년 반려동물 양육현황 조사 결과를 냈다. 반려동물을 기르는 가구는 29.2%였다. 개가 80.5%, 고양이가 14.4%였다. 국가승인통계로 처음 작성돼 이전 조사와 직접 비교하기 어렵다.">H2-E-002</a></p></div>
+    <div class="tablewrap"><table><thead><tr><th>방향</th><th>대상</th><th>해석</th><th>근거</th><th>기록</th></tr></thead><tbody><tr id="H2-I-001"><td><span class="dir up">강화</span></td>
+  <td class="tgt">노후화 → 욕실·주방·설비 교체</td><td>30년 이상 주택이 30%를 넘었고 1년에 2.6%p씩 늘고 있다. 집의 기능 변화는 새 공간 추가보다 낡은 욕실·주방·설비를 바꾸는 개조가 중심이다. 자발적 이사 이유 1위가 시설·설비 향상이고, 매매가 늘자 리모델링 부문 실적이 먼저 좋아졌다.</td><td><a class="rid" href="#H2-M-007" title="2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.">H2-M-007</a><a class="rid" href="#H2-E-006" title="국가데이터처가 2025 인구주택총조사 결과를 발표했다. 총주택은 2,018만 1천 호로 처음 2천만 호를 넘었다. 30년 이상 주택은 30.6%, 1인가구는 36.6%, 65세 이상 1인가구는 10.9%였다.">H2-E-006</a><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a><a class="rid" href="#H2-E-009" title="한샘의 2026년 상반기 매출은 9.6% 줄었으나 리모델링 부문(리하우스) 공헌이익은 113억 원 늘었다. 현대리바트 매출은 14% 줄었고 신축 현장용 빌트인 등 B2B(기업 간 거래) 물량 감소가 컸다.">H2-E-009</a></td><td class="idc"><code>H2-I-001</code></td></tr><tr id="H2-I-002"><td><span class="dir up">강화</span></td>
+  <td class="tgt">고령화 → 욕실·바닥·문턱 안전 개조</td><td>65세 이상 가구주 가구 비중의 증가 속도가 빨라졌다. 반면 욕실 안전손잡이, 단차 제거, 낙상 방지 바닥재를 갖춘 비율은 18~25%에 그친다. 고령 가구가 살던 집에 머물수록 안전 개조 수요와 실제 설치 사이의 차이가 커진다.</td><td><a class="rid" href="#H2-M-013" title="가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다.">H2-M-013</a><a class="rid" href="#H2-M-014" title="65세 이상 1인가구는 2025년 245만 6천 가구로 일반가구의 10.9%다. 1년 새 7.3% 늘었다. 고령자가 있는 가구는 33.3%다.">H2-M-014</a><a class="rid" href="#H2-M-012" title="2023년 노인실태조사에서 노인 배려 설비가 있는 집에 사는 노인은 28.5%다. 욕실 안전손잡이 설치는 18.2%, 단차 제거는 22.6%, 낙상 방지 바닥재는 24.7%다.">H2-M-012</a></td><td class="idc"><code>H2-I-002</code></td></tr><tr id="H2-I-003"><td><span class="dir up">강화</span></td>
+  <td class="tgt">공공 개조 → 동네 고령자 공간</td><td>공공 그린리모델링은 집 밖의 고령자 생활 공간을 먼저 고친다. 선정 동수가 261동에서 318동으로 늘었고 두 해 모두 경로당이 가장 많다. 민간 주택 이자지원도 고령·신혼 가구를 우대하며 재개됐다.</td><td><a class="rid" href="#H2-M-005" title="국토교통부는 2026년 공공건축물 그린리모델링 대상으로 318동을 선정했다. 2025년 261동보다 57동 많다.">H2-M-005</a><a class="rid" href="#H2-E-004" title="국토교통부가 2026년 공공건축물 그린리모델링 2.0 대상 318동을 선정했다. 신청은 535동이었다. 경로당이 217동으로 가장 많았다.">H2-E-004</a><a class="rid" href="#H2-E-003" title="국토교통부가 2024년 멈췄던 민간 그린리모델링 이자지원을 재개했다. 지원율은 기본 4.5%, 에너지 성능 30% 이상 개선이나 고령·신혼·다자녀 가구는 5.5%다. 에너지 진단 컨설팅을 새로 넣었다.">H2-E-003</a></td><td class="idc"><code>H2-I-003</code></td></tr><tr id="H2-I-004"><td><span class="dir flat">중립</span></td>
+  <td class="tgt">에너지비 → 단열·난방설비</td><td>가구당 에너지 소비는 줄었지만 주거·수도·광열 지출(명목)은 2019년보다 30% 많다. 주택용 전기요금은 13분기 동결됐다. 보일러를 히트펌프로 바꾸는 난방 전기화는 단독주택 시범 단계라 공간 변화 규모는 아직 작다.</td><td><a class="rid" href="#H2-M-008" title="2023년 에너지총조사(2022년 실적)에서 가구당 에너지 소비는 2.7% 줄었다. 가정 부문 소비는 2019~2022년 연평균 0.4% 감소했다.">H2-M-008</a><a class="rid" href="#H2-M-009" title="가구당 월평균 주거·수도·광열 지출은 2025년 360,650원으로 2019년(276,589원)보다 30.4% 많다. 2025년 증가율은 2.6%로 직전 5년 연평균(4.9%)보다 낮다.">H2-M-009</a><a class="rid" href="#H2-E-005" title="한국전력이 2026년 3분기 전기요금을 동결했다. 주택용은 13분기 연속 동결이다. 연료비조정단가는 kWh당 +5원을 유지했다.">H2-E-005</a><a class="rid" href="#H2-E-007" title="기후에너지환경부가 제주에서 난방 전기화 지원사업 첫 공기열 히트펌프 설치를 알렸다. 2026년 국비 약 145억 원으로 온난지역 단독주택의 화석연료 보일러를 바꾼다.">H2-E-007</a><a class="rid" href="#H2-E-008" title="기후에너지환경부가 2026년 난방 전기화 보조금 지침을 고쳤다. 공공이 관리하는 공동주택도 사전승인을 받으면 지원할 수 있게 했다. 올해 총사업비는 361억 2,500만 원이다.">H2-E-008</a></td><td class="idc"><code>H2-I-004</code></td></tr><tr id="H2-I-005"><td><span class="dir flat">중립</span></td>
+  <td class="tgt">1인화 → 작은 집·적은 에너지</td><td>1인가구는 가장 큰 집단(36.6%)이지만 증가 속도는 2020~2024년의 절반 수준으로 느려졌다. 가구당 에너지 소비 감소의 원인으로 1인가구 증가가 지목된다. 청년 가구의 1인당 면적은 31.1㎡로 평균보다 좁다.</td><td><a class="rid" href="#H2-M-011" title="1인가구는 2025년 일반가구의 36.6%다. 2020~2024년에는 해마다 평균 1.1%p 늘었으나 2025년에는 0.5%p 늘었다.">H2-M-011</a><a class="rid" href="#H2-M-008" title="2023년 에너지총조사(2022년 실적)에서 가구당 에너지 소비는 2.7% 줄었다. 가정 부문 소비는 2019~2022년 연평균 0.4% 감소했다.">H2-M-008</a><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a></td><td class="idc"><code>H2-I-005</code></td></tr><tr id="H2-I-006"><td><span class="dir down">약화</span></td>
+  <td class="tgt">재택 → 홈오피스</td><td>유연근무제 활용률은 2021년 16.8%에서 2024년 15.0%로 내려왔다. 재택을 위한 별도 업무 공간 수요는 커지는 쪽이 아니다.</td><td><a class="rid" href="#H2-M-004" title="유연근무제(재택·원격근무 포함)를 활용한 임금근로자 비율은 2021년 16.8%에서 2024년 15.0%로 낮아졌다.">H2-M-004</a></td><td class="idc"><code>H2-I-006</code></td></tr><tr id="H2-I-007"><td><span class="dir flat">중립</span></td>
+  <td class="tgt">단지 생활서비스·반려동물</td><td>건설사들이 시니어 건강·안전 서비스를 내놓고 있으나 적용 단지와 이용 가구 수 집계는 없다. 반려동물을 기르는 가구는 29.2%로 규모가 크지만 집 안 공간 변화를 잰 통계는 없다.</td><td><a class="rid" href="#H2-E-010" title="대형 건설사들이 시니어 주거 서비스를 내놓았다. 삼성물산은 건강·안전 관리 솔루션 &#x27;에버링&#x27;을 운영 현장에 적용했다. 현대건설은 5월, 대우건설은 6월에 시니어 주거 관련 업무협약을 맺었다.">H2-E-010</a><a class="rid" href="#H2-E-002" title="농림축산식품부가 2025년 반려동물 양육현황 조사 결과를 냈다. 반려동물을 기르는 가구는 29.2%였다. 개가 80.5%, 고양이가 14.4%였다. 국가승인통계로 처음 작성돼 이전 조사와 직접 비교하기 어렵다.">H2-E-002</a></td><td class="idc"><code>H2-I-007</code></td></tr></tbody></table></div>
+    <h3 class="subhead">라이프스테이지별로 보면</h3>
+    <div class="tablewrap"><table><thead><tr><th>라이프스테이지</th><th>무엇이 바뀌나</th><th>근거</th></tr></thead><tbody><tr><td class="tgt">청년 1인</td><td>1인당 주거면적이 31.1㎡로 평균(36.0㎡)보다 좁다. 1인가구 증가 속도가 느려져 작은 집 수요의 증가폭도 줄고 있다.</td><td><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a><a class="rid" href="#H2-M-011" title="1인가구는 2025년 일반가구의 36.6%다. 2020~2024년에는 해마다 평균 1.1%p 늘었으나 2025년에는 0.5%p 늘었다.">H2-M-011</a></td></tr><tr><td class="tgt">신혼·무자녀 부부</td><td>1인당 주거면적이 27.4㎡로 가장 좁다. 민간 그린리모델링 이자지원에서 우대 대상(5.5%)이다.</td><td><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a><a class="rid" href="#H2-E-003" title="국토교통부가 2024년 멈췄던 민간 그린리모델링 이자지원을 재개했다. 지원율은 기본 4.5%, 에너지 성능 30% 이상 개선이나 고령·신혼·다자녀 가구는 5.5%다. 에너지 진단 컨설팅을 새로 넣었다.">H2-E-003</a></td></tr><tr><td class="tgt">자녀양육 가구</td><td>근거 없음. 자녀양육 가구의 공간 변화를 따로 잰 기록을 확보하지 못했다.</td><td><span class=muted>근거 없음</span></td></tr><tr><td class="tgt">중장년</td><td>근거 없음. 노후주택 개조 수요를 연령대별로 나눈 기록을 확보하지 못했다.</td><td><span class=muted>근거 없음</span></td></tr><tr><td class="tgt">고령 가구</td><td>1인당 주거면적은 46.6㎡로 넓고 자가 거주가 많다. 욕실 손잡이·문턱·바닥 안전 설비는 18~25%만 갖췄다. 65세 이상 1인가구는 1년 새 7.3% 늘었다.</td><td><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a><a class="rid" href="#H2-M-012" title="2023년 노인실태조사에서 노인 배려 설비가 있는 집에 사는 노인은 28.5%다. 욕실 안전손잡이 설치는 18.2%, 단차 제거는 22.6%, 낙상 방지 바닥재는 24.7%다.">H2-M-012</a><a class="rid" href="#H2-M-014" title="65세 이상 1인가구는 2025년 245만 6천 가구로 일반가구의 10.9%다. 1년 새 7.3% 늘었다. 고령자가 있는 가구는 33.3%다.">H2-M-014</a></td></tr></tbody></table></div>
+    <h3 class="subhead">평형대별로 보면</h3>
+    <div class="tablewrap"><table><thead><tr><th>평형대</th><th>무엇이 바뀌나</th><th>근거</th></tr></thead><tbody><tr><td class="tgt">소형 (전용 60㎡ 이하)</td><td>근거 없음. 주거면적 구간별 가구 통계를 이번에 확보하지 못했다. 1인당 면적이 좁은 청년·신혼 가구의 면적 구간은 다음 조사에서 확인한다.</td><td><span class=muted>근거 없음</span></td></tr><tr><td class="tgt">중형 (60~85㎡)</td><td>근거 없음. 가구당 평균 주거면적은 68.1㎡(2024)이나 구간 분포는 확보하지 못했다.</td><td><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a></td></tr><tr><td class="tgt">대형 (85㎡ 초과)</td><td>근거 없음.</td><td><span class=muted>근거 없음</span></td></tr></tbody></table></div></section>
+  <section><h2>주요 사건 <small>최신순 · 원문 확인된 것만</small></h2><p class="lead">최근 12개월 사건은 노후·고령 대응 개조 지원 재개와 확대, 난방 전기화 시범, 2025 인구주택총조사 발표가 중심이다. 시장 쪽에서는 리모델링이 버티고 신축 빌트인이 줄었다.</p><ul class="timeline"><li id="H2-E-010"><time>2026-08-16</time><div><b>삼성물산·현대건설·대우건설</b> 대형 건설사들이 시니어 주거 서비스를 내놓았다. 삼성물산은 건강·안전 관리 솔루션 &#x27;에버링&#x27;을 운영 현장에 적용했다. 현대건설은 5월, 대우건설은 6월에 시니어 주거 관련 업무협약을 맺었다.
+  <div class="src"><a href="https://www.theguru.co.kr/mobile/article.html?no=105839" target="_blank" rel="noopener">더구루 (건설사 시니어 주거 서비스 보도)</a><span class="grade gB">B</span> <code>H2-E-010</code></div></div></li><li id="H2-E-009"><time>2026-08-12</time><div><b>한샘·현대리바트</b> 한샘의 2026년 상반기 매출은 9.6% 줄었으나 리모델링 부문(리하우스) 공헌이익은 113억 원 늘었다. 현대리바트 매출은 14% 줄었고 신축 현장용 빌트인 등 B2B(기업 간 거래) 물량 감소가 컸다.
+  <div class="src"><a href="https://news.bizwatch.co.kr/article/consumer/2026/08/11/0025" target="_blank" rel="noopener">비즈니스워치 (한샘·현대리바트 2026년 상반기 실적 보도)</a><span class="grade gB">B</span> <code>H2-E-009</code></div></div></li><li id="H2-E-008"><time>2026-08-08</time><div><b>기후에너지환경부</b> 기후에너지환경부가 2026년 난방 전기화 보조금 지침을 고쳤다. 공공이 관리하는 공동주택도 사전승인을 받으면 지원할 수 있게 했다. 올해 총사업비는 361억 2,500만 원이다.
+  <div class="src"><a href="https://www.kharn.kr/mobile/article.html?no=31533" target="_blank" rel="noopener">칸(KHARN) (기후에너지환경부 난방 전기화 보조금 지침 개정 인용)</a><span class="grade gB">B</span> <code>H2-E-008</code></div></div></li><li id="H2-E-007"><time>2026-07-31</time><div><b>기후에너지환경부</b> 기후에너지환경부가 제주에서 난방 전기화 지원사업 첫 공기열 히트펌프 설치를 알렸다. 2026년 국비 약 145억 원으로 온난지역 단독주택의 화석연료 보일러를 바꾼다.
+  <div class="src"><a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284982" target="_blank" rel="noopener">기후에너지환경부 보도자료 (KDI 경제정보센터 게재)</a><span class="grade gA">A</span> <code>H2-E-007</code></div></div></li><li id="H2-E-006"><time>2026-07-28</time><div><b>국가데이터처</b> 국가데이터처가 2025 인구주택총조사 결과를 발표했다. 총주택은 2,018만 1천 호로 처음 2천만 호를 넘었다. 30년 이상 주택은 30.6%, 1인가구는 36.6%, 65세 이상 1인가구는 10.9%였다.
+  <div class="src"><a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284799" target="_blank" rel="noopener">국가데이터처 2025 인구주택총조사 결과 보도자료 (KDI 경제정보센터 게재)</a><span class="grade gA">A</span> · <a href="https://www.news1.kr/amp/economy/trend/6241227" target="_blank" rel="noopener">뉴스1 (국가데이터처 2025 인구주택총조사 주택 부문 인용)</a><span class="grade gB">B</span> · <a href="https://www.heraldk.com/article/2026072722090410402" target="_blank" rel="noopener">헤럴드경제 (국가데이터처 2025 인구주택총조사 가구 부문 인용)</a><span class="grade gB">B</span> <code>H2-E-006</code></div></div></li><li id="H2-E-005"><time>2026-06-22</time><div><b>한국전력공사</b> 한국전력이 2026년 3분기 전기요금을 동결했다. 주택용은 13분기 연속 동결이다. 연료비조정단가는 kWh당 +5원을 유지했다.
+  <div class="src"><a href="https://www.kukinews.com/article/view/kuk202606220018" target="_blank" rel="noopener">쿠키뉴스 (한국전력 2026년 3분기 전기요금 결정 인용)</a><span class="grade gB">B</span> <code>H2-E-005</code></div></div></li><li id="H2-E-004"><time>2026-06-03</time><div><b>국토교통부</b> 국토교통부가 2026년 공공건축물 그린리모델링 2.0 대상 318동을 선정했다. 신청은 535동이었다. 경로당이 217동으로 가장 많았다.
+  <div class="src"><a href="https://www.fnnews.com/news/202606021507382282" target="_blank" rel="noopener">파이낸셜뉴스 (국토교통부 2026 공공건축물 그린리모델링 선정 인용)</a><span class="grade gB">B</span> · <a href="https://www.heraldk.com/article/2026060218000070240" target="_blank" rel="noopener">헤럴드경제 (국토교통부 2026 공공건축물 그린리모델링 선정 인용)</a><span class="grade gB">B</span> <code>H2-E-004</code></div></div></li><li id="H2-E-003"><time>2026-03-17</time><div><b>국토교통부</b> 국토교통부가 2024년 멈췄던 민간 그린리모델링 이자지원을 재개했다. 지원율은 기본 4.5%, 에너지 성능 30% 이상 개선이나 고령·신혼·다자녀 가구는 5.5%다. 에너지 진단 컨설팅을 새로 넣었다.
+  <div class="src"><a href="https://www.kairnews.com/news/474800" target="_blank" rel="noopener">한국AI부동산신문 (국토교통부 그린리모델링 이자지원 재개 인용)</a><span class="grade gB">B</span> · <a href="https://v.daum.net/v/20260326043356184" target="_blank" rel="noopener">다음뉴스 게재 기사 (국토교통부 그린리모델링 이자지원 재개 인용)</a><span class="grade gB">B</span> <code>H2-E-003</code></div></div></li><li id="H2-E-002"><time>2026-02-12</time><div><b>농림축산식품부</b> 농림축산식품부가 2025년 반려동물 양육현황 조사 결과를 냈다. 반려동물을 기르는 가구는 29.2%였다. 개가 80.5%, 고양이가 14.4%였다. 국가승인통계로 처음 작성돼 이전 조사와 직접 비교하기 어렵다.
+  <div class="src"><a href="https://www.newsseoul.co.kr/news/view/1065584423215514" target="_blank" rel="noopener">뉴스서울 (농림축산식품부 2025 반려동물 양육현황 조사 인용)</a><span class="grade gB">B</span> · <a href="https://www.khan.co.kr/article/202602121457001/" target="_blank" rel="noopener">경향신문 (농림축산식품부 2025 반려동물 양육현황 조사 인용)</a><span class="grade gB">B</span> <code>H2-E-002</code></div></div></li><li id="H2-E-001"><time>2025-11-16</time><div><b>국토교통부</b> 국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.
+  <div class="src"><a href="https://biz.newdaily.co.kr/site/data/html/2025/11/15/2025111500090.html" target="_blank" rel="noopener">뉴데일리 (국토교통부 2024년도 주거실태조사 결과 인용)</a><span class="grade gB">B</span> <code>H2-E-001</code></div></div></li></ul></section>
+  <section><h2>전망 <small>2027년 말까지 개조가 노후화·고령화를 따라가는가</small></h2><p class="lead">갈림길은 가구 수선 지출이 다시 늘어나는지와 공공 개조 선정이 2026년 수준 이상을 유지하는지다. 노후주택과 고령 가구 비중은 두 시나리오 모두에서 늘어난다.</p>
+    <div class="scens"><article class="scen opt" id="H2-F-101"><header><span class="sk">낙관 · Optimistic</span><code>H2-F-101</code></header>
+  <p class="sstmt">2027년 말까지 노후화·고령화 속도에 맞춰 집 개조가 늘어난다. 공공 그린리모델링은 규모를 키우고, 가구의 수선 지출이 다시 늘며, 욕실·바닥 안전 개조와 난방 설비 교체가 시범을 넘어 확대된다.</p><ol class="ms"><li><time>2027-05</time><span>2026년 가구 주택유지·수선 지출이 2025년보다 많음</span></li><li><time>2027-07</time><span>2027년 공공 그린리모델링 선정 318동 이상</span></li><li><time>2027-08</time><span>30년 이상 주택 32.5% 이상, 65세 이상 가구주 가구 29.5% 이상으로 개조 수요 기반 확대 확인</span></li></ol>
+  <dl class="sdl"><div><dt>판정 시점</dt><dd>2027-12-31</dd></div><div><dt>판정 방법</dt><dd>세 가지 중 두 가지 이상 충족 시 적중: (1) H2-F-005 적중 (2) H2-F-004 적중 (3) H2-F-001과 H2-F-002 모두 적중</dd></div>
+  <div><dt>전제</dt><dd>노후주택·고령가구 증가가 이어지고 개조 지원 예산이 줄지 않음</dd></div><div><dt>근거</dt><dd><a class="rid" href="#H2-M-002" title="가구당 월평균 주택유지·수선 지출은 2025년 26,866원으로 2024년(30,363원)보다 줄었다. 2021년 37,115원이 최근 7년 중 가장 높았다.">H2-M-002</a><a class="rid" href="#H2-M-005" title="국토교통부는 2026년 공공건축물 그린리모델링 대상으로 318동을 선정했다. 2025년 261동보다 57동 많다.">H2-M-005</a><a class="rid" href="#H2-M-007" title="2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.">H2-M-007</a><a class="rid" href="#H2-M-013" title="가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다.">H2-M-013</a></dd></div></dl></article><article class="scen pes" id="H2-F-102"><header><span class="sk">비관 · Pessimistic</span><code>H2-F-102</code></header>
+  <p class="sstmt">2027년 말까지 낡은 집과 고령 가구는 늘지만 개조는 따라가지 못한다. 가구 수선 지출이 정체하고 공공 개조 선정이 줄어 욕실·바닥 안전 설비 부족이 이어진다.</p><ol class="ms"><li><time>2027-05</time><span>2026년 가구 주택유지·수선 지출이 2025년 이하</span></li><li><time>2027-07</time><span>2027년 공공 그린리모델링 선정 318동 미만</span></li><li><time>2027-08</time><span>30년 이상 주택·고령 가구주 가구 비중은 계속 상승</span></li></ol>
+  <dl class="sdl"><div><dt>판정 시점</dt><dd>2027-12-31</dd></div><div><dt>판정 방법</dt><dd>낙관 조건 중 하나 이하 충족 시 적중</dd></div>
+  <div><dt>전제</dt><dd>없음</dd></div><div><dt>근거</dt><dd><a class="rid" href="#H2-M-002" title="가구당 월평균 주택유지·수선 지출은 2025년 26,866원으로 2024년(30,363원)보다 줄었다. 2021년 37,115원이 최근 7년 중 가장 높았다.">H2-M-002</a><a class="rid" href="#H2-M-005" title="국토교통부는 2026년 공공건축물 그린리모델링 대상으로 318동을 선정했다. 2025년 261동보다 57동 많다.">H2-M-005</a><a class="rid" href="#H2-M-012" title="2023년 노인실태조사에서 노인 배려 설비가 있는 집에 사는 노인은 28.5%다. 욕실 안전손잡이 설치는 18.2%, 단차 제거는 22.6%, 낙상 방지 바닥재는 24.7%다.">H2-M-012</a></dd></div></dl></article></div>
+    <h3 class="subhead">세부 판정 근거</h3>
+    <p class="lead muted">각 세부 전망이 적중하거나 빗나갔을 때 어느 시나리오 쪽 신호인지 표시했다. 확인 시점이 오면 확인 방법대로 판정한다.</p>
+    <div class="tablewrap"><table><thead><tr><th>세부 전망</th><th>확인 시점</th><th>적중 시</th><th>빗나갈 시</th><th>상태</th><th>근거</th></tr></thead><tbody><tr id="H2-F-006"><td class="stmt">2026년 반려동물 양육현황 조사의 양육 가구 비율은 28~31% 범위일 것이다.<small>확인 방법: 농림축산식품부 2026년 반려동물 양육현황 조사 발표값 확인</small></td>
+  <td class="asof">2027-03-31</td><td><span class="muted">—</span></td><td><span class="muted">—</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#H2-E-002" title="농림축산식품부가 2025년 반려동물 양육현황 조사 결과를 냈다. 반려동물을 기르는 가구는 29.2%였다. 개가 80.5%, 고양이가 14.4%였다. 국가승인통계로 처음 작성돼 이전 조사와 직접 비교하기 어렵다.">H2-E-002</a></td></tr><tr id="H2-F-005"><td class="stmt">2026년 가구당 월평균 주택유지·수선 지출은 2025년(26,866원)보다 많을 것이다.<small>확인 방법: KOSIS DT_1L9U101 2026년 연간 주택유지및수선 지출(전국 1인 이상) 확인</small></td>
+  <td class="asof">2027-05-31</td><td><span class="side opt">낙관</span></td><td><span class="side pes">비관</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#H2-M-002" title="가구당 월평균 주택유지·수선 지출은 2025년 26,866원으로 2024년(30,363원)보다 줄었다. 2021년 37,115원이 최근 7년 중 가장 높았다.">H2-M-002</a><a class="rid" href="#H2-E-009" title="한샘의 2026년 상반기 매출은 9.6% 줄었으나 리모델링 부문(리하우스) 공헌이익은 113억 원 늘었다. 현대리바트 매출은 14% 줄었고 신축 현장용 빌트인 등 B2B(기업 간 거래) 물량 감소가 컸다.">H2-E-009</a></td></tr><tr id="H2-F-004"><td class="stmt">2027년 공공건축물 그린리모델링 선정 동수는 2026년(318동) 이상일 것이다.<small>확인 방법: 국토교통부 2027년 공공건축물 그린리모델링 대상 선정 발표의 선정 동수 확인</small></td>
+  <td class="asof">2027-07-31</td><td><span class="side opt">낙관</span></td><td><span class="side pes">비관</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#H2-M-005" title="국토교통부는 2026년 공공건축물 그린리모델링 대상으로 318동을 선정했다. 2025년 261동보다 57동 많다.">H2-M-005</a></td></tr><tr id="H2-F-001"><td class="stmt">2026년 기준 인구주택총조사에서 30년 이상 주택 비중은 32.5% 이상일 것이다.<small>확인 방법: 국가데이터처 2026 인구주택총조사 주택 부문 발표(2027년 7월 예상)의 30년 이상 주택 비중 확인</small></td>
+  <td class="asof">2027-08-31</td><td><span class="side opt">낙관</span></td><td><span class="muted">—</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#H2-M-007" title="2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.">H2-M-007</a></td></tr><tr id="H2-F-002"><td class="stmt">2026년 가구주 65세 이상 가구 비중은 29.5% 이상일 것이다.<small>확인 방법: KOSIS DT_1JC1517 2026년 값으로 가구주 65세 이상 5개 구간 합 ÷ 일반가구 합계 계산</small></td>
+  <td class="asof">2027-08-31</td><td><span class="side opt">낙관</span></td><td><span class="muted">—</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#H2-M-013" title="가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다.">H2-M-013</a></td></tr><tr id="H2-F-003"><td class="stmt">2026년 1인가구 비중 증가폭은 0.8%p 미만에 머물 것이다.<small>확인 방법: KOSIS DT_1PL1502·DT_1JC1517 2026년 값으로 1인가구 비중을 계산해 2025년(36.6%)과 비교</small></td>
+  <td class="asof">2027-08-31</td><td><span class="side pes">비관</span></td><td><span class="muted">—</span></td>
+  <td><span class="fstat">진행 중</span></td><td><a class="rid" href="#H2-M-011" title="1인가구는 2025년 일반가구의 36.6%다. 2020~2024년에는 해마다 평균 1.1%p 늘었으나 2025년에는 0.5%p 늘었다.">H2-M-011</a></td></tr></tbody></table></div></section>
+  <section><h2>판정 <small>집을 바꾸는 요인의 영향 순위</small></h2><p class="lead">요인마다 노출된 가구·주택 규모와 최근 변화 속도를 함께 봤다. 규모가 비슷하면 빠른 쪽을 위에 뒀다. 금액은 명목이라 에너지비는 잠정이다. 자녀 돌봄은 공간 변화를 잰 기록이 없어 순위에서 뺐다.</p><div class="tablewrap"><table><thead><tr><th>순위</th><th>요인</th><th>규모</th><th>방향·속도</th><th>바꾸는 공간·기능</th><th>근거</th></tr></thead><tbody><tr><td class="num">1</td><td class="tgt">주택 노후화</td><td>30년 이상 주택 30.6% (618만 호, 2025)</td>
+  <td><span class="own neutral">증가·유지</span></td><td>욕실·주방·설비 교체, 창호·단열 개조</td><td><a class="rid" href="#H2-M-007" title="2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.">H2-M-007</a><a class="rid" href="#H2-E-006" title="국가데이터처가 2025 인구주택총조사 결과를 발표했다. 총주택은 2,018만 1천 호로 처음 2천만 호를 넘었다. 30년 이상 주택은 30.6%, 1인가구는 36.6%, 65세 이상 1인가구는 10.9%였다.">H2-E-006</a><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a></td></tr><tr><td class="num">2</td><td class="tgt">고령화·재가 돌봄</td><td>65세 이상 가구주 가구 28.3%, 고령자 있는 가구 33.3% (2025)</td>
+  <td><span class="own neutral">증가·가속</span></td><td>욕실 손잡이·문턱·바닥 안전 개조, 경로당 개조, 시니어 서비스</td><td><a class="rid" href="#H2-M-013" title="가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다.">H2-M-013</a><a class="rid" href="#H2-M-014" title="65세 이상 1인가구는 2025년 245만 6천 가구로 일반가구의 10.9%다. 1년 새 7.3% 늘었다. 고령자가 있는 가구는 33.3%다.">H2-M-014</a><a class="rid" href="#H2-M-012" title="2023년 노인실태조사에서 노인 배려 설비가 있는 집에 사는 노인은 28.5%다. 욕실 안전손잡이 설치는 18.2%, 단차 제거는 22.6%, 낙상 방지 바닥재는 24.7%다.">H2-M-012</a><a class="rid" href="#H2-E-004" title="국토교통부가 2026년 공공건축물 그린리모델링 2.0 대상 318동을 선정했다. 신청은 535동이었다. 경로당이 217동으로 가장 많았다.">H2-E-004</a></td></tr><tr><td class="num">3</td><td class="tgt">1인화</td><td>1인가구 36.6% (2025)</td>
+  <td><span class="own neutral">증가·둔화</span></td><td>작은 주거면적, 가구당 에너지 감소</td><td><a class="rid" href="#H2-M-011" title="1인가구는 2025년 일반가구의 36.6%다. 2020~2024년에는 해마다 평균 1.1%p 늘었으나 2025년에는 0.5%p 늘었다.">H2-M-011</a><a class="rid" href="#H2-M-008" title="2023년 에너지총조사(2022년 실적)에서 가구당 에너지 소비는 2.7% 줄었다. 가정 부문 소비는 2019~2022년 연평균 0.4% 감소했다.">H2-M-008</a><a class="rid" href="#H2-E-001" title="국토교통부가 2024년도 주거실태조사 결과를 발표했다. 1인당 주거면적은 36.0㎡로 전년과 같았다. 청년가구 31.1㎡, 신혼부부 27.4㎡, 고령가구 46.6㎡였다. 자발적 이사 이유 1위는 시설·설비 향상(47.2%)이었다.">H2-E-001</a></td></tr><tr><td class="num">4</td><td class="tgt">에너지비·전기화<span class="prov-tag" title="기준을 직접 재는 수치가 없어 간접 근거로 판정">잠정</span></td><td>주거·수도·광열 지출 월 360,650원 (2025, 명목)</td>
+  <td><span class="own neutral">증가·둔화(명목)</span></td><td>창호·단열, 보일러 → 히트펌프(시범)</td><td><a class="rid" href="#H2-M-009" title="가구당 월평균 주거·수도·광열 지출은 2025년 360,650원으로 2019년(276,589원)보다 30.4% 많다. 2025년 증가율은 2.6%로 직전 5년 연평균(4.9%)보다 낮다.">H2-M-009</a><a class="rid" href="#H2-M-008" title="2023년 에너지총조사(2022년 실적)에서 가구당 에너지 소비는 2.7% 줄었다. 가정 부문 소비는 2019~2022년 연평균 0.4% 감소했다.">H2-M-008</a><a class="rid" href="#H2-E-005" title="한국전력이 2026년 3분기 전기요금을 동결했다. 주택용은 13분기 연속 동결이다. 연료비조정단가는 kWh당 +5원을 유지했다.">H2-E-005</a><a class="rid" href="#H2-E-007" title="기후에너지환경부가 제주에서 난방 전기화 지원사업 첫 공기열 히트펌프 설치를 알렸다. 2026년 국비 약 145억 원으로 온난지역 단독주택의 화석연료 보일러를 바꾼다.">H2-E-007</a></td></tr><tr><td class="num">5</td><td class="tgt">반려동물<span class="prov-tag" title="기준을 직접 재는 수치가 없어 간접 근거로 판정">잠정</span></td><td>양육 가구 29.2% (2025)</td>
+  <td><span class="own neutral">추세 미확인</span></td><td>집 안 공간 변화 근거 없음</td><td><a class="rid" href="#H2-E-002" title="농림축산식품부가 2025년 반려동물 양육현황 조사 결과를 냈다. 반려동물을 기르는 가구는 29.2%였다. 개가 80.5%, 고양이가 14.4%였다. 국가승인통계로 처음 작성돼 이전 조사와 직접 비교하기 어렵다.">H2-E-002</a></td></tr><tr><td class="num">6</td><td class="tgt">재택<span class="prov-tag" title="기준을 직접 재는 수치가 없어 간접 근거로 판정">잠정</span></td><td>유연근무제 활용 근로자 15.0% (2024)</td>
+  <td><span class="own neutral">감소·유지</span></td><td>홈오피스 수요 약화</td><td><a class="rid" href="#H2-M-004" title="유연근무제(재택·원격근무 포함)를 활용한 임금근로자 비율은 2021년 16.8%에서 2024년 15.0%로 낮아졌다.">H2-M-004</a></td></tr></tbody></table></div><h3 class="subhead">변하는 공간과 기능</h3><p class="lead">요인별로 집 안팎에서 늘거나 줄어드는 공간·기능이다. 사라진다고 수치로 확인된 공간은 없다. 줄어드는 쪽은 신축 빌트인 물량과 홈오피스 수요다.</p><div class="tablewrap"><table style="word-break:keep-all;overflow-wrap:break-word"><thead><tr><th>공간·기능</th><th>변화</th><th>관련 요인</th><th>내용</th><th>근거</th></tr></thead><tbody><tr><td class="tgt">욕실·주방·설비</td><td><span class="own neutral">교체 수요 증가</span></td><td>노후화</td><td>30년 이상 주택 30.6%. 자발적 이사 이유 1위가 시설·설비 향상(47.2%). 리모델링 부문 실적 개선.</td><td><a class="rid" href="#H2-M-007">H2-M-007</a><a class="rid" href="#H2-E-001">H2-E-001</a><a class="rid" href="#H2-E-009">H2-E-009</a></td></tr><tr><td class="tgt">욕실 손잡이·문턱·바닥(낙상 방지)</td><td><span class="own neutral">필요 증가, 설치는 낮음</span></td><td>고령화</td><td>안전손잡이 18.2%, 단차 제거 22.6%, 낙상 방지 바닥재 24.7%.</td><td><a class="rid" href="#H2-M-012">H2-M-012</a><a class="rid" href="#H2-M-013">H2-M-013</a></td></tr><tr><td class="tgt">창호·단열(그린리모델링)</td><td><span class="own neutral">지원 재개·확대</span></td><td>노후화·에너지비</td><td>민간 이자지원 2026년 재개. 공공 선정 261동 → 318동.</td><td><a class="rid" href="#H2-E-003">H2-E-003</a><a class="rid" href="#H2-M-005">H2-M-005</a></td></tr><tr><td class="tgt">난방 설비(보일러 → 히트펌프)</td><td><span class="own neutral">시범 시작</span></td><td>에너지비·전기화</td><td>온난지역 단독주택 대상, 2026년 국비 약 145억 원. 공공 관리 공동주택은 사전승인 시 지원.</td><td><a class="rid" href="#H2-E-007">H2-E-007</a><a class="rid" href="#H2-E-008">H2-E-008</a></td></tr><tr><td class="tgt">경로당 등 동네 고령자 공간</td><td><span class="own neutral">개조 증가</span></td><td>고령화</td><td>공공 그린리모델링 선정 중 경로당 187동(2025), 217동(2026).</td><td><a class="rid" href="#H2-M-005">H2-M-005</a><a class="rid" href="#H2-E-004">H2-E-004</a></td></tr><tr><td class="tgt">단지 내 시니어 건강·안전 서비스</td><td><span class="own neutral">고급·시니어 주거에서 시도</span></td><td>고령화</td><td>건설사 서비스 출시와 협약. 적용 단지·이용 가구 집계 없음.</td><td><a class="rid" href="#H2-E-010">H2-E-010</a></td></tr><tr><td class="tgt">신축 빌트인 가구</td><td><span class="own neutral">물량 감소</span></td><td>신축 공급 감소</td><td>현대리바트 빌트인 등 B2B(기업 간 거래) 물량 감소.</td><td><a class="rid" href="#H2-E-009">H2-E-009</a></td></tr><tr><td class="tgt">홈오피스(재택 공간)</td><td><span class="own neutral">수요 약화</span></td><td>재택</td><td>유연근무제 활용률 16.8%(2021) → 15.0%(2024).</td><td><a class="rid" href="#H2-M-004">H2-M-004</a></td></tr><tr><td class="tgt">반려동물 공간</td><td><span class="own neutral">근거 없음</span></td><td>반려동물</td><td>양육 가구 29.2%. 집 안 공간 변화를 잰 통계 없음.</td><td><a class="rid" href="#H2-E-002">H2-E-002</a></td></tr></tbody></table></div><details class="criteria"><summary>판정 기준 보기</summary><div class="crit-body"><h4>순위 기준</h4><div class="tablewrap"><table class="crit"><thead><tr><th>항목</th><th>뜻</th></tr></thead><tbody><tr><td>규모</td><td>그 요인에 직접 노출된 가구 수 또는 비중</td></tr><tr><td>속도</td><td>최근 1~3년 변화율(방향×속도 기준과 같음)</td></tr><tr><td>근거</td><td>공식 통계 또는 A·B 출처 2개 이상. C 단독은 순위에 넣지 않는다</td></tr></tbody></table></div><h4>판정 규칙</h4><ul class="crit-rules"><li>순위는 영향받는 가구 규모(현재값)와 변화 속도를 함께 본다. 규모가 비슷하면 빠른 쪽이 위다.</li><li>요인마다 그 요인이 바꾸는 공간·기능을 근거 기록과 함께 적는다.</li><li>규모 또는 속도를 직접 재는 수치가 없으면 &#x27;잠정&#x27;으로 둔다.</li><li>순위 변동은 직전 딥리서치 회차 대비로 표시한다.</li></ul></div></details></section>
+  <section><h2>핵심 지표 <small>추적 지표 5/7개 값 확보</small></h2><p class="lead">추적 지표 7개 중 5개에 값이 있다. 가전 보유율(H2-K4)과 단지 생활서비스 도입 단지 수(H2-K6)는 비어 있다. 가구 에너지 소비(H2-K3)는 변화율만 있고 가구당 TOE(석유환산톤) 수준값이 없다. 고령자 주택 개조(H2-K5)는 지원 가구 수 대신 설비 보유율을 썼다. 생활 인프라 접근성(H2-K7)은 2020년 기준이다. 다음 조사에서 에너지경제연구원 가구에너지패널 보고서와 국토모니터링 최신본을 먼저 연다.</p>
+    <div class="tablewrap"><table><thead><tr><th>추적 지표</th><th>내용 · 출처</th><th style="text-align:right">현재값</th><th>기준 시점</th><th>기록</th></tr></thead><tbody><tr id="H2-M-001"><td class="ind">H2-K1<small>인테리어·리모델링 시장 규모</small></td>
+  <td class="stmt">한국건설산업연구원은 2020년 건축물 리모델링 시장(개수와 유지·보수 포함)을 30조원으로 추정했다. 2025년 37조원, 2030년 44조원으로 전망했다. <span class="warn">확인 필요</span><div class="src"><a href="https://cerik.re.kr/board/press/589" target="_blank" rel="noopener">한국건설산업연구원 보도자료 (건축물 리모델링 시장의 전망과 정책 과제)</a><span class="grade gB">B</span></div></td>
+  <td class="num">30 조원</td><td class="asof">2020<small>KR</small></td><td class="idc"><code>H2-M-001</code></td></tr><tr id="H2-M-002"><td class="ind">H2-K1<small>인테리어·리모델링 시장 규모</small></td>
+  <td class="stmt">가구당 월평균 주택유지·수선 지출은 2025년 26,866원으로 2024년(30,363원)보다 줄었다. 2021년 37,115원이 최근 7년 중 가장 높았다. <span class="warn">확인 필요</span><div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1L9U101&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1L9U101 가구당 월평균 가계수지, 전국 1인 이상)</a><span class="grade gA">A</span></div></td>
+  <td class="num">26,866 원/월</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>H2-M-002</code></td></tr><tr id="H2-M-003"><td class="ind">H2-K1<small>인테리어·리모델링 시장 규모</small></td>
+  <td class="stmt">가구당 월평균 가구·조명 지출은 2025년 18,210원으로 2021년(22,440원) 정점 이후 줄어든 수준에 머물렀다. <span class="warn">확인 필요</span><div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1L9U101&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1L9U101 가구당 월평균 가계수지, 전국 1인 이상)</a><span class="grade gA">A</span></div></td>
+  <td class="num">18,210 원/월</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>H2-M-003</code></td></tr><tr id="H2-M-004"><td class="ind">H2-K1<small>인테리어·리모델링 시장 규모</small></td>
+  <td class="stmt">유연근무제(재택·원격근무 포함)를 활용한 임금근로자 비율은 2021년 16.8%에서 2024년 15.0%로 낮아졌다. <span class="warn">확인 필요</span><div class="src"><a href="https://bizhankook.com/articles/30184.html" target="_blank" rel="noopener">비즈한국 (통계청 유연근무제 활용 근로자 비율 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">15%</td><td class="asof">2024<small>KR</small></td><td class="idc"><code>H2-M-004</code></td></tr><tr id="H2-M-005"><td class="ind">H2-K2<small>주택 개조·그린리모델링 실적</small></td>
+  <td class="stmt">국토교통부는 2026년 공공건축물 그린리모델링 대상으로 318동을 선정했다. 2025년 261동보다 57동 많다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.fnnews.com/news/202606021507382282" target="_blank" rel="noopener">파이낸셜뉴스 (국토교통부 2026 공공건축물 그린리모델링 선정 인용)</a><span class="grade gB">B</span> · <a href="https://www.heraldk.com/article/2026060218000070240" target="_blank" rel="noopener">헤럴드경제 (국토교통부 2026 공공건축물 그린리모델링 선정 인용)</a><span class="grade gB">B</span> · <a href="https://newsseoul.co.kr/news/view/1065568824606918?dt=m" target="_blank" rel="noopener">뉴스서울 (국토교통부 2025 공공건축물 그린리모델링 선정 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">318 동</td><td class="asof">2026<small>KR</small></td><td class="idc"><code>H2-M-005</code></td></tr><tr id="H2-M-007"><td class="ind">H2-K2<small>주택 개조·그린리모델링 실적</small></td>
+  <td class="stmt">2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다. <span class="warn">확인 필요</span><div class="src"><a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284799" target="_blank" rel="noopener">국가데이터처 2025 인구주택총조사 결과 보도자료 (KDI 경제정보센터 게재)</a><span class="grade gA">A</span> · <a href="https://www.news1.kr/amp/economy/trend/6241227" target="_blank" rel="noopener">뉴스1 (국가데이터처 2025 인구주택총조사 주택 부문 인용)</a><span class="grade gB">B</span> · <a href="https://www.newsis.com/view/NISX20260728_0003726109" target="_blank" rel="noopener">뉴시스 (국가데이터처 2025 인구주택총조사 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">30.6%</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>H2-M-007</code></td></tr><tr id="H2-M-006"><td class="ind">H2-K2<small>주택 개조·그린리모델링 실적</small></td>
+  <td class="stmt">민간 건축물 그린리모델링 이자지원은 2014~2023년 약 8만 건을 지원했다. 2024년 신규 지원이 멈췄다가 2026년 재개됐다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.kairnews.com/news/474800" target="_blank" rel="noopener">한국AI부동산신문 (국토교통부 그린리모델링 이자지원 재개 인용)</a><span class="grade gB">B</span> · <a href="https://v.daum.net/v/20260326043356184" target="_blank" rel="noopener">다음뉴스 게재 기사 (국토교통부 그린리모델링 이자지원 재개 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">80,000 건</td><td class="asof">2014~2023 누적<small>KR</small></td><td class="idc"><code>H2-M-006</code></td></tr><tr id="H2-M-008"><td class="ind">H2-K3<small>가구 에너지 소비</small></td>
+  <td class="stmt">2023년 에너지총조사(2022년 실적)에서 가구당 에너지 소비는 2.7% 줄었다. 가정 부문 소비는 2019~2022년 연평균 0.4% 감소했다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.kukinews.com/article/view/kuk202503120201" target="_blank" rel="noopener">쿠키뉴스 (산업통상자원부 2023 에너지총조사 결과 인용)</a><span class="grade gB">B</span> · <a href="https://newsseoul.co.kr/news/view/1065583214519538" target="_blank" rel="noopener">뉴스서울 (산업통상자원부 2023 에너지총조사 결과 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">-2.7%</td><td class="asof">2022<small>KR</small></td><td class="idc"><code>H2-M-008</code></td></tr><tr id="H2-M-009"><td class="ind">H2-K3<small>가구 에너지 소비</small></td>
+  <td class="stmt">가구당 월평균 주거·수도·광열 지출은 2025년 360,650원으로 2019년(276,589원)보다 30.4% 많다. 2025년 증가율은 2.6%로 직전 5년 연평균(4.9%)보다 낮다. <span class="warn">확인 필요</span><div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1L9U101&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1L9U101 가구당 월평균 가계수지, 전국 1인 이상)</a><span class="grade gA">A</span></div></td>
+  <td class="num">360,650 원/월</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>H2-M-009</code></td></tr><tr id="H2-M-011"><td class="ind">H2-K3<small>가구 에너지 소비</small></td>
+  <td class="stmt">1인가구는 2025년 일반가구의 36.6%다. 2020~2024년에는 해마다 평균 1.1%p 늘었으나 2025년에는 0.5%p 늘었다. <div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1PL1502&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1PL1502 성 및 연령별 1인가구)</a><span class="grade gA">A</span> · <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1JC1517&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1JC1517 가구주 연령·성·점유형태별 일반가구)</a><span class="grade gA">A</span></div></td>
+  <td class="num">36.6%</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>H2-M-011</code></td></tr><tr id="H2-M-010"><td class="ind">H2-K3<small>가구 에너지 소비</small></td>
+  <td class="stmt">2024년 중부지역 아파트의 단위면적당 에너지 사용량은 136kWh/㎡로 단독주택(178kWh/㎡)보다 약 24% 적다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.hankyung.com/article/2025073019141" target="_blank" rel="noopener">한국경제 (국토교통부 2024년 건물 용도별·지역별 에너지 지표 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">136 kWh/㎡</td><td class="asof">2024<small>KR 중부</small></td><td class="idc"><code>H2-M-010</code></td></tr><tr id="H2-M-012"><td class="ind">H2-K5<small>고령자 주택 개조</small></td>
+  <td class="stmt">2023년 노인실태조사에서 노인 배려 설비가 있는 집에 사는 노인은 28.5%다. 욕실 안전손잡이 설치는 18.2%, 단차 제거는 22.6%, 낙상 방지 바닥재는 24.7%다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.etoday.co.kr/news/view/2434002" target="_blank" rel="noopener">이투데이 (보건복지부 2023 노인실태조사 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">28.5%</td><td class="asof">2023<small>KR</small></td><td class="idc"><code>H2-M-012</code></td></tr><tr id="H2-M-013"><td class="ind">H2-K5<small>고령자 주택 개조</small></td>
+  <td class="stmt">가구주가 65세 이상인 가구는 2025년 637만 2천 가구로 일반가구의 28.3%다. 2025년 증가폭은 1.4%p로 2020~2024년 연평균(1.1%p)보다 크다. <div class="src"><a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1JC1517&amp;conn_path=I2" target="_blank" rel="noopener">국가데이터처 KOSIS (DT_1JC1517 가구주 연령·성·점유형태별 일반가구)</a><span class="grade gA">A</span></div></td>
+  <td class="num">28.3%</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>H2-M-013</code></td></tr><tr id="H2-M-014"><td class="ind">H2-K5<small>고령자 주택 개조</small></td>
+  <td class="stmt">65세 이상 1인가구는 2025년 245만 6천 가구로 일반가구의 10.9%다. 1년 새 7.3% 늘었다. 고령자가 있는 가구는 33.3%다. <span class="warn">확인 필요</span><div class="src"><a href="https://www.heraldk.com/article/2026072722090410402" target="_blank" rel="noopener">헤럴드경제 (국가데이터처 2025 인구주택총조사 가구 부문 인용)</a><span class="grade gB">B</span> · <a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284799" target="_blank" rel="noopener">국가데이터처 2025 인구주택총조사 결과 보도자료 (KDI 경제정보센터 게재)</a><span class="grade gA">A</span></div></td>
+  <td class="num">10.9%</td><td class="asof">2025<small>KR</small></td><td class="idc"><code>H2-M-014</code></td></tr><tr id="H2-M-015"><td class="ind">H2-K7<small>생활 인프라 접근성</small></td>
+  <td class="stmt">2020년도 국토모니터링보고서에서 응급의료시설까지 전국 평균 접근거리는 11.9km로 2019년(12.1km)보다 짧아졌다. <span class="warn">확인 필요</span><div class="src"><a href="https://biz.newdaily.co.kr/site/data/html/2021/08/05/2021080500024.amp.html" target="_blank" rel="noopener">뉴데일리 (국토교통부 2020년도 국토모니터링보고서 인용)</a><span class="grade gB">B</span></div></td>
+  <td class="num">11.9 km</td><td class="asof">2020<small>KR</small></td><td class="idc"><code>H2-M-015</code></td></tr></tbody></table></div>
+    <h3 class="subhead">추적 지표 목록 v1.0</h3>
+    <div class="tablewrap"><table><thead><tr><th>ID</th><th>지표 · 정의</th><th>우선 출처</th><th>발표 시기</th><th>이번 회차</th></tr></thead><tbody><tr><td class="ind">H2-K1</td><td>인테리어·리모델링 시장 규모<small>주거용 인테리어·리모델링 시장(공사·자재)</small></td><td>건설산업연구원·업계 추정(B)</td>
+  <td>부정기(한국건설산업연구원 보고서) · 최근 추정 2020-09-16 발표(2020년 추정, 2025·2030년 전망) · 다음 발표 확인 필요. 보조로 가계동향조사 연간(KOSIS DT_1L9U101) 사용</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">H2-K2</td><td>주택 개조·그린리모델링 실적<small>공공 그린리모델링·주택 개보수 지원 실적</small></td><td>국토교통부·국토안전관리원</td>
+  <td>공공건축물 그린리모델링 연 1회 선정 발표(6월 초) · 2026년분 2026-06-03 발표 · 다음 2027년 6월 예상. 민간 이자지원 연도별 실적 공표 주기는 확인 필요</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">H2-K3</td><td>가구 에너지 소비<small>가구당 에너지원별 소비량</small></td><td>에너지경제연구원 에너지총조사·가구에너지패널 · 팩트베이스 H06</td>
+  <td>에너지총조사 3년 주기(산업통상자원부·에너지경제연구원) · 2022년 실적 2025-03-12 발표 · 다음(2025년 실적) 발표 시기 확인 필요</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">H2-K4</td><td>주요 가전 보유율<small>가구당 주요 가전 보유율·보유대수</small></td><td>에너지경제연구원 가구에너지패널 · 팩트베이스 H07</td>
+  <td>확인 필요 (가구에너지패널조사 연 1회 보고서, 최신 공개분과 발표 시기 미확인)</td><td><span class="own contest">미확보</span></td></tr><tr><td class="ind">H2-K5</td><td>고령자 주택 개조<small>고령자 주거환경 개선·주택 개조 지원 가구</small></td><td>국토교통부·보건복지부·지자체</td>
+  <td>노인실태조사 3년 주기(보건복지부) · 2023년 조사값 사용 · 다음 조사 발표 시기 확인 필요. 전국 주택 개조 지원 가구 집계는 확인 필요</td><td><span class="own brand">확보</span></td></tr><tr><td class="ind">H2-K6</td><td>단지 생활서비스 도입<small>조식·청소·돌봄 등 생활서비스를 도입한 공동주택 단지</small></td><td>건설사·언론(B)</td>
+  <td>공식 집계 없음 · 건설사·언론 발표 수시</td><td><span class="own contest">미확보</span></td></tr><tr><td class="ind">H2-K7</td><td>생활 인프라 접근성<small>생활SOC(의원·약국·돌봄시설 등)까지 평균 접근 거리·시간</small></td><td>국토교통부 국토모니터링</td>
+  <td>국토모니터링보고서(국토교통부) · 2020년 기준 2021-08-05 보도 확인 · 이후 발간본과 주기는 확인 필요</td><td><span class="own brand">확보</span></td></tr></tbody></table></div></section>
+  <section><h2>미확인·경고 <small>본문 판단에서 빼거나 주의해서 쓴 기록</small></h2>
+    <div class="tablewrap"><table><thead><tr><th>기록</th><th>구분</th><th>진술</th><th>사유</th></tr></thead><tbody><tr><td><code>H2-M-001</code></td><td><span class="wk">확인 필요</span></td><td>한국건설산업연구원은 2020년 건축물 리모델링 시장(개수와 유지·보수 포함)을 30조원으로 추정했다. 2025년 37조원, 2030년 44조원으로 전망했다.</td><td class="muted">확인 필요: 주거용만의 시장 규모가 아니고 2020년 추정 이후 실적 갱신값을 찾지 못함. 2025년 37조원은 전망치</td></tr><tr><td><code>H2-M-002</code></td><td><span class="wk">확인 필요</span></td><td>가구당 월평균 주택유지·수선 지출은 2025년 26,866원으로 2024년(30,363원)보다 줄었다. 2021년 37,115원이 최근 7년 중 가장 높았다.</td><td class="muted">확인 필요: 명목 금액이며 소비자물가 실질화 전 값</td></tr><tr><td><code>H2-M-003</code></td><td><span class="wk">확인 필요</span></td><td>가구당 월평균 가구·조명 지출은 2025년 18,210원으로 2021년(22,440원) 정점 이후 줄어든 수준에 머물렀다.</td><td class="muted">확인 필요: 명목 금액이며 소비자물가 실질화 전 값</td></tr><tr><td><code>H2-M-004</code></td><td><span class="wk">확인 필요</span></td><td>유연근무제(재택·원격근무 포함)를 활용한 임금근로자 비율은 2021년 16.8%에서 2024년 15.0%로 낮아졌다.</td><td class="muted">확인 필요: 재택·원격근무만의 비율이 아니라 유연근무제 전체 활용률. KOSIS 원표와 2025년 값 미확인</td></tr><tr><td><code>H2-M-005</code></td><td><span class="wk">확인 필요</span></td><td>국토교통부는 2026년 공공건축물 그린리모델링 대상으로 318동을 선정했다. 2025년 261동보다 57동 많다.</td><td class="muted">확인 필요: 단위가 &#x27;건&#x27;이 아니라 &#x27;동&#x27;(선정 기준). 준공 실적과 다를 수 있음. 2026년 유형별 수는 헤럴드경제 보도 기준</td></tr><tr><td><code>H2-M-006</code></td><td><span class="wk">확인 필요</span></td><td>민간 건축물 그린리모델링 이자지원은 2014~2023년 약 8만 건을 지원했다. 2024년 신규 지원이 멈췄다가 2026년 재개됐다.</td><td class="muted">확인 필요: &#x27;약 8만 건&#x27;은 언론 인용 누적값. 연도별·주거용 실적은 국토안전관리원 원자료 미확인</td></tr><tr><td><code>H2-M-007</code></td><td><span class="wk">확인 필요</span></td><td>2025년 준공 30년 이상 주택은 618만 1천 호로 전체 주택의 30.6%다. 1년 전보다 2.6%p, 5년 전보다 11.2%p 높다. 20년 이상 주택은 56.0%다.</td><td class="muted">확인 필요: 2020·2024년 값은 보도의 증감폭(5년 +11.2%p, 1년 +2.6%p)으로 역산한 값</td></tr><tr><td><code>H2-M-008</code></td><td><span class="wk">확인 필요</span></td><td>2023년 에너지총조사(2022년 실적)에서 가구당 에너지 소비는 2.7% 줄었다. 가정 부문 소비는 2019~2022년 연평균 0.4% 감소했다.</td><td class="muted">확인 필요: 가구당 TOE 수준값과 에너지원별 비중은 보고서 원문 미확인. 2.7%의 비교 기간이 보도에 명확하지 않음</td></tr><tr><td><code>H2-M-009</code></td><td><span class="wk">확인 필요</span></td><td>가구당 월평균 주거·수도·광열 지출은 2025년 360,650원으로 2019년(276,589원)보다 30.4% 많다. 2025년 증가율은 2.6%로 직전 5년 연평균(4.9%)보다 낮다.</td><td class="muted">확인 필요: 월세 등 실제주거비가 포함된 대분류로 연료비만의 값이 아님. 명목 금액</td></tr><tr><td><code>H2-M-010</code></td><td><span class="wk">확인 필요</span></td><td>2024년 중부지역 아파트의 단위면적당 에너지 사용량은 136kWh/㎡로 단독주택(178kWh/㎡)보다 약 24% 적다.</td><td class="muted">확인 필요: 가구당이 아니라 면적당 값. 2025년 기준 발표값 미확인</td></tr><tr><td><code>H2-M-012</code></td><td><span class="wk">확인 필요</span></td><td>2023년 노인실태조사에서 노인 배려 설비가 있는 집에 사는 노인은 28.5%다. 욕실 안전손잡이 설치는 18.2%, 단차 제거는 22.6%, 낙상 방지 바닥재는 24.7%다.</td><td class="muted">확인 필요: 지표 정의(지원 가구 수)와 다른 설비 보유율. 한국보건사회연구원 보고서 원문 미확인. 전국 주택 개조 지원 가구 집계는 찾지 못함</td></tr><tr><td><code>H2-M-014</code></td><td><span class="wk">확인 필요</span></td><td>65세 이상 1인가구는 2025년 245만 6천 가구로 일반가구의 10.9%다. 1년 새 7.3% 늘었다. 고령자가 있는 가구는 33.3%다.</td><td class="muted">확인 필요: 2024년 값 10.2%는 보도의 증감폭(+0.7%p)으로 역산</td></tr><tr><td><code>H2-M-015</code></td><td><span class="wk">확인 필요</span></td><td>2020년도 국토모니터링보고서에서 응급의료시설까지 전국 평균 접근거리는 11.9km로 2019년(12.1km)보다 짧아졌다.</td><td class="muted">확인 필요: 기준연도가 2020년으로 오래됨. 의원·약국·돌봄시설 값과 시간(분) 단위 값 미확보. 이후 발간본 미확인</td></tr><tr><td><code>H2-E-008</code></td><td><span class="wk">확인 필요</span></td><td>기후에너지환경부가 2026년 난방 전기화 보조금 지침을 고쳤다. 공공이 관리하는 공동주택도 사전승인을 받으면 지원할 수 있게 했다. 올해 총사업비는 361억 2,500만 원이다.</td><td class="muted">확인 필요: 개정일은 보도 게재일 기준. 기후에너지환경부 원문 미확인</td></tr><tr><td><code>H2-E-010</code></td><td><span class="wk">확인 필요</span></td><td>대형 건설사들이 시니어 주거 서비스를 내놓았다. 삼성물산은 건강·안전 관리 솔루션 &#x27;에버링&#x27;을 운영 현장에 적용했다. 현대건설은 5월, 대우건설은 6월에 시니어 주거 관련 업무협약을 맺었다.</td><td class="muted">확인 필요: 날짜는 보도일 기준. 일반 분양 단지 적용 여부와 이용 가구 수 미확인</td></tr></tbody></table></div></section>
+  <footer>
+    <span>이 글은 4유형 기록 40건(지표 15 · 사건 10 · 해석 7 · 전망 8)에서 생성했습니다. 문장 옆 번호를 누르면 해당 기록으로 이동합니다.</span>
+    <span>출처 등급 A = 1차 조사·공식 통계, B = 주요 언론·2차 보도·연구기관, C = 블로그·출처 불명(원문 확인 전까지 판단에 쓰지 않음).</span>
+  </footer>
+</main>

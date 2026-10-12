@@ -2,7 +2,7 @@
 
 모든 카테고리·질문의 아티클을 한 사이트에서 보여준다.
 
-- 포털 주소(Claude 아티팩트): (첫 게시 후 기입)
+- 포털 주소(Claude 아티팩트): https://claude.ai/artifact/FmxvVJQ4gyuPg2kR6fiGjj
 - 원본: `site/catalog.json`(카테고리·질문 목록) + 각 질문 폴더의 `article_rN.html`
 - 결과물: `site/dist/` (포털 `index.html`, 회차별 아티클 `<카테고리>/<질문 번호(f1, h1 …)>/rN.html`)
 
