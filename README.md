@@ -69,11 +69,13 @@ cd ../.. && python3 site/build_site.py   # 포털 재생성 (깨진 내부 링�
 
 ## 공식 통계 팩트베이스
 
-- `data/factbase.sqlite`: 카탈로그 49개 항목(엑셀 Core Catalog 39개 + 2026-10 보완 10개), 공식 관측치 약 8만 9천 건. 실적(Actual)과 공식 추계(Official Projection)를 분리한다.
+- `data/factbase.sqlite`: 카탈로그 54개 항목(엑셀 Core Catalog 39개 + 2026-10 보완 15개), 공식 관측치 약 8만 9천 건. 실적(Actual)과 공식 추계(Official Projection)를 분리한다.
 - 수집: `pipeline/factbase.py refresh`(인구·가구·주택 8개 표), `pipeline/extended_facts.py`(맞벌이·이동·생활시간·점유·가계동향). 표 기관은 `factbase.ORG`(기본 통계청 101).
 - 가계동향(`DT_1L9U101`)은 한 번 호출로 125개 항목이 온다. S01~S05에 더해 연료비(S08), 기타주거관련서비스(S09), 실제주거비(S10), 상하수도(S11), 가전관련서비스(S12), 가사소모품(S13), 가구·조명 장식 서비스(S14), 소비지출 총액(S15)을 저장한다. 주거·수도·광열(S05)이 세부 5개 합과 맞는지 매번 검사한다.
 - 생활시간조사는 수면(LS03)·가정관리(LS04)에 더해 행동분류 전체를 LS09로 받는다(보조 출처: 실패해도 나머지 수집은 진행).
-- `DT_1JC1521`은 평균 면적만 있어 H09로 옮겼다. 면적 구간별 가구(H02)는 표 탐색 후 확정한다.
+- `DT_1JC1521`은 평균 면적만 있어 H09로 옮겼다. 면적 구간별 가구(H02)는 생애단계별행정통계 `DT_1LC0030`(생애단계 × 면적 5구간)로 받는다.
+- `pipeline/official_tables.py`가 `pipeline/official_tables.json`에 적은 표 17개를 표마다 독립적으로 받는다(노후주택·빈집·이사 사유·초혼 연령·지출목적별 물가·취업시간·유연근무·가구원수별/가구주 연령별 가계수지·온라인쇼핑, 국토부 점유형태, 장기요양, 결식률·유산소 신체활동, 반려동물, 청년 부모 동거). 결과는 `data/discovery/official_tables_status.json`. 표를 더하려면 probe로 분류 코드를 확인한 뒤 설정 파일에 한 줄 추가한다.
+- PIR·RIR·1인당 주거면적·최저주거기준 미달은 KOSIS 표가 없어 주거실태조사 보고서 조사로 채운다.
 - 저장된 원본으로 다시 넣기(키 불필요): `python3 pipeline/extended_facts.py --from-raw data/raw/<날짜>`.
 - 검증: `python -m unittest discover -s tests -v` → `python pipeline/factbase.py check`.
 

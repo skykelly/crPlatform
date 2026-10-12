@@ -83,6 +83,11 @@ jobs:
         env:
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
         run: python pipeline/extended_facts.py
+      - name: Fetch configured official tables (each table independent)
+        if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources && !inputs.probe_candidates }}
+        env:
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
+        run: python pipeline/official_tables.py
       - name: Rebuild web data and validate again
         run: |
           python pipeline/factbase.py check
@@ -90,7 +95,7 @@ jobs:
       - name: Publish verified data to GitHub
         if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources && !inputs.probe_candidates }}
         run: |
-          git add data/factbase.sqlite data/raw archive/korea-life-fact-base-v2/dist/data/dashboard.json
+          git add data/factbase.sqlite data/raw data/discovery archive/korea-life-fact-base-v2/dist/data/dashboard.json
           if git diff --cached --quiet; then
             echo 'No official data changes; nothing to publish.'
             exit 0

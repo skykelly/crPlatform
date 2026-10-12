@@ -56,6 +56,10 @@ CLASSIFICATIONS = {
 # 표를 공표한 기관의 KOSIS orgId. 적지 않은 표는 통계청·국가데이터처(101).
 # 다른 기관 표(예: 국토교통부 주거실태조사)는 discover_kosis.py 결과에서 orgId를 확인해 여기에 적는다.
 ORG = {}
+try:  # official_tables.json의 표별 기관을 함께 쓴다
+    ORG.update({t["tbl"]: t["org"] for t in json.loads((Path(__file__).resolve().parent / "official_tables.json").read_text(encoding="utf-8"))["tables"]})
+except FileNotFoundError:
+    pass
 
 
 def org_for(table):
@@ -74,6 +78,11 @@ EXTRA_CATALOG = {
     "S13": ("Spending", "생활용품", "가사소모품 지출", "DT_1L9U101 가계수지 M8"),
     "S14": ("Spending", "인테리어", "가구·조명 및 장식 서비스 지출", "DT_1L9U101 가계수지 M2"),
     "S15": ("Spending", "총지출", "소비지출 총액", "DT_1L9U101 가계수지 F 소비지출"),
+    "S16": ("Spending", "가구 유형별 지출", "가구원수별 가계수지(전국, 1인 이상)", "DT_1L9U105 가구원수별 가구당 월평균 가계수지"),
+    "S17": ("Spending", "가구 유형별 지출", "가구주 연령별 가계수지(전국, 1인 이상)", "DT_1L9U108 가구주 연령별 가구당 월평균 가계수지"),
+    "P01": ("Spending", "물가", "지출목적별 소비자물가지수(2020=100)", "DT_1J22135 연도별 지출목적별 소비자물가지수"),
+    "LS10": ("Lifestyle", "일", "취업시간별 취업자", "DT_1DA7011S 취업시간별 취업자"),
+    "LS11": ("Lifestyle", "운동", "유산소 신체활동 실천율", "DT_11702_N236 유산소 신체활동 실천율 추이"),
 }
 BASE_CATALOG = 39
 
