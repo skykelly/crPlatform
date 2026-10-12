@@ -29,9 +29,9 @@ def load_spec():
 
 
 def fetch(t, key, today):
-    end = str(today.year) if t["prd"] != "M" else today.strftime("%Y.%m")
+    end = str(today.year) if t["prd"] != "M" else today.strftime("%Y%m")
     params = {"method": "getList", "apiKey": key, "orgId": t["org"], "tblId": t["tbl"],
-              "itmId": t["itm"], "prdSe": t["prd"], "startPrdDe": str(t["start"]), "endPrdDe": end,
+              "itmId": t["itm"], "prdSe": t["prd"], "startPrdDe": str(t["start"]).replace(".", ""), "endPrdDe": end,
               "format": "json", "jsonVD": "Y"}
     for i, code in enumerate(t["objL"], 1):
         params[f"objL{i}"] = code
