@@ -1,6 +1,23 @@
 {
- "_note": "probe_candidate_tables.py가 읽는 후보 표 목록. discover 결과(data/discovery/)를 보고 표 ID·기관을 채운다.",
+ "_note": "probe_candidate_tables.py가 읽는 후보 표 목록. data/discovery/2026-10-12.json 검색 결과에서 골랐다. 분류·항목 코드를 확인한 뒤 수집 코드에 연결한다.",
  "tables": [
-  {"tbl": "DT_1TS202001", "org": "101", "purpose": "생활시간 행동분류 코드 전체 (LS09)"}
+  {"tbl": "DT_1LC0030", "org": "101", "purpose": "H02 주거면적 구간별 가구 (생애단계별행정통계, 2020-2024)"},
+  {"tbl": "DT_1JU1521", "org": "101", "purpose": "H04 건축 경과연수별 주택 (30년 이상 노후, H1-K6)"},
+  {"tbl": "DT_1JU1512", "org": "101", "purpose": "H05 건축연도·주택종류별 미거주 주택 (H1-K7)"},
+  {"tbl": "DT_1B26B21", "org": "101", "purpose": "L02 전입사유별 이동자수 (F2-K7)"},
+  {"tbl": "DT_1B83A05", "org": "101", "purpose": "L03 시도별 평균초혼연령 (F2-K3)"},
+  {"tbl": "DT_1J22135", "org": "101", "purpose": "N1-K8 연도별 지출목적별 소비자물가지수"},
+  {"tbl": "DT_1J22001", "org": "101", "purpose": "N1-K8 지출목적별 소비자물가지수(품목 포함) 대안"},
+  {"tbl": "DT_1DA7011S", "org": "101", "purpose": "T1-K4 취업시간별 취업자"},
+  {"tbl": "DT_1DE7100S", "org": "101", "purpose": "T1-K5 유연근무제 활용형태(재택·원격)"},
+  {"tbl": "DT_1L9U105", "org": "101", "purpose": "N1 가구원수별 가계수지 (전국, 1인 이상)"},
+  {"tbl": "DT_1L9U108", "org": "101", "purpose": "N1 가구주 연령별 가계수지 (전국, 1인 이상)"},
+  {"tbl": "DT_1KE10071", "org": "101", "purpose": "S07 온라인쇼핑 상품군별 거래액 (N1-K7)"},
+  {"tbl": "DT_MLTM_6909", "org": "116", "purpose": "H03 주거실태조사 행정구역별 점유형태 (H1-K1)"},
+  {"tbl": "DT_35006_N004", "org": "350", "purpose": "L07 연도별 장기요양 인정 신청·인정 (T2-K4)"},
+  {"tbl": "DT_11702_N033", "org": "177", "purpose": "LS01 아침식사 결식률 추이 (T1-K8)"},
+  {"tbl": "DT_11702_N236", "org": "177", "purpose": "T1-K9 유산소 신체활동 실천율 추이"},
+  {"tbl": "DT_114063_001", "org": "114", "purpose": "D07 반려동물 양육 여부 (F1-K8)"},
+  {"tbl": "DT_170002_B001", "org": "170", "purpose": "L05 청년 부모 동거 여부 (F2-K1)"}
  ]
 }
