@@ -81,11 +81,13 @@ def _menu_html(prefix, cur_path):
                      f'<a class="main" href="{prefix}{E(a["path"])}">{E(a["title"])}<small>{E(q.get("area", ""))}</small></a>{chg}</div>')
         cats += f'<p class="mp-cat">{int(c["no"]):02d} · {E(c["name"])}</p>{rows}'
     home_cur = ' aria-current="page"' if cur_path == "index" else ""
+    dash_cur = ' aria-current="page"' if cur_path == "dashboard" else ""
     return (f'<div class="menuscrim" id="menuscrim" hidden></div>'
             f'<aside class="menupanel" id="menupanel" role="dialog" aria-modal="true" aria-label="페이지 바로가기" hidden inert>'
             f'<div class="mp-head"><span>{E(SITE_TITLE)}</span><button class="mp-x" type="button" aria-label="메뉴 닫기">×</button></div>'
             f'<div class="mp-body"><nav class="mp-top" aria-label="바로가기">'
             f'<a href="{prefix}index.html"{home_cur}>홈 · 신호 보드</a>'
+            f'<a href="{prefix}dashboard.html"{dash_cur}>통계 대시보드<span>공식 통계</span></a>'
             f'<a href="{prefix}changes.html">전체 변경 이력<span>{changes_total}건</span></a></nav>{cats}</div></aside>')
 
 _BTN = '<button class="menubtn" type="button" aria-haspopup="dialog" aria-controls="menupanel" aria-expanded="false"><i aria-hidden="true"></i>메뉴</button>'
@@ -109,5 +111,6 @@ def _inject(path, prefix, cur_path, portal_page=False):
 _inject(DIST / "index.html", "", "index", True)
 _inject(DIST / "artifact_index.html", "", "index", True)
 _inject(DIST / "changes.html", "", "changes")
+_inject(DIST / "dashboard.html", "", "dashboard")
 for _p in pages:
     _inject(DIST / _p, "../../", _p)

@@ -198,6 +198,8 @@ CSS = (ROOT / "lib" / "article.css").read_text(encoding="utf-8").split("/* 한 �
 PORTAL_CSS = (SITE / "portal.css").read_text(encoding="utf-8")
 PORTAL_JS = (SITE / "portal.js").read_text(encoding="utf-8")
 
+_DASH_SECS = [("d", "01", "인구·가구"), ("e", "02", "생애사건"), ("t", "03", "생활시간·돌봄"), ("h", "04", "주거"), ("s", "05", "지출·물가"), ("x", "표", "전체 탐색기")]
+dash_secs = "".join(f'<li><a href="dashboard.html#{k}"><b>{n}</b>{E(t)}</a></li>' for k, n, t in _DASH_SECS)
 portal = f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{E(SITE_TITLE)}</title>
@@ -214,12 +216,18 @@ portal = f"""<!doctype html>
         <div><dt>발행 아티클</dt><dd data-count="{total_live}">{total_live}</dd></div>
         <div><dt>근거 기록</dt><dd data-count="{total_rec}">{total_rec:,}</dd></div>
         <div><dt>판정 대기 전망</dt><dd data-count="{len(forecasts)}">{len(forecasts)}</dd></div>
+        <div><dt>통계 대시보드</dt><dd><a class="chg-link" href="dashboard.html">열기</a></dd></div>
         <div><dt>변경 이력</dt><dd><a class="chg-link" href="changes.html">{changes_total}건</a></dd></div>
         <div><dt>최근 업데이트</dt><dd>{E(last_date)}</dd></div>
       </dl>
     </div>
     <div class="mh-radar">{radar_svg}</div>
   </header>
+
+  <section class="dashlink" aria-labelledby="h-dash">
+    <a class="dl-main" href="dashboard.html"><span class="dl-k">공식 통계</span><h2 id="h-dash">통계 대시보드</h2><p>KOSIS 공식 표에서 꺼낸 가구·생애사건·생활시간·주거·지출 수치를 구분별 차트와 표로 봅니다. 전체 탐색기에서 표의 모든 값을 열어 볼 수 있습니다.</p><span class="dl-go">대시보드 열기 →</span></a>
+    <ol class="dl-secs">{dash_secs}</ol>
+  </section>
 
   <section class="signals" aria-labelledby="h-signals">
     <div class="sechead"><h2 id="h-signals">최근 주요 사건</h2><p>중요도 3 사건을 질문마다 하나씩, 최근 순으로 모았습니다. 2회차부터는 판정 단계가 바뀐 질문이 여기에 먼저 올라옵니다.</p></div>

@@ -83,6 +83,8 @@ cd ../.. && python3 site/build_site.py   # 포털 재생성 (깨진 내부 링�
 
 **기록과 대조:** `python3 tools/factbase_sync.py`가 `data/indicator_map.json`에 적은 지표 기록을 DB로 다시 계산해 일치·값 다름·새 연도를 `data/sync_report.md`에 쓴다. 기록은 바꾸지 않는다. 주간 조사는 이 보고서부터 본다.
 
+**통계 대시보드:** 포털의 `dashboard.html`. 팩트베이스를 5개 구분(인구·가구 / 생애사건 / 생활시간·돌봄 / 주거 / 지출·물가) 카드와 전체 탐색기로 보여 준다. 만드는 법은 `site/README.md`.
+
 **자동 실행:** [GitHub Actions](.github/workflows/factbase-refresh.yml)가 매월 10일 09:30(서울)에 수집한다. 저장소 Secrets의 `KOSIS_API_KEY`를 쓴다. 이전 정적 대시보드는 `archive/`에 보관했다.
 
 ## 폴더

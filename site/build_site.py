@@ -99,18 +99,22 @@ for c in cat["categories"]:
     sections.append((c, items))
 
 exec(compile((SITE / "changes.py").read_text(encoding="utf-8"), "changes.py", "exec"))
+# 통계 대시보드 (팩트베이스 → dashboard.html). 계산 문제가 있으면 빌드를 멈춘다
+sys.path.insert(0, str(SITE))
+import dashboard as _dash
+dash_bytes = _dash.build(DIST, ARTICLE_CSS, SITE_TITLE, ARTICLE_UI.split("<script>")[0], pages)
 exec(compile((SITE / "portal.py").read_text(encoding="utf-8"), "portal.py", "exec"))
 exec(compile((SITE / "menu.py").read_text(encoding="utf-8"), "menu.py", "exec"))
 
 # ---------------------------------------------------------------- 점검
 bad = []
-for p in [DIST / "index.html", DIST / "changes.html"] + [DIST / x for x in pages]:
+for p in [DIST / "index.html", DIST / "changes.html", DIST / "dashboard.html"] + [DIST / x for x in pages]:
     s = p.read_text(encoding="utf-8")
     for href in re.findall(r'href="([^"#:]+\.html)"', s):
         if not (p.parent / href).resolve().exists():
             bad.append(f"{p.relative_to(DIST)} → {href}")
-(DIST / "manifest.json").write_text(json.dumps({"pages": pages + ["changes.html"]}, ensure_ascii=False, indent=1), encoding="utf-8")
+(DIST / "manifest.json").write_text(json.dumps({"pages": pages + ["changes.html", "dashboard.html"]}, ensure_ascii=False, indent=1), encoding="utf-8")
 print(f"포털 생성: 카테고리 {len(sections)}, 질문 {total_q}, 아티클 페이지 {len(pages)}")
-print("페이지:", pages)
+print("페이지:", pages, "+ changes.html, dashboard.html", f"(대시보드 {dash_bytes // 1024:,} KB)")
 print("깨진 내부 링크:", bad or "없음")
 sys.exit(1 if bad else 0)
