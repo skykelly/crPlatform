@@ -13,7 +13,7 @@ from factbase import connect
 
 class DashboardV3Tests(unittest.TestCase):
     def test_publication_contains_only_dashboard(self):
-        dist = ROOT / "sites/korea-life-fact-base-v2/dist"
+        dist = ROOT / "archive/korea-life-fact-base-v2/dist"
         markup = (dist / "index.html").read_text(encoding="utf-8")
         for name in ("trend.html", "insights.html", "outlook.html", "editorial.js", "editorial.css"):
             self.assertFalse((dist / name).exists(), name)

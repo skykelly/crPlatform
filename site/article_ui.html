@@ -1,0 +1,104 @@
+<style>
+/* 아티클 페이지 공통 UI: 사이트 바 · 읽기 진행 막대 · 섹션 목차(스크롤 위치 표시) · 기록 미리보기 */
+.readbar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 30; pointer-events: none; }
+.readbar span { display: block; height: 100%; width: 100%; background: var(--signal); transform-origin: 0 50%; transform: scaleX(var(--read, 0)); }
+.sitebar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid var(--rule);
+  margin: 0 -20px; padding: 10px 20px 0; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 14px; align-items: center; font: 500 13px/1.4 var(--mono); }
+.sitebar a { color: var(--ink); text-decoration: none; }
+.sitebar .home { font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.sitebar .home::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 3px var(--signal-soft); }
+.sitebar a:hover, .sitebar a:focus-visible { color: var(--signal-ink); }
+.sitebar .crumb { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sitebar .rounds { display: flex; gap: 8px; }
+.sitebar .rounds a[aria-current="page"] { color: var(--signal-ink); }
+.toc { grid-column: 1 / -1; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin: 4px -4px 0; }
+.toc::-webkit-scrollbar { display: none; }
+.toc a { flex: none; padding: 8px 10px 9px; font: 500 13px var(--body); color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+.toc a[aria-current="true"] { color: var(--ink); border-bottom-color: var(--signal); }
+main h2[id] { scroll-margin-top: 110px; }
+:target { scroll-margin-top: 120px; }
+/* 기록 미리보기 */
+.recpop { position: fixed; z-index: 40; width: min(380px, calc(100vw - 32px)); background: var(--bg-elevated); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 6px; box-shadow: var(--shadow); padding: 14px 16px; display: grid; gap: 10px; font-size: 14px; line-height: 1.6; }
+.recpop header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.recpop code { font: 600 12px var(--mono); color: var(--signal-ink); }
+.recpop .k { font: 500 11px var(--mono); color: var(--muted); }
+.recpop p { margin: 0; }
+.recpop .go { justify-self: start; font: 500 13px var(--body); color: var(--ink); text-decoration: underline; text-decoration-color: var(--signal); }
+.recpop .x { border: 0; background: none; color: var(--muted); font: 500 18px/1 var(--body); cursor: pointer; padding: 4px; }
+@media (max-width: 640px) {
+  .recpop { left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto; border-radius: 12px 12px 0 0; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .sitebar { grid-template-columns: auto 1fr; }
+  .sitebar .rounds { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .recpop { animation: pop .16s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px); } }
+  html { scroll-behavior: smooth; }
+}
+</style>
+<script>
+(function () {
+  var bar = document.querySelector('.sitebar');
+  var heads = Array.prototype.slice.call(document.querySelectorAll('main h2'));
+  var short = { '한 줄 답': '답', '미확인·경고': '경고' };
+  if (bar && heads.length) {
+    var toc = document.createElement('nav');
+    toc.className = 'toc'; toc.setAttribute('aria-label', '이 글의 섹션');
+    heads.forEach(function (h, i) {
+      if (!h.id) h.id = 'sec-' + (i + 1);
+      var label = (h.firstChild && h.firstChild.nodeType === 3 ? h.firstChild.textContent : h.textContent).trim();
+      var a = document.createElement('a'); a.href = '#' + h.id; a.textContent = short[label] || label;
+      toc.appendChild(a);
+    });
+    bar.appendChild(toc);
+    var links = toc.querySelectorAll('a');
+    var setActive = function () {
+      var y = window.scrollY + bar.offsetHeight + 40, cur = 0;
+      heads.forEach(function (h, i) { if (h.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+      links.forEach(function (a, i) {
+        if (i === cur) { if (a.getAttribute('aria-current') !== 'true') { a.setAttribute('aria-current', 'true'); var l = a.offsetLeft - 20; toc.scrollTo ? toc.scrollTo({ left: l }) : (toc.scrollLeft = l); } }
+        else a.removeAttribute('aria-current');
+      });
+    };
+    var read = function () {
+      var d = document.documentElement, max = d.scrollHeight - window.innerHeight;
+      d.style.setProperty('--read', max > 0 ? Math.min(1, window.scrollY / max).toFixed(4) : 0);
+    };
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function () { setActive(); read(); ticking = false; });
+    }, { passive: true });
+    setActive(); read();
+  }
+  // 기록 번호를 누르면 이동 대신 미리보기를 띄운다
+  var pop = null, last = null, opened = 0;
+  function close() { if (pop) { pop.remove(); pop = null; if (last) last.focus(); last = null; } }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a.rid');
+    if (pop && !e.target.closest('.recpop') && !a) { close(); return; }
+    if (!a) return;
+    var id = (a.getAttribute('href') || '').slice(1);
+    var text = a.getAttribute('title') || '';
+    var target = document.getElementById(id);
+    if (!text && target) text = target.textContent.trim().slice(0, 240);
+    if (!text) return;
+    e.preventDefault(); close(); last = a; opened = Date.now();
+    var kind = { M: '지표', E: '사건', I: '해석', F: '전망' }[(id.split('-')[1] || '')[0]] || '기록';
+    pop = document.createElement('div'); pop.className = 'recpop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', '기록 ' + id);
+    pop.innerHTML = '<header><span><code></code> <span class="k"></span></span><button class="x" type="button" aria-label="닫기">×</button></header><p></p>' + (target ? '<a class="go">본문의 기록 위치로 이동</a>' : '');
+    pop.querySelector('code').textContent = id; pop.querySelector('.k').textContent = kind; pop.querySelector('p').textContent = text;
+    if (target) { var g = pop.querySelector('.go'); g.href = '#' + id; g.addEventListener('click', function () { pop.remove(); pop = null; }); }
+    pop.querySelector('.x').addEventListener('click', close);
+    document.body.appendChild(pop);
+    var r = a.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    var left = Math.max(16, Math.min(r.left, window.innerWidth - w - 16));
+    var top = r.bottom + 8 + h > window.innerHeight ? r.top - h - 8 : r.bottom + 8;
+    pop.style.left = left + 'px'; pop.style.top = Math.max(16, top) + 'px';
+    pop.querySelector('.x').focus({ preventScroll: true });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  window.addEventListener('scroll', function () { if (pop && window.innerWidth > 640 && Date.now() - opened > 400) close(); }, { passive: true });
+})();
+</script>

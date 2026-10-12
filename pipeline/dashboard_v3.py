@@ -6,7 +6,7 @@ from pathlib import Path
 
 from factbase import ROOT, check, connect, source_url
 
-OUT = ROOT / "sites" / "korea-life-fact-base-v2" / "dist" / "data" / "dashboard.json"
+OUT = ROOT / "archive" / "korea-life-fact-base-v2" / "dist" / "data" / "dashboard.json"
 
 
 def observations(conn, table, measure, d2=None, d3=None, fact=None):

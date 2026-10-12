@@ -1,0 +1,96 @@
+{
+ "site": {
+  "title": "Life Signals",
+  "tagline": "한국인의 가족·시간·집·지출이 어떻게 바뀌는지, 의견이 아닌 기록으로 쓰는 생활 변화 리포트"
+ },
+ "categories": [
+  {
+   "id": "family",
+   "no": 1,
+   "name": "가구와 생애 전환",
+   "short": "가구",
+   "prefix": "F",
+   "desc": "한국인이 누구와 함께 살며, 독립·결혼·출산·이사·은퇴 같은 삶의 전환이 언제 얼마나 자주 일어나는지 추적한다.",
+   "questions": [
+    {
+     "id": "f1",
+     "no": "F1",
+     "area": "Household Composition",
+     "question": "한국인은 누구와 함께 살며, 그 구성은 어느 쪽으로 얼마나 빨리 바뀌는가?"
+    },
+    {
+     "id": "f2",
+     "no": "F2",
+     "area": "Life Transitions",
+     "question": "독립·결혼·출산·이사·은퇴는 언제, 얼마나 자주 일어나는가?"
+    }
+   ]
+  },
+  {
+   "id": "time-care",
+   "no": 2,
+   "name": "시간과 돌봄",
+   "short": "시간·돌봄",
+   "prefix": "T",
+   "desc": "하루의 시간이 어디에 쓰이는지, 자녀와 부모를 돌보는 부담을 누가 지는지 추적한다.",
+   "questions": [
+    {
+     "id": "t1",
+     "no": "T1",
+     "area": "Daily Time Use",
+     "question": "하루의 시간은 어디에 쓰이며, 집 안에서 보내는 시간은 어떻게 바뀌는가?"
+    },
+    {
+     "id": "t2",
+     "no": "T2",
+     "area": "Care Burden",
+     "question": "자녀·부모 돌봄은 누가 맡으며, 가족에서 공공·시장·기술로 얼마나 넘어가는가?"
+    }
+   ]
+  },
+  {
+   "id": "residence",
+   "no": 3,
+   "name": "집과 공간",
+   "short": "집",
+   "prefix": "H",
+   "desc": "가구가 사는 집의 조건이 가구 변화와 얼마나 맞는지, 무엇이 거주 공간의 변화를 앞당기는지 추적한다.",
+   "questions": [
+    {
+     "id": "h1",
+     "no": "H1",
+     "area": "Housing Conditions",
+     "question": "집의 비용·면적·점유·노후도는 가구 변화와 얼마나 어긋나 있는가?"
+    },
+    {
+     "id": "h2",
+     "no": "H2",
+     "area": "Drivers of Home Change",
+     "question": "무엇이 집의 공간과 기능을 바꾸고 있으며, 어떤 공간·기능이 생기고 사라지는가?"
+    }
+   ]
+  },
+  {
+   "id": "needs",
+   "no": 4,
+   "name": "지출과 새 수요",
+   "short": "수요",
+   "prefix": "N",
+   "desc": "생활 변화가 Home & Living 지출과 새로운 서비스 수요로 어떻게 이어지는지 추적한다.",
+   "questions": [
+    {
+     "id": "n1",
+     "no": "N1",
+     "area": "Home & Living Spending",
+     "question": "Home & Living 지출은 품목별로 실질 기준 어디서 늘고 줄었는가?"
+    },
+    {
+     "id": "n2",
+     "no": "N2",
+     "area": "New Home & Living Needs",
+     "question": "생활 변화가 만든 새 Home & Living 서비스 수요는 어디까지 왔는가?"
+    }
+   ]
+  }
+ ]
+}

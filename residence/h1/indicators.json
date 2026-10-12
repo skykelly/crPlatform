@@ -1,0 +1,74 @@
+[
+ {
+  "id": "H1-K1",
+  "name": "점유 형태 비중",
+  "unit": "%",
+  "definition": "자가·전세·월세 가구 비중",
+  "source": "국토교통부 주거실태조사·국가데이터처 인구주택총조사",
+  "factbase": "H03",
+  "release": "확인 필요"
+ },
+ {
+  "id": "H1-K2",
+  "name": "소득 대비 주거비 부담",
+  "unit": "%",
+  "definition": "소득 대비 임대료 비율(RIR), 소득 대비 주택가격 비율(PIR)",
+  "source": "국토교통부 주거실태조사",
+  "factbase": "",
+  "release": "확인 필요"
+ },
+ {
+  "id": "H1-K3",
+  "name": "주거면적 구간별 가구",
+  "unit": "%",
+  "definition": "주거면적 구간별 일반가구 비중",
+  "source": "국가데이터처 인구주택총조사",
+  "factbase": "H02",
+  "release": "확인 필요"
+ },
+ {
+  "id": "H1-K4",
+  "name": "1인당 주거면적·최저주거기준 미달",
+  "unit": "㎡ / %",
+  "definition": "1인당 평균 주거면적, 최저주거기준 미달 가구 비율",
+  "source": "국토교통부 주거실태조사",
+  "factbase": "H08",
+  "release": "확인 필요"
+ },
+ {
+  "id": "H1-K5",
+  "name": "주택 종류별 비중",
+  "unit": "%",
+  "definition": "아파트·단독·연립·다세대 등 주택 재고 비중",
+  "source": "국가데이터처 주택총조사",
+  "factbase": "H01",
+  "release": "확인 필요"
+ },
+ {
+  "id": "H1-K6",
+  "name": "30년 이상 노후주택 비중",
+  "unit": "%",
+  "definition": "건축 후 30년 이상 주택 비중",
+  "source": "국가데이터처 주택총조사",
+  "factbase": "H04",
+  "release": "확인 필요"
+ },
+ {
+  "id": "H1-K7",
+  "name": "빈집(미거주 주택)",
+  "unit": "호",
+  "definition": "미거주 주택 수와 비중",
+  "source": "국가데이터처 주택총조사",
+  "factbase": "H05",
+  "release": "확인 필요"
+ },
+ {
+  "id": "H1-K8",
+  "name": "소득 대비 주택가격 배수(PIR)",
+  "unit": "배",
+  "definition": "자가 가구의 연소득 대비 주택가격 배수(중위수)",
+  "source": "국토교통부 주거실태조사",
+  "factbase": "",
+  "release": "확인 필요"
+ }
+]

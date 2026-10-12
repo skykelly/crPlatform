@@ -1,0 +1,220 @@
+<style>
+/* AI Chat: 오른쪽 아래 버튼 → 대화 창. 답변은 보는 사람의 Claude 로그인으로 처리된다 */
+.chat-fab { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); z-index: 60;
+  display: flex; align-items: center; gap: 8px; background: var(--bg-elevated); color: var(--ink); border: 1px solid var(--rule); border-radius: 999px;
+  padding: 9px 16px 9px 11px; font: 500 14px var(--body); cursor: pointer; box-shadow: var(--shadow); }
+.chat-fab:hover { border-color: var(--signal); }
+.chat-fab:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.ai-ico { display: block; flex: none; object-fit: contain; }
+.chat { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); z-index: 60;
+  width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100dvh - 96px)); background: var(--bg-elevated); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 10px; box-shadow: var(--shadow); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.chat-h { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--rule); background: var(--panel); }
+.chat-h b { font: 600 14px var(--body); flex: 1; }
+.chat-h button { background: none; border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; padding: 3px 9px; font: 400 12px var(--body); cursor: pointer; }
+.chat-h button:hover { border-color: var(--border-strong); }
+.chat-log { overflow: auto; padding: 14px 12px; display: grid; gap: 12px; align-content: start; }
+.chat-note { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.chat-sugg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chat-sugg button { font: 400 12px var(--body); color: var(--ink); background: var(--bg-base); border: 1px solid var(--rule); border-radius: 999px; padding: 4px 10px; cursor: pointer; text-align: left; }
+.chat-sugg button:hover { border-color: var(--signal); color: var(--signal-ink); }
+.msg { max-width: 100%; font-size: 14px; line-height: 1.65; word-break: keep-all; overflow-wrap: break-word; }
+.msg.u { justify-self: end; background: var(--signal-soft); padding: 8px 11px; border-radius: 10px 10px 2px 10px; max-width: 88%; white-space: pre-wrap; }
+.msg.a { background: var(--panel); border: 1px solid var(--rule); padding: 10px 12px; border-radius: 10px 10px 10px 2px; }
+.msg.a p { margin: .3em 0; } .msg.a ul, .msg.a ol { margin: .3em 0; padding-left: 1.3em; }
+.msg.a h1, .msg.a h2, .msg.a h3 { font: 600 15px var(--body); margin: .6em 0 .3em; }
+.msg.a table { border-collapse: collapse; font-size: 12px; display: block; overflow-x: auto; min-width: 0; width: auto; }
+.msg.a th, .msg.a td { border-bottom: 1px solid var(--rule); padding: 4px 6px; text-align: left; vertical-align: top; word-break: keep-all; }
+.msg.a code { font: 500 12px var(--mono); }
+.msg .wl { font: 500 12px var(--mono); text-decoration: none; color: var(--signal-ink); background: var(--signal-soft); padding: 0 5px; border-radius: 3px; white-space: nowrap; }
+.msg .st { color: var(--muted); font: 400 12px var(--mono); }
+.msg .err { color: var(--color-error-fg); font-size: 13px; margin-top: 6px; }
+.chat-f { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--rule); }
+.chat-f textarea { resize: none; font: 400 14px/1.5 var(--body); padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg-base); color: var(--ink); min-height: 40px; max-height: 140px; }
+.chat-f textarea:focus { outline: 2px solid var(--border-focus); outline-offset: -1px; }
+.chat-f button { background: var(--color-primary-600); color: var(--text-on-primary); border: 0; border-radius: 6px; padding: 0 14px; font: 600 13px var(--body); cursor: pointer; }
+.chat-f button.stop { background: var(--color-neutral-700); }
+.chat-f button:disabled { opacity: .5; cursor: default; }
+@media (max-width: 560px) { .chat { height: calc(100dvh - 32px); } }
+</style>
+<button class="chat-fab" id="chat-fab" type="button" hidden aria-controls="chat" aria-expanded="false"><img class="ai-ico" src="%%ICON%%" alt="" width="24" height="24">AI Chat</button>
+<section class="chat" id="chat" hidden aria-label="AI Chat">
+  <div class="chat-h"><img class="ai-ico" src="%%ICON%%" alt="" width="22" height="22"><b>AI Chat</b><button type="button" id="chat-new">새 대화</button><button type="button" id="chat-close" aria-label="닫기">닫기</button></div>
+  <div class="chat-log" id="chat-log" aria-live="polite"></div>
+  <form class="chat-f" id="chat-form"><textarea id="chat-in" rows="1" placeholder="Life Signals 내용에 대해 질문하세요" aria-label="질문 입력"></textarea><button type="submit" id="chat-send">보내기</button></form>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+(function () {
+  var DATA = %%DATA%%;
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var BY_NO = {}; DATA.questions.forEach(function (q) { BY_NO[q.no] = q; });
+
+  function md(src) {
+    var s = String(src || "").replace(/</g, "&lt;");                   // 모델 출력의 HTML은 글자로만 보인다
+    s = s.replace(/(?<!~)~(?!~)/g, "\\~");                              // 범위 표기 물결표가 취소선이 되지 않게
+    s = s.replace(/\[\[([A-Z]\d+)(?:-([MEIF])-(\d{3}))?\]\]/g, function (m, q, t, n) {
+      var it = BY_NO[q]; if (!it) return esc(m.slice(2, -2));
+      var id = t ? q + "-" + t + "-" + n : null;
+      return '<a class="wl" href="' + esc(it.path + (id ? "#" + id : "")) + '">' + esc(id || q) + "</a>";
+    });
+    if (window.marked && marked.parse) return marked.parse(s, { gfm: true, breaks: false });
+    return '<p style="white-space:pre-wrap">' + s + "</p>";
+  }
+
+  // ---------- 아티클 읽기 (같은 아티팩트에 게시된 회차 페이지를 불러온다)
+  var CACHE = {};
+  function loadArticle(no) {
+    var q = BY_NO[String(no || "").toUpperCase().trim()];
+    if (!q) return Promise.reject(new Error("없는 질문 번호입니다. 가능한 번호: " + Object.keys(BY_NO).join(", ")));
+    if (CACHE[q.no]) return Promise.resolve(CACHE[q.no]);
+    return fetch(q.path).then(function (r) { if (!r.ok) throw new Error("아티클을 불러오지 못했습니다: " + q.no); return r.text(); }).then(function (html) {
+      var doc = new DOMParser().parseFromString(html, "text/html");
+      doc.querySelectorAll("script,style,.sitebar,.readbar,details.criteria summary").forEach(function (n) { n.remove(); });
+      var sections = [];
+      doc.querySelectorAll("main section").forEach(function (sec) {
+        var h = sec.querySelector("h2"); if (!h) return;
+        var title = (h.firstChild && h.firstChild.nodeType === 3 ? h.firstChild.textContent : h.textContent).trim();
+        var parts = [];
+        sec.querySelectorAll("p, li, tr, .rung, dl .arow, .scen, .pan, .curve").forEach(function (el) {
+          if (el.closest(".rung") && !el.classList.contains("rung")) return;
+          if (el.closest(".scen") && !el.classList.contains("scen")) return;
+          var t = el.textContent.replace(/\s+/g, " ").trim(); if (t) parts.push(t);
+        });
+        sections.push({ title: title, text: parts.join("\n") });
+      });
+      var art = { no: q.no, title: q.title, question: q.question, sections: sections };
+      CACHE[q.no] = art; return art;
+    });
+  }
+
+  var statusEl = null;
+  function status(t) { if (statusEl) statusEl.textContent = t + " …"; }
+  var TOOLS = [
+    { name: "get_article",
+      description: "질문 번호(C1~C5, I1~I4, S1~S5, L1~L6)의 아티클을 읽습니다. section에 섹션 이름(한 줄 답, 해석, 주요 사건, 전망, 판정 섹션 이름, 핵심 지표, 미확인·경고)의 일부를 주면 그 섹션 전문을, 생략하면 섹션 목록과 앞부분을 돌려줍니다. 본문의 C1-E-003 같은 번호는 근거 기록 번호입니다.",
+      inputSchema: { type: "object", properties: { no: { type: "string" }, section: { type: "string" } }, required: ["no"] },
+      execute: function (inp) {
+        status("아티클 읽기: " + inp.no + (inp.section ? " · " + inp.section : ""));
+        return loadArticle(inp.no).then(function (a) {
+          if (inp.section) {
+            var key = String(inp.section).trim();
+            var hit = a.sections.filter(function (s) { return s.title.indexOf(key) >= 0; })[0];
+            if (!hit) throw new Error("섹션을 찾지 못했습니다. 섹션 목록: " + a.sections.map(function (s) { return s.title; }).join(" / "));
+            return { no: a.no, title: a.title, section: hit.title, text: hit.text.slice(0, 14000) };
+          }
+          return { no: a.no, title: a.title, question: a.question, sections: a.sections.map(function (s) { return s.title; }),
+                   opening: a.sections.slice(0, 2).map(function (s) { return "## " + s.title + "\n" + s.text; }).join("\n\n").slice(0, 6000) };
+        });
+      } },
+    { name: "search_articles",
+      description: "20개 아티클 전체에서 키워드가 들어간 문장·표 행을 찾습니다. 어느 질문의 어느 섹션인지와 해당 줄을 최대 12건 돌려줍니다. 기업·제품·수치·용어가 어디에 나오는지 찾을 때 씁니다.",
+      inputSchema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] },
+      execute: function (inp) {
+        var terms = String(inp.query || "").toLowerCase().split(/\s+/).filter(Boolean);
+        if (!terms.length) throw new Error("query가 비었습니다");
+        status("아티클 검색: " + inp.query);
+        return Promise.all(DATA.questions.map(function (q) { return loadArticle(q.no).catch(function () { return null; }); })).then(function (arts) {
+          var hits = [];
+          arts.forEach(function (a) {
+            if (!a) return;
+            a.sections.forEach(function (s) {
+              s.text.split("\n").forEach(function (line) {
+                var low = line.toLowerCase(), n = terms.filter(function (t) { return low.indexOf(t) >= 0; }).length;
+                if (n) hits.push({ score: n, no: a.no, section: s.title, text: line.slice(0, 500) });
+              });
+            });
+          });
+          hits.sort(function (x, y) { return y.score - x.score; });
+          return { total: hits.length, hits: hits.slice(0, 12).map(function (h) { return { no: h.no, section: h.section, text: h.text }; }) };
+        });
+      } },
+  ];
+
+  function context() {
+    var qs = DATA.questions.map(function (q) {
+      return q.no + " [" + q.cat + "] " + q.title + " | 질문: " + q.question + " | 한 줄 답: " + q.answer + " | 판정: " + q.chip +
+        (q.score != null ? " | 점수 " + q.score + "점" : "") + (q.items ? " | 항목별 단계: " + q.items : "") + " | 회차 R" + q.round + " " + q.date;
+    }).join("\n");
+    var ev = DATA.events.map(function (e) { return e.date + " " + e.id + " " + e.text; }).join("\n");
+    var fc = DATA.forecasts.map(function (f) { return f.due + " " + f.id + " " + f.text; }).join("\n");
+    return '당신은 "Life Signals" 포털의 질의응답 도우미입니다. Life Signals는 한국인의 가족·시간과 돌봄·집·지출과 새 수요의 변화를 같은 질문으로 매달 다시 묻고, 근거 기록(지표·사건·해석·전망)으로 아티클을 쓰는 생활 변화 리포트입니다. 데이터 기준일은 ' + DATA.generated + "입니다.\n\n" +
+      "답변 원칙:\n- 포털 데이터를 먼저 근거로 씁니다. 아래 요약으로 부족하면 도구로 아티클을 읽거나 검색한 뒤 답합니다.\n" +
+      "- 포털에 없는 내용은 일반 지식으로 보충해도 됩니다. 이때 그 문장 끝에 \"(일반 지식)\"이라고 표시합니다.\n" +
+      "- 수치·날짜는 아티클에 적힌 그대로 씁니다. 수치를 지어내지 않습니다.\n" +
+      "- 근거는 질문 번호 [[C1]]이나 기록 번호 [[C1-E-003]]처럼 이중 대괄호로 표기합니다. 화면에서 링크로 바뀝니다.\n" +
+      "- 한국어 보고체(\"~습니다\")로, 결론을 먼저 쓰고 간결하게 답합니다. 필요하면 짧은 목록이나 표를 씁니다.\n\n" +
+      "판정 규칙: 질문 성격에 따라 방향×속도(증가·정체·감소 × 가속·유지·둔화), 주도 주체 지도, 영향 순위, 채택 4단계(실험·얼리어답터·확산·주류) 중 하나로 판정합니다. 채택 4단계 점수는 항목마다 1단계 0점, 2단계 33점, 3단계 67점, 4단계 100점으로 매긴 평균입니다. '잠정'은 기준을 직접 재는 수치가 없어 간접 근거로 판정한 칸입니다. 단계 정의와 기준은 각 아티클의 판정 섹션에 있습니다.\n\n" +
+      "[카테고리] " + DATA.categories.join(" / ") + "\n\n[20개 질문 현재 상태]\n" + qs + "\n\n[최근 주요 사건]\n" + ev + "\n\n[90일 안에 판정할 전망]\n" + fc;
+  }
+
+  var CHAT = { sample: null, tools: false, turns: [], busy: false, ctl: null };
+  var ERR = { rate_limited: "요청이 많아 잠시 멈췄습니다. 조금 뒤 다시 질문해 주세요.", session_expired: "Claude 로그인이 만료되었습니다. 다시 로그인한 뒤 질문해 주세요.",
+              refused: "이 질문에는 답할 수 없습니다. 질문을 바꿔 주세요.", empty_completion: "답변이 비어 있습니다. 질문을 조금 바꿔 다시 시도해 주세요.",
+              prompt_too_large: "대화가 너무 길어졌습니다. 새 대화로 시작해 주세요.", upstream_error: "연결이 끊겼습니다. 다시 보내 주세요." };
+  var OFF = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
+  var SUGG = ["이번 달 가장 큰 변화는 무엇인가요?", "1인 가구와 고령 가구 변화를 함께 정리해 주세요", "집의 개조를 밀어붙이는 요인 1위는?", "앞으로 90일 안에 판정할 전망은?"];
+
+  function add(cls, html) { var d = document.createElement("div"); d.className = "msg " + cls; d.innerHTML = html; $("chat-log").append(d); $("chat-log").scrollTop = $("chat-log").scrollHeight; return d; }
+  function busy(b) { CHAT.busy = b; var btn = $("chat-send"); btn.textContent = b ? "중지" : "보내기"; btn.classList.toggle("stop", b); $("chat-in").disabled = b; }
+  function intro() {
+    $("chat-log").innerHTML = "";
+    var d = add("a", '<div class="chat-note">20개 질문의 아티클과 근거 기록을 바탕으로 답합니다. 포털에 없는 내용은 일반 지식으로 보충하고 "(일반 지식)"으로 표시합니다. 답변은 보는 사람의 Claude 로그인으로 처리되며, 처음 질문할 때 사용 동의를 묻습니다.</div><div class="chat-sugg"></div>');
+    var box = d.querySelector(".chat-sugg");
+    SUGG.forEach(function (t) { var b = document.createElement("button"); b.type = "button"; b.textContent = t; b.onclick = function () { if (!CHAT.busy) send(t); }; box.appendChild(b); });
+  }
+  function send(q) {
+    CHAT.turns.push({ role: "user", content: q });
+    if (CHAT.turns.length > 16) CHAT.turns = CHAT.turns.slice(-16);
+    while (CHAT.turns.length && CHAT.turns[0].role !== "user") CHAT.turns.shift();
+    add("u", esc(q));
+    var bub = add("a", '<div class="st">생각 중 …</div>'); statusEl = bub.querySelector(".st");
+    CHAT.ctl = new AbortController(); busy(true);
+    var opts = { cache: false, signal: CHAT.ctl.signal, onText: function (o) { statusEl = null; bub.innerHTML = md(o.text); $("chat-log").scrollTop = $("chat-log").scrollHeight; } };
+    if (CHAT.tools) opts.tools = TOOLS;
+    CHAT.sample([{ role: "user", content: context() }].concat(CHAT.turns), opts).then(function (r) {
+      bub.innerHTML = md(r.text) + (r.truncated ? '<div class="err">답변이 길이 제한으로 잘렸습니다. 범위를 좁혀 다시 질문해 주세요.</div>' : "");
+      CHAT.turns.push({ role: "assistant", content: r.text });
+    }).catch(function (e) {
+      CHAT.turns.pop();
+      var kept = e && e.text && e.code !== "refused" ? md(e.text) : "";
+      if (e && e.code === "cancelled") bub.innerHTML = kept || '<div class="chat-note">중지했습니다.</div>';
+      else if (e && OFF.indexOf(e.code) >= 0) { bub.innerHTML = '<div class="err">이 화면에서는 Claude 질의 기능을 사용할 수 없습니다.</div>'; $("chat-in").disabled = true; $("chat-send").disabled = true; }
+      else if (e && e.code === "tools_unavailable") { CHAT.tools = false; bub.innerHTML = '<div class="err">이 화면에서는 아티클 조회 기능을 쓸 수 없어 요약 정보만으로 답합니다. 질문을 다시 보내 주세요.</div>'; }
+      else bub.innerHTML = kept + '<div class="err">' + esc(ERR[e && e.code] || ERR.upstream_error) + "</div>";
+    }).then(function () {
+      statusEl = null; CHAT.ctl = null;
+      if (!$("chat-send").disabled) { busy(false); $("chat-in").focus(); } else { CHAT.busy = false; }
+    });
+  }
+  function open(on) {
+    $("chat").hidden = !on; $("chat-fab").hidden = on; $("chat-fab").setAttribute("aria-expanded", String(on));
+    if (on) { if (!$("chat-log").children.length) intro(); $("chat-in").focus(); } else $("chat-fab").focus();
+  }
+  function init() {
+    if (!window.claude || typeof window.claude.use !== "function") return;
+    window.claude.use("sample").then(function (sample) {
+      if (!sample) return;
+      CHAT.sample = sample;
+      (sample.limits ? sample.limits() : Promise.resolve(null)).then(function (lim) {
+        CHAT.tools = !!(lim && lim.tools && lim.tools.maxCount >= TOOLS.length);
+      }).catch(function () { CHAT.tools = false; });
+      $("chat-fab").hidden = false;
+      $("chat-fab").onclick = function () { open(true); };
+      $("chat-close").onclick = function () { open(false); };
+      $("chat-new").onclick = function () { if (CHAT.ctl) CHAT.ctl.abort(); CHAT.turns = []; intro(); $("chat-in").focus(); };
+      var ta = $("chat-in");
+      ta.addEventListener("input", function () { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 140) + "px"; });
+      ta.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("chat-form").requestSubmit(); } });
+      $("chat-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (CHAT.busy) { if (CHAT.ctl) CHAT.ctl.abort(); return; }
+        var q = ta.value.trim(); if (!q) return; ta.value = ""; ta.style.height = "auto"; send(q);
+      });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("chat").hidden) open(false); });
+    }).catch(function () {});
+  }
+  init();
+})();
+</script>

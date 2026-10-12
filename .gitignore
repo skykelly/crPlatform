@@ -14,3 +14,7 @@ sites/**/site-source*.tar.gz
 outputs/**/*.png
 outputs/**/*.inspect.ndjson
 outputs/**/verification.txt
+
+# Signal report
+inbox/
+site/dist/

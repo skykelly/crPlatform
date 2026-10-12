@@ -1,0 +1,74 @@
+[
+ {
+  "id": "F1-K1",
+  "name": "1인가구 비중",
+  "unit": "%",
+  "definition": "일반가구 중 1인가구",
+  "source": "국가데이터처 인구주택총조사(등록센서스)",
+  "factbase": "D01",
+  "release": "확인 필요"
+ },
+ {
+  "id": "F1-K2",
+  "name": "부부가구 비중",
+  "unit": "%",
+  "definition": "부부로만 구성된 가구",
+  "source": "국가데이터처 인구주택총조사 세대구성",
+  "factbase": "D06",
+  "release": "확인 필요"
+ },
+ {
+  "id": "F1-K3",
+  "name": "부부+미혼자녀 가구 비중",
+  "unit": "%",
+  "definition": "부부와 미혼자녀로 구성된 가구",
+  "source": "국가데이터처 인구주택총조사 세대구성",
+  "factbase": "D09",
+  "release": "확인 필요"
+ },
+ {
+  "id": "F1-K4",
+  "name": "한부모 가구 비중",
+  "unit": "%",
+  "definition": "한부모와 미혼자녀 가구",
+  "source": "국가데이터처 인구주택총조사 세대구성",
+  "factbase": "D09",
+  "release": "확인 필요"
+ },
+ {
+  "id": "F1-K5",
+  "name": "3세대 이상 가구 비중",
+  "unit": "%",
+  "definition": "3세대 이상이 함께 사는 가구",
+  "source": "국가데이터처 인구주택총조사 세대구성",
+  "factbase": "D09",
+  "release": "확인 필요"
+ },
+ {
+  "id": "F1-K6",
+  "name": "비친족 가구",
+  "unit": "가구",
+  "definition": "친족이 아닌 사람끼리 사는 5인 이하 가구",
+  "source": "국가데이터처 인구주택총조사",
+  "factbase": "",
+  "release": "확인 필요"
+ },
+ {
+  "id": "F1-K7",
+  "name": "평균 가구원수",
+  "unit": "명",
+  "definition": "일반가구 평균 가구원수",
+  "source": "국가데이터처 인구주택총조사",
+  "factbase": "D08",
+  "release": "확인 필요"
+ },
+ {
+  "id": "F1-K8",
+  "name": "반려동물 양육가구 비율",
+  "unit": "%",
+  "definition": "반려동물을 기르는 가구",
+  "source": "농림축산식품부 동물보호 국민의식조사 등",
+  "factbase": "D07",
+  "release": "확인 필요"
+ }
+]

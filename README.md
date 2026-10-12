@@ -1,36 +1,86 @@
-# Korea Customer / Life Fact Base
+# Life Signals — 한국 고객의 가족·시간·집·지출 변화 리포트
 
-한국 고객의 생활 변화와 Home & Living 수요를 분석하기 위한 공식 통계 기반 리서치 저장소입니다.
+한국 가구가 누구와 살고, 하루를 어떻게 쓰고, 어떤 집에 살며, 무엇에 돈을 쓰는지를 고정 질문으로 정해 두고 주기적으로 다시 조사한다. 매 회차 결과는 4유형 기록(지표·사건·해석·전망)으로 쌓고, 아티클·변경 이력(Diff)·포털은 그 기록에서 다시 만든다.
 
-## 구성
+- **독자와 목적:** 고객 관계형 플랫폼(Customer Relationship Platform)을 기획하는 사람이 "어떤 가구·생애 전환·평형대에서 어떤 Home & Living 수요가 생기는가"를 근거로 판단하게 한다.
+- **포털:** https://claude.ai/artifact/ (첫 게시 후 기입)
+- **지역 렌즈:** 한국 중심. 해외는 한국의 다음 단계를 가늠할 비교가 필요할 때만 쓰고 등급을 표시한다.
 
-- `sites/korea-life-fact-base/` — 배포 가능한 정적 리서치 웹페이지
-- `outputs/01a1263b-a1e2-7bf1-92f4-1494b204937a/` — Core Fact Catalog, 1차 Fact Dataset, 월간 갱신 Workflow
+## 주제와 고정 질문 v1.0 (2026-10-12 확정)
+
+| 카테고리 | 번호 | 질문 | 판정 척도 |
+|---|---|---|---|
+| 01. 가구와 생애 전환 `family/` | F1 | 한국인은 누구와 함께 살며, 그 구성은 어느 쪽으로 얼마나 빨리 바뀌는가? | 방향×속도 |
+| | F2 | 독립·결혼·출산·이사·은퇴는 언제, 얼마나 자주 일어나는가? | 방향×속도 |
+| 02. 시간과 돌봄 `time-care/` | T1 | 하루의 시간은 어디에 쓰이며, 집 안에서 보내는 시간은 어떻게 바뀌는가? | 방향×속도 |
+| | T2 | 자녀·부모 돌봄은 누가 맡으며, 가족에서 공공·시장·기술로 얼마나 넘어가는가? | 주도 주체 지도 |
+| 03. 집과 공간 `residence/` | H1 | 집의 비용·면적·점유·노후도는 가구 변화와 얼마나 어긋나 있는가? | 방향×속도 |
+| | H2 | 무엇이 집의 공간과 기능을 바꾸고 있으며, 어떤 공간·기능이 생기고 사라지는가? | 영향 순위 |
+| 04. 지출과 새 수요 `needs/` | N1 | Home & Living 지출은 품목별로 실질 기준 어디서 늘고 줄었는가? | 방향×속도(실질) |
+| | N2 | 생활 변화가 만든 새 Home & Living 서비스 수요는 어디까지 왔는가? | 채택 4단계 |
+
+질문별 한 줄 답 형식과 진행 상황은 카테고리 폴더의 `README.md`, 추적 지표는 질문 폴더의 `indicators.json`과 `request_rN.md`에 있다. 판정 기준표는 `lib/judge.py`.
+
+**공통 렌즈:** 해석·전망은 라이프스테이지 5개(청년 1인 / 신혼·무자녀 부부 / 자녀양육 가구 / 중장년 / 고령 가구)와 평형대 3개(전용 60㎡ 이하 / 60~85㎡ / 85㎡ 초과)로 나눠 본다.
+
+## 번호 규칙
+
+- 질문: 가구 `F1~`, 시간·돌봄 `T1~`, 집 `H1~`, 수요 `N1~`. 질문 폴더는 소문자(`family/f1/`).
+- 추적 지표: `<질문>-K1~` (예: H1-K3).
+- 기록: `<질문>-M-001`(지표) · `-E-`(사건) · `-I-`(해석) · `-F-`(전망). 시나리오 전망은 `-F-101~`.
+- 회차: `R1, R2 …` (질문 번호와 겹치지 않게 '집' 카테고리는 H를 쓴다).
 
 ## 운영 원칙
 
-- KOSIS·국가데이터처·국토교통부 등 1차 공식 출처를 우선 사용합니다.
-- Actual과 Official Projection은 별도 관측치로 보관합니다.
-- 통계표 ID, 단위, 지역 범위, 수집일, QA 이슈를 함께 기록합니다.
-- 현장 보도는 생활 조건을 이해하기 위한 사례로만 사용하며, 통계적 대표성의 근거로 쓰지 않습니다.
+- **원본은 하나:** 질문별 `records.jsonl`만 원본이다. 아티클·Diff·변경 이력·포털은 다시 만드는 결과물이다.
+- **근거와 판단의 분리:** 지표·사건은 원문 링크를 갖고, 해석·전망은 사실 기록 번호(`basis`)에 연결한다.
+- **본 조사는 백지에서:** 딥리서치는 이전 글을 보지 않는다. 이전 기록과의 대조는 그다음 단계에서 한다.
+- **비교 가능성:** 질문과 추적 지표는 분기에 한 번만 바꾸고, 바꾸면 버전을 올린다.
+- **출처 등급:** A = 정부 통계·공식 발표, B = 주요 언론·연구기관·공시, C = 블로그·출처 불명(단독 근거 금지).
+- **공식 통계 우선:** `data/factbase.sqlite`(KOSIS 공식 API 수집값)에 있는 지표는 거기서 먼저 꺼낸다.
+- **공개 저장소:** 남의 글 전문, 사내 자료를 커밋하지 않는다. 요약과 링크만 남긴다.
 
-## 웹페이지
+## 회차 흐름
 
-정적 파일은 `sites/korea-life-fact-base/dist/index.html`입니다. 웹페이지는 지표 대시보드, 사건, 해석, 전망 탭으로 구성됩니다.
+| 실행 | 언제 | 하는 일 |
+|---|---|---|
+| 주간 간단 조사 | 매주 월요일 07:00 (서울) | 8개 질문 전체에서 새 공식 통계·사건을 찾아 `patches.jsonl`로 반영. 판정은 바꾸지 않고 '확인 필요'만 남김 |
+| 딥리서치 회차 | 매주 월요일 09:00 (서울), 순환 | 이번 주 순번 질문 2개를 백지 조사 → 이전 기록과 대조 → 새 회차 아티클·Diff |
+| 공식 통계 수집 | 매월 10일 09:30 (GitHub Actions) | KOSIS 표 재수집 → 팩트베이스 DB 갱신 |
 
-## 데이터 파이프라인
+**딥리서치 순환표** (그 달의 몇째 월요일인지로 정한다. 날짜 1~7일 = 첫째 주)
 
-- `data/factbase.sqlite` — 39개 Catalog 항목과 84,592개 공식 관측치의 기준 DB. 기존 엑셀을 손상시키지 않고 옮겼습니다.
-- `pipeline/factbase.py` — KOSIS 공식 API 수집, Actual/Official Projection 분리, 중복·결측·개정 검증, 웹용 JSON 생성.
-- `sites/korea-life-fact-base/dist/data/dashboard.json` — DB에서 생성한 공개 대시보드 데이터. 웹페이지는 공개 GitHub `main`의 이 파일을 먼저 읽고, 연결 실패 시 배포된 저장본을 사용합니다.
-- `data/raw/YYYY-MM-DD/` — 실제 값이 변경된 실행의 KOSIS API 응답 원문. 인증키는 저장하지 않습니다.
+| 주 | 질문 |
+|---|---|
+| 첫째 월요일 | F1 · F2 |
+| 둘째 월요일 | T1 · T2 |
+| 셋째 월요일 | H1 · H2 |
+| 넷째 월요일 | N1 · N2 |
+| 다섯째 월요일 | 딥리서치 없음 (밀린 '확인 필요' 정리) |
 
-첫 적재는 `python -m pip install openpyxl==3.1.5` 후 `python pipeline/factbase.py bootstrap`으로 재현할 수 있습니다. 이미 DB가 있으면 덮어쓰지 않습니다. 검증과 웹 데이터 재생성은 `python -m unittest discover -s tests -v`, `python pipeline/factbase.py check`, `python pipeline/factbase.py build` 순서입니다.
+**검증 탐침**(백지 재조사 → 대조)은 사업 판단에 바로 쓰이고 민간 출처 비중이 큰 H(집)·N(수요) 카테고리에서 딥리서치 회차마다 돌린다.
 
-## 자동 실행
+질문 폴더에서:
+```bash
+python3 build_records.py   # records.jsonl 재생성 + 규칙 검증
+python3 render_article.py  # article_rN.html, signal_rN.json 생성
+cd ../.. && python3 site/build_site.py   # 포털 재생성 (깨진 내부 링크 0이어야 통과)
+```
 
-[GitHub Actions](.github/workflows/factbase-refresh.yml)가 매월 10일 09:30(서울)에 실행됩니다. 수동 실행도 가능합니다. 저장소 Settings → Secrets and variables → Actions에 `KOSIS_API_KEY`를 등록해야 합니다. KOSIS [공식 활용신청](https://kosis.kr/openapi/)에서 발급한 키를 사용하고, 키를 이 저장소나 채팅에 붙여 넣지 마세요.
+## 공식 통계 팩트베이스
 
-실행 순서: 테스트 → 기존 DB 확인 → 8개 공식 표 API 조회 → 중복·분류·상태 검사 → 개정 이력 기록 → DB 및 웹 JSON 생성 → 변경이 있을 때만 `main`에 커밋. 수집 또는 검증 실패 시 후속 커밋 단계가 실행되지 않습니다. 공식 전망 표의 수치가 바뀌면 추계 버전 확인이 필요하므로 자동 반영하지 않고 실행을 실패시킵니다. 웹은 공개 GitHub JSON을 읽으므로 승인된 커밋이 반영되면 다음 페이지 조회부터 최신 값을 보여줍니다. 소스 코드나 기사 해석은 이 데이터 파이프라인이 자동 수정하지 않습니다.
+- `data/factbase.sqlite`: Catalog 39개 항목, 공식 관측치 8만 4천여 건(Actual과 Official Projection 분리).
+- `pipeline/factbase.py`: KOSIS 공식 API 수집, 중복·결측·개정 검증. `python -m unittest discover -s tests -v` → `python pipeline/factbase.py check` → `python pipeline/factbase.py build`.
+- `data/raw/YYYY-MM-DD/`: 값이 바뀐 실행의 API 응답 원문. 인증키는 저장하지 않는다.
+- [GitHub Actions](.github/workflows/factbase-refresh.yml)가 매월 10일 09:30에 실행된다. 저장소 Secrets에 `KOSIS_API_KEY`를 등록해야 하며, 아직 등록 전이라 실시간 재수집은 검증 전이다. 자세한 규칙은 [월간 갱신 Workflow](outputs/01a1263b-a1e2-7bf1-92f4-1494b204937a/monthly_refresh_workflow.md).
+- 이전 정적 대시보드는 `archive/`에 보관했다.
 
-현재 API 인증키가 등록되지 않아 실시간 재수집은 검증 전입니다. 자세한 운영 규칙은 [월간 갱신 Workflow](outputs/01a1263b-a1e2-7bf1-92f4-1494b204937a/monthly_refresh_workflow.md)를 참조하세요.
+## 폴더
+
+| 경로 | 내용 |
+|---|---|
+| `<카테고리>/<질문>/` | `request_rN.md`(요청서), `indicators.json`(추적 지표), `build_records.py`, `records.jsonl`, `patches.jsonl`, `render_article.py`, `article_rN.html`, `research_rN_summary.md` |
+| `lib/` | 기록 규칙(`records.py`, `validate.py`), 판정 기준표(`judge.py`), 아티클 생성기(`article.py`, `article.css`) |
+| `site/` | 포털 생성(`build_site.py`), 카탈로그, 포털 UI |
+| `tools/` | 수동 입력(`intake.py`), 회차 견본(`templates/`) |
+| `data/`, `pipeline/` | 공식 통계 팩트베이스 |
