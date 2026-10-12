@@ -56,34 +56,6 @@ def score_of(sg):
     top = len(sg["levels"]) - 1
     return round(sum(st / top * 100 for _, st, _ in sg["items"]) / len(sg["items"]))
 
-# ---------- 레이더 (사분면 = 카테고리, 점 = 질문, 바깥일수록 게이지가 많이 찬 질문)
-import math as _m
-radar_dots = []
-quad_names = []
-for ci, (c, items) in enumerate(sections):
-    live = [it for it in items if it["status"] == "live"]
-    a0 = -90 + ci * 90
-    quad_names.append((a0 + 45, c))
-    for k, it in enumerate(live):
-        sg = it["cur"].get("signal", {})
-        sc = score_of(sg)
-        ratio = sc / 100 if sc is not None else ((sg.get("on", 0) / sg.get("of", 1)) if sg.get("of") else 0.3)
-        ang = _m.radians(a0 + 90 * (k + 1) / (len(live) + 1))
-        rad = 18 + ratio * 70
-        radar_dots.append((round(100 + rad * _m.cos(ang), 1), round(100 + rad * _m.sin(ang), 1), it["q"]["no"], it["cur"]["title"], c["id"]))
-radar_svg = [f'<svg class="radar" viewBox="-14 -14 228 228" role="img" aria-label="{len(radar_dots)}개 질문의 신호 위치. 사분면은 영역, 바깥쪽일수록 빠르게 변하는 항목이 많은 질문">']
-for rr in (30, 55, 80):
-    radar_svg.append(f'<circle cx="100" cy="100" r="{rr}" class="ring"/>')
-radar_svg.append('<line x1="100" y1="12" x2="100" y2="188" class="axis"/><line x1="12" y1="100" x2="188" y2="100" class="axis"/>')
-radar_svg.append('<g class="sweep"><path d="M100 100 L100 12 A88 88 0 0 1 162.2 37.8 Z" class="beam"/></g>')
-for i, (x, y, no, title, cid) in enumerate(radar_dots):
-    radar_svg.append(f'<a href="#{E(cid)}" class="dot" data-q="{E(no)}"><circle cx="{x}" cy="{y}" r="3.6" style="--i:{i}"/><title>{E(no)} {E(title)}</title></a>')
-for ang, c in quad_names:
-    x = 100 + 100 * _m.cos(_m.radians(ang)); y = 100 + 100 * _m.sin(_m.radians(ang))
-    radar_svg.append(f'<text x="{x:.0f}" y="{y + 4:.0f}" text-anchor="middle" class="ql">{E(c.get("short", c["name"]))}</text>')
-radar_svg.append("</svg>")
-radar_svg = "".join(radar_svg)
-
 # ---------- 타일
 def pips(on, of):
     return "".join(f'<i class="{"on" if k < on else ""}" style="--k:{k}"></i>' for k in range(of))
@@ -200,6 +172,8 @@ PORTAL_JS = (SITE / "portal.js").read_text(encoding="utf-8")
 
 _DASH_SECS = [("d", "01", "인구·가구"), ("e", "02", "생애사건"), ("t", "03", "생활시간·돌봄"), ("h", "04", "주거"), ("s", "05", "지출·물가"), ("x", "표", "전체 탐색기")]
 dash_secs = "".join(f'<li><a href="dashboard.html#{k}"><b>{n}</b>{E(t)}</a></li>' for k, n, t in _DASH_SECS)
+import dashboard as _dashmod
+dash_tiles = "".join(_dashmod.tile_html(t) for t in _dashmod.LAST["tiles"])
 portal = f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{E(SITE_TITLE)}</title>
@@ -216,17 +190,16 @@ portal = f"""<!doctype html>
         <div><dt>발행 아티클</dt><dd data-count="{total_live}">{total_live}</dd></div>
         <div><dt>근거 기록</dt><dd data-count="{total_rec}">{total_rec:,}</dd></div>
         <div><dt>판정 대기 전망</dt><dd data-count="{len(forecasts)}">{len(forecasts)}</dd></div>
-        <div><dt>통계 대시보드</dt><dd><a class="chg-link" href="dashboard.html">열기</a></dd></div>
         <div><dt>변경 이력</dt><dd><a class="chg-link" href="changes.html">{changes_total}건</a></dd></div>
         <div><dt>최근 업데이트</dt><dd>{E(last_date)}</dd></div>
       </dl>
     </div>
-    <div class="mh-radar">{radar_svg}</div>
   </header>
 
-  <section class="dashlink" aria-labelledby="h-dash">
-    <a class="dl-main" href="dashboard.html"><span class="dl-k">공식 통계</span><h2 id="h-dash">통계 대시보드</h2><p>KOSIS 공식 표에서 꺼낸 가구·생애사건·생활시간·주거·지출 수치를 구분별 차트와 표로 봅니다. 전체 탐색기에서 표의 모든 값을 열어 볼 수 있습니다.</p><span class="dl-go">대시보드 열기 →</span></a>
-    <ol class="dl-secs">{dash_secs}</ol>
+  <section class="kls" aria-labelledby="h-kls">
+    <h2 id="h-kls">Korean Life Statistics</h2>
+    <ol class="kls-nav">{dash_secs}</ol>
+    <div class="kls-tiles">{dash_tiles}</div>
   </section>
 
   <section class="signals" aria-labelledby="h-signals">

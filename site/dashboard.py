@@ -336,6 +336,36 @@ def model(pages=()):
     return {"asof": asof, "qpath": qpath, "nobs": nobs, "ncat": len(cat), "tiles": tiles, "sections": secs, "tables": tables}, problems
 
 
+LAST = None
+
+
+def tile_html(t):
+    """포털 첫 화면용 요약 타일 한 칸(대시보드 상단 타일과 같은 값·표기)."""
+    f, v = t["fmt"], t["v"]
+    if f["unit"] == "time":
+        m = round(v); val = (f"{m // 60}시간 " if m >= 60 else "") + f"{m % 60}분"; unit = ""
+    elif f["unit"] == "%":
+        val = f"{v:.1f}%"; unit = ""
+    else:
+        val = f"{v:,.0f}"; unit = f"<small>{E(f['unit'])}</small>"
+    d = ""
+    if t.get("py") is not None and t.get("pv") is not None:
+        cur, prev, mode = v, t["pv"], t["delta"]
+        if mode == "p":
+            x = cur - prev; txt = f"{x:+.1f}%p"
+        elif mode == "min":
+            x = round(cur - prev); txt = f"{x:+d}분" if x else "±0분"
+        else:
+            x = (cur / prev - 1) * 100; txt = f"{x:+.1f}%"
+        txt = txt.replace("-", "−")
+        if abs(x) < 0.05 and mode != "min":
+            txt = "±0.0" + ("%p" if mode == "p" else "%")
+        cls = "up" if x > 0 else "dn" if x < 0 else ""
+        d = f" · {t['py']} 대비 <span class=\"{cls}\">{txt}</span>"
+    return (f'<a class="ks-tile" href="dashboard.html#{t["sec"]}"><span class="ks-l">{E(t["label"])}</span>'
+            f'<span class="ks-v">{val}{unit}</span><span class="ks-d">{t["y"]}{d}</span></a>')
+
+
 def build(dist, head_css, site_title, ui_html, pages):
     data, problems = model(pages)
     if problems:
@@ -362,6 +392,8 @@ def build(dist, head_css, site_title, ui_html, pages):
             f'</main><div class="tip" id="tip" role="status" hidden></div>'
             f'<script type="application/json" id="dash-data">{payload}</script><script>{js}</script>{ui_html}</body></html>')
     (dist / "dashboard.html").write_text(page, encoding="utf-8")
+    global LAST
+    LAST = data
     return len(page)
 
 
