@@ -69,11 +69,19 @@ cd ../.. && python3 site/build_site.py   # 포털 재생성 (깨진 내부 링�
 
 ## 공식 통계 팩트베이스
 
-- `data/factbase.sqlite`: Catalog 39개 항목, 공식 관측치 8만 4천여 건(Actual과 Official Projection 분리).
-- `pipeline/factbase.py`: KOSIS 공식 API 수집, 중복·결측·개정 검증. `python -m unittest discover -s tests -v` → `python pipeline/factbase.py check` → `python pipeline/factbase.py build`.
-- `data/raw/YYYY-MM-DD/`: 값이 바뀐 실행의 API 응답 원문. 인증키는 저장하지 않는다.
-- [GitHub Actions](.github/workflows/factbase-refresh.yml)가 매월 10일 09:30에 실행된다. 저장소 Secrets에 `KOSIS_API_KEY`를 등록해야 하며, 아직 등록 전이라 실시간 재수집은 검증 전이다. 자세한 규칙은 [월간 갱신 Workflow](outputs/01a1263b-a1e2-7bf1-92f4-1494b204937a/monthly_refresh_workflow.md).
-- 이전 정적 대시보드는 `archive/`에 보관했다.
+- `data/factbase.sqlite`: 카탈로그 49개 항목(엑셀 Core Catalog 39개 + 2026-10 보완 10개), 공식 관측치 약 8만 9천 건. 실적(Actual)과 공식 추계(Official Projection)를 분리한다.
+- 수집: `pipeline/factbase.py refresh`(인구·가구·주택 8개 표), `pipeline/extended_facts.py`(맞벌이·이동·생활시간·점유·가계동향). 표 기관은 `factbase.ORG`(기본 통계청 101).
+- 가계동향(`DT_1L9U101`)은 한 번 호출로 125개 항목이 온다. S01~S05에 더해 연료비(S08), 기타주거관련서비스(S09), 실제주거비(S10), 상하수도(S11), 가전관련서비스(S12), 가사소모품(S13), 가구·조명 장식 서비스(S14), 소비지출 총액(S15)을 저장한다. 주거·수도·광열(S05)이 세부 5개 합과 맞는지 매번 검사한다.
+- 생활시간조사는 수면(LS03)·가정관리(LS04)에 더해 행동분류 전체를 LS09로 받는다(보조 출처: 실패해도 나머지 수집은 진행).
+- `DT_1JC1521`은 평균 면적만 있어 H09로 옮겼다. 면적 구간별 가구(H02)는 표 탐색 후 확정한다.
+- 저장된 원본으로 다시 넣기(키 불필요): `python3 pipeline/extended_facts.py --from-raw data/raw/<날짜>`.
+- 검증: `python -m unittest discover -s tests -v` → `python pipeline/factbase.py check`.
+
+**표 찾기 (Actions 수동 실행):** `discover_sources`는 빈 지표용 검색어로 KOSIS 전 기관을 찾아 `data/discovery/<날짜>.json`에, `probe_candidates`는 `pipeline/candidates.json`의 표 분류·항목 코드를 `data/discovery/probe_<날짜>.json`에 커밋한다(키는 저장하지 않음).
+
+**기록과 대조:** `python3 tools/factbase_sync.py`가 `data/indicator_map.json`에 적은 지표 기록을 DB로 다시 계산해 일치·값 다름·새 연도를 `data/sync_report.md`에 쓴다. 기록은 바꾸지 않는다. 주간 조사는 이 보고서부터 본다.
+
+**자동 실행:** [GitHub Actions](.github/workflows/factbase-refresh.yml)가 매월 10일 09:30(서울)에 수집한다. 저장소 Secrets의 `KOSIS_API_KEY`를 쓴다. 이전 정적 대시보드는 `archive/`에 보관했다.
 
 ## 폴더
 

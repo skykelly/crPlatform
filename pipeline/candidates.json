@@ -1,0 +1,6 @@
+{
+ "_note": "probe_candidate_tables.py가 읽는 후보 표 목록. discover 결과(data/discovery/)를 보고 표 ID·기관을 채운다.",
+ "tables": [
+  {"tbl": "DT_1TS202001", "org": "101", "purpose": "생활시간 행동분류 코드 전체 (LS09)"}
+ ]
+}

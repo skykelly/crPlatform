@@ -12,11 +12,11 @@ on:
         type: boolean
         default: false
       discover_sources:
-        description: 'Search KOSIS metadata for the new five-driver dashboard'
+        description: 'Search KOSIS tables for missing indicators (writes data/discovery/)'
         type: boolean
         default: false
       probe_candidates:
-        description: 'Inspect dimensions of candidate dashboard tables'
+        description: 'Inspect dimensions of tables in pipeline/candidates.json (writes data/discovery/)'
         type: boolean
         default: false
   schedule:
@@ -60,6 +60,19 @@ jobs:
         env:
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
         run: python pipeline/probe_candidate_tables.py
+      - name: Publish discovery and probe results
+        if: ${{ inputs.discover_sources || inputs.probe_candidates }}
+        run: |
+          git add data/discovery
+          if git diff --cached --quiet; then
+            echo 'No discovery output.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'discovery: KOSIS table search and probe results'
+          git pull --rebase origin main
+          git push origin HEAD:main
       - name: Fetch and validate KOSIS data
         if: ${{ !inputs.validate_only && !inputs.probe_api && !inputs.discover_sources && !inputs.probe_candidates }}
         env:
@@ -85,4 +98,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'data: refresh official Korea life facts'
+          git pull --rebase origin main
           git push origin HEAD:main

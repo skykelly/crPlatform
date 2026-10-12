@@ -1,0 +1,27 @@
+{
+ "_note": "factbase_sync.py가 쓰는 지표 기록 ↔ 팩트베이스 질의 대응표. 항목: {dataset, measure, d2?, d3?} 또는 그 목록(합). ratio = num/den×scale. kind=time 이면 '시:분'을 분으로 바꾼다.",
+ "records": {
+  "F1-M-001": {"num": [{"dataset": "DT_1JC1516", "measure": "T10", "d2": "50"}], "den": [{"dataset": "DT_1JC1516", "measure": "T10", "d2": "00"}], "scale": 100, "round": 1},
+  "F1-M-005": {"num": [{"dataset": "DT_1JC1517", "measure": "T210", "d2": "0", "d3": "000"}], "den": [{"dataset": "DT_1JC1517", "measure": "T100", "d2": "0", "d3": "000"}], "scale": 100, "round": 1},
+  "F1-M-007": {"num": [{"dataset": "DT_1JC1517", "measure": "T310", "d2": "0", "d3": "000"}], "den": [{"dataset": "DT_1JC1517", "measure": "T100", "d2": "0", "d3": "000"}], "scale": 100, "round": 2},
+  "F1-M-009": {"num": [{"dataset": "DT_1JC1516", "measure": "T10", "d2": "202"}, {"dataset": "DT_1JC1516", "measure": "T10", "d2": "203"}], "den": [{"dataset": "DT_1JC1516", "measure": "T10", "d2": "00"}], "scale": 100, "round": 1},
+  "F1-M-011": {"num": [{"dataset": "DT_1JC1516", "measure": "T10", "d2": "30"}, {"dataset": "DT_1JC1516", "measure": "T10", "d2": "40"}], "den": [{"dataset": "DT_1JC1516", "measure": "T10", "d2": "00"}], "scale": 100, "round": 2},
+  "F1-M-012": {"sum": [{"dataset": "DT_1JC1516", "measure": "T10", "d2": "60"}], "round": 0},
+  "F2-M-004": {"sum": [{"dataset": "DT_1B8000G", "measure": "20"}], "round": 0},
+  "F2-M-009": {"sum": [{"dataset": "DT_1B8000G", "measure": "10"}], "round": 0},
+  "F2-M-010": {"sum": [{"dataset": "DT_1B8000G", "measure": "12"}], "round": 3},
+  "F2-M-014": {"sum": [{"dataset": "DT_1B26001_A01", "measure": "T10"}], "round": 0},
+  "T1-M-001": {"sum": [{"dataset": "DT_1TS202001", "measure": "T10", "d2": "S4"}], "kind": "time", "round": 0},
+  "T1-M-005": {"sum": [{"dataset": "DT_1TS202001", "measure": "T10", "d2": "S11"}], "kind": "time", "round": 0},
+  "T1-M-008": {"sum": [{"dataset": "DT_1ES4F09S", "measure": "T20"}], "round": 1},
+  "T2-M-013": {"sum": [{"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "070"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "075"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "080"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "085"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "086"}], "round": 0},
+  "H1-M-021": {"num": [{"dataset": "DT_1JU1501", "measure": "T30"}], "den": [{"dataset": "DT_1JU1501", "measure": "T10"}], "scale": 100, "round": 1},
+  "H2-M-002": {"sum": [{"dataset": "DT_1L9U101", "measure": "T110", "d2": "L3"}], "round": 0},
+  "H2-M-003": {"sum": [{"dataset": "DT_1L9U101", "measure": "T110", "d2": "M0"}], "round": 0},
+  "H2-M-009": {"sum": [{"dataset": "DT_1L9U101", "measure": "T110", "d2": "L"}], "round": 0},
+  "N2-M-006": {"sum": [{"dataset": "DT_1L9U101", "measure": "T110", "d2": "M9"}], "round": 0},
+  "T2-M-017": {"sum": [{"dataset": "DT_1L9U101", "measure": "T110", "d2": "M9"}], "round": 0},
+  "N2-M-008": {"sum": [{"dataset": "DT_1ES4F09S", "measure": "T20"}], "round": 1},
+  "N2-M-021": {"sum": [{"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "070"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "075"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "080"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "085"}, {"dataset": "DT_1JC1517", "measure": "T600", "d2": "0", "d3": "086"}], "round": 0}
+ }
+}

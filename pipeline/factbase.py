@@ -53,6 +53,56 @@ CLASSIFICATIONS = {
     "DT_1JU1501": {},
     "DT_1JC1521": {"objL2": "ALL"},
 }
+# 표를 공표한 기관의 KOSIS orgId. 적지 않은 표는 통계청·국가데이터처(101).
+# 다른 기관 표(예: 국토교통부 주거실태조사)는 discover_kosis.py 결과에서 orgId를 확인해 여기에 적는다.
+ORG = {}
+
+
+def org_for(table):
+    return ORG.get(table, "101")
+
+
+# 엑셀 Core Catalog(39개) 이후에 더한 항목. ensure_catalog()가 없으면 넣는다.
+EXTRA_CATALOG = {
+    "H09": ("Home", "평형", "주택 종류별 가구당·1인당 주거면적", "DT_1JC1521 주택 종류·주거면적별 가구(평균 면적만 수록)"),
+    "LS09": ("Lifestyle", "생활시간", "행동분류별 평균시간(10세 이상)", "DT_1TS202001 생활시간조사 평균시간"),
+    "S08": ("Spending", "에너지", "연료비 지출", "DT_1L9U101 가계수지 L6 연료비"),
+    "S09": ("Spending", "수리/관리", "기타주거관련서비스 지출(관리비 대리)", "DT_1L9U101 가계수지 L5"),
+    "S10": ("Spending", "주거비", "실제주거비(월세 등) 지출", "DT_1L9U101 가계수지 L1"),
+    "S11": ("Spending", "에너지", "상하수도·폐기물처리 지출", "DT_1L9U101 가계수지 L4"),
+    "S12": ("Spending", "가전", "가전관련서비스(수리·렌탈 등) 지출", "DT_1L9U101 가계수지 M5"),
+    "S13": ("Spending", "생활용품", "가사소모품 지출", "DT_1L9U101 가계수지 M8"),
+    "S14": ("Spending", "인테리어", "가구·조명 및 장식 서비스 지출", "DT_1L9U101 가계수지 M2"),
+    "S15": ("Spending", "총지출", "소비지출 총액", "DT_1L9U101 가계수지 F 소비지출"),
+}
+BASE_CATALOG = 39
+
+
+def ensure_catalog(conn):
+    """EXTRA_CATALOG 항목을 catalog에 넣는다(이미 있으면 그대로 둔다)."""
+    template = json.loads(conn.execute("SELECT record_json FROM catalog WHERE fact_id='S01'").fetchone()[0])
+    added = 0
+    for fact_id, (driver, topic, metric, table) in EXTRA_CATALOG.items():
+        if conn.execute("SELECT 1 FROM catalog WHERE fact_id=?", (fact_id,)).fetchone():
+            continue
+        record = {key: "" for key in template}
+        record.update({"Fact ID": fact_id, "Driver": driver, "Topic": topic, "Metric": metric,
+                       "Source organization": "국가데이터처", "Table ID 또는 데이터 식별자": table,
+                       "Actual / Official Projection": "Actual", "API 제공 여부": "KOSIS OpenAPI",
+                       "원본 URL": source_url(table.split()[0]), "수집 우선순위": "보완(2026-10)"})
+        conn.execute("INSERT INTO catalog VALUES (?,?)", (fact_id, json.dumps(record, ensure_ascii=False)))
+        added += 1
+    h02 = conn.execute("SELECT record_json FROM catalog WHERE fact_id='H02'").fetchone()
+    if h02:
+        data = json.loads(h02[0])
+        note = "DT_1JC1521은 면적 구간별 가구 수가 없어 H09(평균 면적)로 옮겼다. 면적 구간 표는 discover_kosis.py 결과로 확정한다."
+        if data.get("데이터 품질 및 한계") != note:
+            data["데이터 품질 및 한계"] = note
+            data["Table ID 또는 데이터 식별자"] = "미정(면적 구간별 일반가구 표 탐색 중)"
+            conn.execute("UPDATE catalog SET record_json=? WHERE fact_id='H02'", (json.dumps(data, ensure_ascii=False),))
+    return added
+
+
 FIELDS = ["fact_id", "driver", "topic", "dataset_id", "actual_projection", "year", "geography_code", "geography_name", "dimension_2_code", "dimension_2_name", "dimension_3_code", "dimension_3_name", "measure_code", "measure_name", "value_raw", "unit", "source_url", "retrieved_at"]
 
 
@@ -83,7 +133,7 @@ def connect(path=DB):
 
 
 def source_url(table):
-    return f"https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId={table}&conn_path=I2"
+    return f"https://kosis.kr/statHtml/statHtml.do?orgId={org_for(table)}&tblId={table}&conn_path=I2"
 
 
 def fact_for(table, measure, name):
@@ -95,6 +145,7 @@ def fact_for(table, measure, name):
     if table == "DT_1IN1502": return "D08 context"
     if table == "DT_1B8000G":
         return "L04" if measure in ("10", "11", "12") else "L03" if measure in ("20", "21", "23", "24") else "L03/L04 context"
+    if table == "DT_1JC1521": return "H09"  # 평균 면적만 수록. 면적 구간(H02) 아님
     return "H01" if table == "DT_1JU1501" else "H02"
 
 
@@ -156,7 +207,7 @@ def bootstrap():
 def fetch(table, api_key, current_year):
     projection = TABLES[table][2] == "Official Projection"
     params = {
-        "method": "getList", "apiKey": api_key, "orgId": "101", "tblId": table,
+        "method": "getList", "apiKey": api_key, "orgId": org_for(table), "tblId": table,
         "objL1": "00", **CLASSIFICATIONS[table], "itmId": "ALL", "prdSe": "Y",
         "startPrdDe": "2022" if projection else str(current_year - 2),
         "endPrdDe": "2052" if projection else str(current_year), "format": "json", "jsonVD": "Y",
@@ -209,7 +260,7 @@ def from_api(table, item, today):
 def check(conn):
     count = conn.execute("SELECT count(*) FROM observations").fetchone()[0]
     catalog_count = conn.execute("SELECT count(*) FROM catalog").fetchone()[0]
-    if count < 80000 or catalog_count != 39: raise ValueError(f"Baseline incomplete: {count} rows, {catalog_count} facts")
+    if count < 80000 or catalog_count < BASE_CATALOG: raise ValueError(f"Baseline incomplete: {count} rows, {catalog_count} facts")
     if conn.execute("SELECT count(*) FROM observations WHERE source_url='' OR value_raw='' OR dataset_id='' OR year IS NULL").fetchone()[0]:
         raise ValueError("Required observation fields missing")
     modes = set(r[0] for r in conn.execute("SELECT DISTINCT actual_projection FROM observations"))
@@ -241,6 +292,7 @@ def refresh(api_key):
         check(conn)
         changes = 0
         with conn:
+            ensure_catalog(conn)
             for row in staged: changes += insert_row(conn, row, revisions=True)
             check(conn)
         if changes:
@@ -249,6 +301,19 @@ def refresh(api_key):
             for table, items in responses.items():
                 (raw_dir / f"{table}.json").write_text(json.dumps(items, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
         print(json.dumps({"retrieved_at": today, "api_rows": len(staged), "changed_observations": changes}, ensure_ascii=False))
+    finally:
+        conn.close()
+
+
+def migrate():
+    """키 없이 돌리는 구조 정리: 추가 카탈로그, DT_1JC1521을 H02에서 H09로."""
+    conn = connect()
+    try:
+        with conn:
+            added = ensure_catalog(conn)
+            moved = conn.execute("UPDATE observations SET fact_id='H09' WHERE dataset_id='DT_1JC1521' AND fact_id='H02'").rowcount
+            check(conn)
+        return {"catalog_added": added, "h02_to_h09": moved, **check(conn)}
     finally:
         conn.close()
 
@@ -353,10 +418,11 @@ def build():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("bootstrap", "refresh", "check"))
+    parser.add_argument("command", choices=("bootstrap", "refresh", "check", "migrate"))
     args = parser.parse_args()
     if args.command == "bootstrap": bootstrap()
     elif args.command == "refresh": refresh(os.environ.get("KOSIS_API_KEY", ""))
+    elif args.command == "migrate": print(json.dumps(migrate(), ensure_ascii=False))
     else:
         conn = connect()
         try: print(json.dumps(check(conn), ensure_ascii=False))

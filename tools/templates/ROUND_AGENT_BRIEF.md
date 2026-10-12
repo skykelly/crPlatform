@@ -21,6 +21,7 @@
    - 출처는 `{"url": source_url, "publisher": "국가데이터처 KOSIS (표 ID·표 이름)", "date": retrieved_at, "grade": "A"}`, `verified=True`, definition에 "팩트베이스(KOSIS API) 값"이라 적는다.
    - 팩트베이스 H02(주거면적)·H03(점유형태) 매핑은 정정 대기 중이라 표 이름·항목을 꼭 확인하고, 어긋나면 공식 발표로 대체하며 `check_flags`에 남긴다.
    - 비율은 DB의 분자·분모로 직접 계산해도 된다(definition에 계산식). DB에 없거나 더 최신 공표가 있으면 공식 발표로 보완한다.
+   - 먼저 `python3 tools/factbase_sync.py`를 돌려 `data/sync_report.md`의 DB 시계열을 본다. DB에 있는 연도의 값은 역산하지 않는다. 가계동향 세부 항목(S08~S15)과 생활시간 행동분류 전체(LS09)도 DB에 있다.
 3. **발표 시기:** 지표마다 발표 주기와 최근·다음 발표 시기를 조사해 `indicators.json`의 `release`에 한 줄로 적는다(예: "연 1회, 7월 말 · 2025년 기준 2026-07-28 발표 · 다음 2027년 7월"). 모르면 "확인 필요"를 그대로 둔다.
 4. **기록 작성 (`build_records.py`):** 견본 형식 그대로. 목표 규모
    - 지표: 추적 지표마다 대표값 1개 이상(가능하면 시계열 `extra.series`와 `prev_value`) — 판정에 필요한 3~5년 추세가 보이게
