@@ -108,9 +108,24 @@ def _inject(path, prefix, cur_path, portal_page=False):
         s = s.replace("</body>", block + "</body>", 1)
     path.write_text(s, encoding="utf-8")
 
+def _inject_chat(path, prefix, page):
+    s = path.read_text(encoding="utf-8")
+    if 'id="chat-fab"' in s:
+        return
+    block = CHAT_TPL.replace("%%PREFIX%%", prefix).replace("%%PAGE%%", page)
+    s = s.replace("</body>", block + "</body>", 1)
+    path.write_text(s, encoding="utf-8")
+
 _inject(DIST / "index.html", "", "index", True)
 _inject(DIST / "artifact_index.html", "", "index", True)
 _inject(DIST / "changes.html", "", "changes")
 _inject(DIST / "dashboard.html", "", "dashboard")
 for _p in pages:
     _inject(DIST / _p, "../../", _p)
+
+# AI Chat: 포털 첫 화면 외 모든 페이지에도 같은 대화 창을 붙인다(현재 화면을 함께 알려 준다)
+_inject_chat(DIST / "changes.html", "", "changes")
+_inject_chat(DIST / "dashboard.html", "", "dashboard")
+_qno = {it["cur"]["path"]: it["q"]["no"] for _c, _its in sections for it in _its if it["status"] == "live"}
+for _p in pages:
+    _inject_chat(DIST / _p, "../../", "question:" + _qno.get(_p, ""))

@@ -165,6 +165,8 @@ CHAT_DATA = {"generated": str(TODAY), "categories": [f"{c['no']:02d} {c['name']}
 CHAT_HTML = ((SITE / "chat.html").read_text(encoding="utf-8")
              .replace("%%ICON%%", (SITE / "ai_icon.txt").read_text(encoding="utf-8").strip())
              .replace("%%DATA%%", json.dumps(CHAT_DATA, ensure_ascii=False).replace("</", "<\\/")))
+CHAT_TPL = CHAT_HTML                                     # 다른 페이지용: %%PREFIX%%·%%PAGE%% 자리 유지
+CHAT_HTML = CHAT_TPL.replace("%%PREFIX%%", "").replace("%%PAGE%%", "index")
 
 CSS = (ROOT / "lib" / "article.css").read_text(encoding="utf-8").split("/* 한 줄 답 */")[0]
 PORTAL_CSS = (SITE / "portal.css").read_text(encoding="utf-8")
