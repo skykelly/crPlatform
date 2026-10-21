@@ -140,7 +140,7 @@ total_q = sum(len(i) for _, i in sections)
 total_live = sum(1 for _, its in sections for i in its if i["status"] == "live")
 total_rec = sum(int(i["cur"]["records"] or 0) for _, its in sections for i in its if i["status"] == "live")
 latest.sort(key=lambda x: x[0], reverse=True)
-last_date = max([latest[0][0]] + [c[0] for c in changes]) if latest else "—"
+last_date = max([latest[0][0]] + [c[0] for c in changes] + list(day_notes)) if latest else "—"
 
 # ---------- AI Chat 데이터 (포털 요약; 상세는 채팅이 아티클 페이지를 직접 읽는다)
 _chat_q = []
