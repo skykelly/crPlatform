@@ -1,22 +1,19 @@
 # 변경 이력 페이지 생성 (build_site.py가 exec). 각 질문 records.jsonl의 revisions·added_on에서 모은다.
 # 결과: dist/changes.html, 변수 changes_total
-changes = []   # (날짜, 질문번호, 종류, 기록ID, 현재 진술, 이전 진술, 이유)
+changes = []   # (날짜, 질문번호, 종류, 기록ID, 현재 진술, 이전 진술, 이유, 출처 구분)
+day_notes = {}  # 날짜 → 메모(기준선, 회차 재조사, 변화 없음, 주간 요약)
 _qpath = {}
 for _c, _items in sections:
     for _it in _items:
-        if _it["status"] != "live":
-            continue
-        _no = _it["q"]["no"]
-        _qpath[_no] = _it["cur"]["path"]
-        _rp = ROOT / _c["id"] / _it["q"]["id"] / "records.jsonl"
-        for _l in _rp.read_text(encoding="utf-8").splitlines():
-            if not _l.strip():
-                continue
-            _r = json.loads(_l)
-            if _r.get("added_on"):
-                changes.append((_r["added_on"], _no, "신규", _r["id"], _r["statement"], None, "이전 조사에서 빠졌거나 이후에 나온 기록을 추가했다.", _r.get("origin")))
-            for _v in _r.get("revisions", []):
-                changes.append((_v["on"], _no, _v["kind"], _r["id"], _r["statement"], _v.get("before"), _v["why"], _v.get("origin")))
+        if _it["status"] == "live":
+            _qpath[_it["q"]["no"]] = _it["cur"]["path"]
+# 변경 이력의 원본은 lib/diff_day.py가 매일 쌓는 changelog/<날짜>.json 이다(기록에서 다시 만들지 않는다)
+for _f in sorted((ROOT / "changelog").glob("*.json")):
+    _d = json.loads(_f.read_text(encoding="utf-8"))
+    day_notes[_d["date"]] = _d.get("notes", [])
+    for _x in _d.get("items", []):
+        if _x["q"] in _qpath:
+            changes.append((_d["date"], _x["q"], _x["kind"], _x["id"], _x.get("now") or "", _x.get("before"), _x.get("why", ""), _x.get("origin")))
 changes_total = len(changes)
 
 sys.path.insert(0, str(ROOT / "lib"))
@@ -35,7 +32,10 @@ _by = {}
 for c in changes:
     _by.setdefault(c[0], {}).setdefault(c[1], []).append(c)
 _body = ""
-for _on in sorted(_by, reverse=True):
+for _on in sorted(set(_by) | set(day_notes), reverse=True):
+    if _on not in _by:
+        _body += f'<section class="day"><h2>{E(_on)}<small>{E(" · ".join(day_notes[_on]))}</small></h2></section>'
+        continue
     _n = sum(len(v) for v in _by[_on].values())
     _kinds = {}
     for v in _by[_on].values():
@@ -43,6 +43,8 @@ for _on in sorted(_by, reverse=True):
             _kinds[c[2]] = _kinds.get(c[2], 0) + 1
     _sum = " · ".join(f"{k} {_kinds[k]}" for k in KIND_ORDER if k in _kinds)
     _body += f'<section class="day"><h2>{E(_on)}<small>{_n}건 · {E(_sum)}</small></h2>'
+    if day_notes.get(_on):
+        _body += f'<p class="lead">{E(" · ".join(day_notes[_on]))}</p>'
     for _no in sorted(_by[_on]):
         _q = next(it["q"] for _c2, its in sections for it in its if it["status"] == "live" and it["q"]["no"] == _no)
         _body += f'<div class="qgrp" id="{E(_no)}"><h3><a href="{E(_qpath[_no])}">{E(_no)}</a><span>{E(_q.get("area",""))}</span></h3><ul>'
@@ -93,6 +95,6 @@ _page = (f'<!doctype html>\n<html lang="ko"><head><meta charset="utf-8"><meta na
          f'<style>{ARTICLE_CSS}{CHANGES_CSS}</style></head><body>'
          f'<div class="readbar" aria-hidden="true"><span></span></div><nav class="sitebar" aria-label="사이트"><a class="home" href="index.html">{E(SITE_TITLE)}</a><span class="crumb">/ 변경 이력</span></nav>'
          f'<main class="chgpage"><h1>변경 이력</h1>'
-         f'<p class="lead">아티클에는 늘 최신 내용만 보입니다. 기록이 바뀐 날짜와 이유, 바뀌기 전 문장을 여기에 남깁니다. 번호를 누르면 아티클의 해당 기록으로 이동합니다.</p>'
+         f'<p class="lead">아티클에는 늘 최신 내용만 보입니다. 2026-10-21 기준선 이후 배치가 바뀐 기록(신규·갱신·판정·정정)과 이유, 바뀌기 전 문장을 날짜별로 쌓습니다. 변화가 없는 날도 한 줄로 남깁니다. 번호를 누르면 아티클의 해당 기록으로 이동합니다.</p>'
          f'<ul class="legend">{_legend}</ul>{_body}</main>{ARTICLE_UI}</body></html>')
 (DIST / "changes.html").write_text(_page, encoding="utf-8")

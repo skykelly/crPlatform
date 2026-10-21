@@ -96,3 +96,10 @@ cd ../.. && python3 site/build_site.py   # 포털 재생성 (깨진 내부 링�
 | `site/` | 포털 생성(`build_site.py`), 카탈로그, 포털 UI |
 | `tools/` | 수동 입력(`intake.py`), 회차 견본(`templates/`) |
 | `data/`, `pipeline/` | 공식 통계 팩트베이스 |
+
+## 변경 이력(일간 Diff)
+
+- 기준선 2026-10-21: 그날의 기록 전체를 `state/snapshot.json`에 저장했고, 그 이전 변경은 이력에 남기지 않는다.
+- `python3 lib/diff_day.py`가 직전 스냅숏과 지금 기록을 비교해 바뀐 것만 `changelog/<날짜>.json`에 추가하고 스냅숏을 갱신한다. 변경 이력 페이지는 이 파일만 읽는다.
+- 담는 것: 신규, 갱신, 판정, 정정(누락정정·단정반증 등), 삭제와 이전 문장·이유. 변화가 없는 날은 '변화 없음' 1줄, 회차 재조사는 `--round <질문>`으로 1줄.
+- 같은 방식의 최신 구현: https://github.com/skykelly/kr_electronics_market
