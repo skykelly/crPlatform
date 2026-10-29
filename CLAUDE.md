@@ -4,7 +4,8 @@
 
 ## 작업 시작 전
 - 정기 실행과 수동 작업이 같은 저장소를 고친다. **작업 전 항상 `git pull --rebase`**, 커밋 직전에도 한 번 더.
-- 포털 주소: https://claude.ai/artifact/FmxvVJQ4gyuPg2kR6fiGjj. 재게시는 같은 주소로 하고 `capabilities`는 생략해 유지한다(`{}`를 넘기면 AI 질의응답이 꺼진다).
+- 포털 주소: https://claude.ai/artifact/FmxvVJQ4gyuPg2kR6fiGjj. 재게시는 같은 주소로 하고 `capabilities`는 생략해 저장된 선언(sample, db, user)을 유지한다(`{}`를 넘기면 AI Chat이 꺼진다). 게시 파일에 `chat_stats.json`(AI Chat 통계 검색 색인)을 포함한다.
+- AI Chat 이전 대화는 db의 `data/users/<id>/chats`에 본인 계정 전용으로 저장된다.
 - 게시가 "더 새 버전이 있다"며 거부되면, 저장된 최신본 위에 내 변경을 합쳐 다시 게시한다. 덮어쓰지 않는다.
 
 ## 공통 판단 규칙

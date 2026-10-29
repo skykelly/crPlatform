@@ -366,6 +366,41 @@ def tile_html(t):
             f'<span class="ks-v">{val}{unit}</span><span class="ks-d">{t["y"]}{d}</span></a>')
 
 
+def _num(v, dp):
+    if v is None:
+        return "-"
+    return f"{v:,.{dp}f}" if dp else f"{v:,.0f}"
+
+
+def stats_index(data):
+    """AI Chat 검색용: 카드마다 사람이 읽을 수 있는 한 덩어리 글. 값은 대시보드에 보이는 그대로."""
+    out = []
+    for s in data["sections"]:
+        for c in s["cards"]:
+            fmt = c.get("fmt", {}); dp = fmt.get("dp", 1); div = fmt.get("div", 1); unit = fmt.get("unit", "")
+            val = lambda v: _num(None if v is None else v / div, dp)
+            lines = [f"[{s['no']} {s['name']}] {c['title']}" + (f" (단위 {unit})" if unit else "")]
+            if c.get("note"):
+                lines.append("기준: " + c["note"])
+            yrs = c.get("years", [])
+            if c["type"] == "real":
+                for r in c["rows"]:
+                    lines.append(f"- {r['name']}: {r['y0']}→{r['y1']} 명목 {r['nom']:+.1f}%, 물가 {r['cpi']:+.1f}%, 실질 {r['real']:+.1f}% (월 {r['n0']:,.0f}원 → {r['n1']:,.0f}원)")
+            elif c["type"] == "matrix":
+                for r in c["rows"]:
+                    for col, v in zip(c["cols"], r["v"]):
+                        lines.append(f"- {r['name']} · {col}: " + ", ".join(f"{y} {val(x)}" for y, x in zip(yrs, v) if x is not None))
+            else:
+                for se in c.get("series", []):
+                    tag = " (공식 장래추계, 실적 아님)" if se.get("proj") else ""
+                    lines.append(f"- {se['name']}{tag}: " + ", ".join(f"{y} {val(x)}" for y, x in zip(yrs, se["v"]) if x is not None))
+            src = "; ".join(f"{t['title']} ({t['id']})" for t in c.get("src", []))
+            if src:
+                lines.append("출처: KOSIS " + src)
+            out.append({"sec": s["id"], "id": c["id"], "title": c["title"], "text": "\n".join(lines)})
+    return out
+
+
 def build(dist, head_css, site_title, ui_html, pages):
     data, problems = model(pages)
     if problems:
@@ -392,6 +427,7 @@ def build(dist, head_css, site_title, ui_html, pages):
             f'</main><div class="tip" id="tip" role="status" hidden></div>'
             f'<script type="application/json" id="dash-data">{payload}</script><script>{js}</script>{ui_html}</body></html>')
     (dist / "dashboard.html").write_text(page, encoding="utf-8")
+    (dist / "chat_stats.json").write_text(json.dumps({"asof": data["asof"], "cards": stats_index(data)}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     global LAST
     LAST = data
     return len(page)
