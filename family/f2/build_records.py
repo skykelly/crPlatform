@@ -372,6 +372,10 @@ add(id=f"{Q}-F-102", type="전망", importance=3, forecast_status="진행 중", 
     signposts=[{"id": f"{Q}-F-001", "on_miss": "비관"}, {"id": f"{Q}-F-003", "on_hit": "비관"},
                {"id": f"{Q}-F-006", "on_hit": "비관"}])
 
+# R2: 이번 회차 백지 조사에서 다시 확인된 기록은 last_seen을 올린다
+for _r in records:
+    _r["last_seen"] = "R2"
+
 # ---------- 공통 마무리: patches.jsonl 적용 → 검증 → records.jsonl ----------
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lib"))
 from validate import finish
