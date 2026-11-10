@@ -1,6 +1,6 @@
 {
- "run_at": "2026-10-12",
- "changed_observations": 154,
+ "run_at": "2026-11-10",
+ "changed_observations": 14,
  "tables": {
   "DT_1LC0030": {
    "rows": 750
@@ -24,7 +24,7 @@
    "rows": 176
   },
   "DT_1DE7100S": {
-   "rows": 154
+   "rows": 168
   },
   "DT_1L9U105": {
    "rows": 6125
